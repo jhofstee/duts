@@ -1,0 +1,120 @@
+#
+#
+# This is a skeleton TC definition file
+# generated from ../testgroups/non-59.tg
+#
+#
+
+
+duts_tc InstallUBootUsingLinux {
+ 	Type u-boot
+ 	Commands {
+		"" ".*"
+	}
+}
+
+duts_tc InstallUBootUsingUBoot {
+ 	Type u-boot
+ 	Commands {
+		"" ".*"
+	}
+	Info {
+	5.4.3. Installation using U-Boot
+	tftp 100000 /tftpboot/uboot.bin
+	protect off 40000000 4003FFFF
+	era 40000000 4003FFFF
+	cp.b 100000 40000000 $(filesize)
+	setenv filesize
+	saveenv
+	reset
+	}
+}
+
+duts_tc LinuxBootNfs {
+ 	Type u-boot
+	Commands "!testcases/userLinuxBootNfs.exp"
+}
+
+duts_tc LinuxBootNetNfs {
+ 	Type u-boot
+ 	Commands "!testcases/userLinuxBootNetNfs.exp"
+}
+
+duts_tc LinuxBootSelf {
+ 	Type u-boot
+ 	Commands "!testcases/userLinuxBootSelf.exp"
+}
+
+duts_tc LinuxMtdDump {
+ 	Type linux 
+ 	Commands {
+		"xxd /dev/mtd0 | head -4" ".*"
+	}
+}
+
+duts_tc LinuxMtdErase {
+ 	Type linux
+ 	Commands {
+		"" ".*"
+	}
+	Info {
+		"eraseall /dev/mtd6" ".*"
+		"date > /dev/mtd6" ".*"
+		"head -1 /dev/mtd6" ".*"
+	}
+}
+
+duts_tc LinuxMtdWrite {
+ 	Type linux
+ 	Commands {
+		"" ".*"
+	}
+	Info {
+		"date > /dev/mtd6" ".*"
+		"head -1 /dev/mtd6" ".*"
+		"date > /dev/mtd6" ".*"
+	}
+}
+
+duts_tc LinuxProcMtd {
+ 	Type linux
+ 	Commands {
+		"cat /proc/mtd" ".*"
+	}
+}
+
+duts_tc UBootBoot {
+ 	Type u-boot
+ 	Commands {
+		"" ".*"
+	}
+}
+
+duts_tc UBootHelp {
+ 	Type u-boot
+ 	Commands {
+		"help" ".*"
+	}
+}
+
+duts_tc UBootHelpAbbrev {
+ 	Type u-boot
+ 	Commands {
+		"help fli tftp" ".*"
+	}
+}
+
+duts_tc UBootHelpLong {
+ 	Type u-boot
+ 	Commands {
+		"help tftpboot" ".*"
+		"help setenv printenv" ".*"
+	}
+}
+
+duts_tc UBootPrintenvBoardID {
+ 	Type u-boot
+ 	Commands {
+		"printenv serial# ethaddr" ".*"
+	}
+}

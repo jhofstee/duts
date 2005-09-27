@@ -1,0 +1,14 @@
+#
+# 
+#
+
+expect "*"
+
+set timeout 300
+send -s "run bootcmd\r"
+expect "login: "
+
+set timeout 10
+send -s "root\r"
+expect "#"
+

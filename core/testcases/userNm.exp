@@ -1,0 +1,20 @@
+#
+# interactively modify memory and display result
+#
+
+expect "*"
+send -s "nm.b 100000\r"
+expect "?"
+
+foreach v {48 65 6c 6c 6f} {
+	send -s "$v\r"
+	sleep 0.25
+	expect "?"
+}
+
+send -s ".\r"
+expect "=>"
+unset v
+
+send_cmd "md 100000 8" ".*"
+

@@ -1,0 +1,13 @@
+duts_tg UBootCmdGroupFlash {
+UBootCpHelp
+UBootCpFlash
+UBootCpFlashErrors
+UBootFlinfo
+UBootEraseHelp
+UBootEraseStartEnd
+UBootEraseSectors
+UBootEraseBank
+UBootEraseAll
+UBootProtectHelp
+UBootProtect
+}

@@ -1,0 +1,121 @@
+#
+#
+# This is a skeleton TC definition file
+# generated from UBootCmdGroupFlash.tg
+#
+#
+
+
+duts_tc UBootCpHelp {
+	Type u-boot
+	Commands {
+		"help cp" ".*"
+	}
+}
+
+duts_tc UBootCpFlash {
+	Type u-boot
+	Timeout 300
+	Pre {
+		"prot off ff800000 ff9fffff" ".*"
+		"era ff800000 ff9fffff" ".*"
+	}
+	Commands {
+		"cp.b 100000 ff800000 40000" ".*"
+	}
+}
+
+duts_tc UBootCpFlashErrors {
+	Type u-boot
+	Timeout 300
+	Pre {
+		"prot on ff800000 ff9fffff" ".*"
+	}
+	Commands {
+		"cp.b 100000 ff800000 40000" ".*"
+	}
+}
+
+duts_tc UBootFlinfo {
+	Type u-boot
+	Commands {
+		"fli" ".*"
+	}
+}
+
+duts_tc UBootEraseHelp {
+	Type u-boot
+	Commands {
+		"help era" ".*"
+	}
+}
+
+duts_tc UBootEraseStartEnd {
+	Type u-boot
+	Timeout 300
+	Pre {
+		"prot off ff800000 ff9fffff" ".*"
+	}
+	Commands {
+		"era ff800000 ff8fffff" ".*"
+	}
+}
+
+duts_tc UBootEraseSectors {
+	Type u-boot
+	Timeout 300
+	Pre {
+		"prot off ff800000 ff9fffff" ".*"
+	}
+	Commands {
+		"era 1:0-1" ".*"
+	}
+}
+
+duts_tc UBootEraseBank {
+	Type u-boot
+	Timeout 300
+	Pre {
+		"prot on ff900000 ff9fffff" ".*"
+	}
+	Commands {
+		"era bank 1" ".*"
+	}
+}
+
+duts_tc UBootEraseAll {
+	Type u-boot
+	Timeout 300
+	Pre {
+		"prot on ff900000 ff9fffff" ".*"
+		"prot on fffc0000 ffffffff" ".*"
+	}
+	Commands {
+		"era all" ".*"
+	}
+}
+
+duts_tc UBootProtectHelp {
+	Type u-boot
+	Commands {
+		"help protect" ".*"
+	}
+}
+
+duts_tc UBootProtect {
+	Type u-boot
+	Timeout 300
+	Pre {
+		"prot off ff800000 ff9fffff" ".*"
+	}
+	Commands {
+		"fli" ".*"
+		"prot on ff800000 ff9fffff" ".*"
+		"fli" ".*"
+		"era ff800000 ff9fffff" ".*"
+		"prot off 1:0" ".*"
+		"fli" ".*"
+		"era 1:0" ".*"
+	}
+}
+

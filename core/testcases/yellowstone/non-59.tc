@@ -1,0 +1,33 @@
+#
+#
+# This is a skeleton TC definition file
+# generated from ../testgroups/non-59.tg
+#
+#
+
+
+duts_tc InstallKernelTftp {
+ 	Type u-boot
+	Timeout 600
+ 	Commands {
+		"era fc000000 fc1fffff" ".*"
+		"tftp 100000 /tftpboot/yellowstone/uImage" ".*"
+		"imi 100000" ".*"
+		{cp.b 100000 $(kernel_addr) $(filesize)} ".*"
+		{iminfo $(kernel_addr)} ".*"
+	}
+}
+
+duts_tc UBootInstallRamdisk {
+ 	Type u-boot
+	Timeout 600
+ 	Commands {
+		"setenv ramdisk_addr fc200000" ".*"
+		"era fc200000 fc3fffff" ".*"
+		"tftp 100000 /tftpboot/amcc/uRamdisk" ".*"
+		"imi 100000" ".*"
+		{cp.b 100000 $(ramdisk_addr) $(filesize)} ".*"
+		{imi $(ramdisk_addr)} ".*"
+	}
+}
+

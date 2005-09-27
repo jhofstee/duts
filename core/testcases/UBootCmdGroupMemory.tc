@@ -1,0 +1,214 @@
+#
+#
+# This is a skeleton TC definition file
+# generated from UBootCmdGroupMemory.tg
+#
+#
+
+
+duts_tc UBootBaseHelp {
+ 	Type u-boot
+ 	Commands {
+		"help base" ".*"
+	}
+}
+
+duts_tc UBootBase {
+ 	Type u-boot
+ 	Commands {
+		"base" ".*"
+		"md 0 c" ".*"
+		"base 100000" ".*"
+		"md 0 c" ".*"
+	}
+	Post {
+		"base 0" ".*"
+	}
+}
+
+duts_tc UBootCrc {
+ 	Type u-boot
+ 	Commands {
+		"crc 100004 3FC" ".*"
+	}
+}
+
+duts_tc UBootCrcStore {
+ 	Type u-boot
+ 	Commands {
+		"crc 100004 3FC 100000" ".*"
+		"md 100000 4" ".*"
+	}
+}
+
+duts_tc UBootCmpHelp {
+ 	Type u-boot
+ 	Commands {
+		"help cmp" ".*"
+	}
+}
+
+duts_tc UBootCmp {
+ 	Type u-boot
+ 	Commands {
+		"cmp 100000 200000 400" ".*"
+		"md 100000 C" ".*"
+		"md 200000 C" ".*"
+	}
+}
+
+duts_tc UBootCmpExt {
+ 	Type u-boot
+ 	Commands {
+		"cmp.l 100000 200000 400" ".*"
+		"cmp.w 100000 200000 800" ".*"
+		"cmp.b 100000 200000 1000" ".*"
+	}
+}
+
+duts_tc UBootCpHelp {
+ 	Type u-boot
+ 	Commands {
+		"help cp" ".*"
+	}
+}
+
+duts_tc UBootCp {
+ 	Type u-boot
+ 	Commands {
+		"cp 200000 100000 10000" ".*"
+	}
+}
+
+duts_tc UBootCpExt {
+ 	Type u-boot
+ 	Commands {
+		"cp.l 200000 100000 10000" ".*"
+		"cp.w 200000 100000 20000" ".*"
+		"cp.b 200000 100000 40000" ".*"
+	}
+}
+
+duts_tc UBootMdHelp {
+ 	Type u-boot
+ 	Commands {
+		"help md" ".*"
+	}
+}
+
+duts_tc UBootMd {
+ 	Type u-boot
+ 	Commands {
+		"md 100000" ".*"
+		"\r" ".*"
+	}
+}
+
+duts_tc UBootMdExt {
+ 	Type u-boot
+ 	Commands {
+		"md.w 100000" ".*"
+		"md.b 100000" ".*"
+	}
+}
+
+duts_tc UBootMdLength {
+ 	Type u-boot
+ 	Commands {
+		"md.b 100000 20" ".*"
+		"md.w 100000" ".*"
+		"md 100000" ".*"
+	}
+}
+
+duts_tc UBootMmHelp {
+ 	Type u-boot
+ 	Commands {
+		"help mm" ".*"
+	}
+}
+
+duts_tc UBootMm {
+ 	Type u-boot
+ 	Commands {
+		"!testcases/userMm.exp"
+	}
+}
+
+duts_tc UBootMmW {
+ 	Type u-boot
+ 	Commands {
+		"!testcases/userMmW.exp"
+	}
+}
+
+duts_tc UBootMmB {
+ 	Type u-boot
+ 	Commands {
+		"!testcases/userMmB.exp"
+	}
+}
+
+duts_tc UBootMtestHelp {
+ 	Type u-boot
+ 	Commands {
+		"help mtest" ".*"
+	}
+}
+
+duts_tc UBootMtest {
+ 	Type u-boot
+ 	Commands {
+		"!testcases/userMtest.exp"
+	}
+}
+
+duts_tc UBootMwHelp {
+ 	Type u-boot
+ 	Commands {
+		"help mw" ".*"
+	}
+}
+
+duts_tc UBootMw {
+ 	Type u-boot
+ 	Commands {
+		"md 100000 10" ".*"
+		"mw 100000 aabbccdd" ".*"
+		"md 100000 10" ".*"
+		"mw 100000 0 6" ".*"
+		"md 100000 10" ".*"
+	}
+}
+
+duts_tc UBootMwExt {
+ 	Type u-boot
+ 	Commands {
+		"mw.w 100004 1155 6" ".*"
+		"md 100000 10" ".*"
+		"mw.b 100007 ff 7" ".*"
+		"md 100000 10" ".*"
+	}
+}
+
+duts_tc UBootNmHelp {
+ 	Type u-boot
+ 	Commands {
+		"help nm" ".*"
+	}
+}
+
+duts_tc UBootNm {
+ 	Type u-boot
+ 	Commands {
+		"!testcases/userNm.exp"
+	}
+}
+
+duts_tc UBootLoopHelp {
+ 	Type u-boot
+ 	Commands {
+		"help loop" ".*"
+	}
+}
+

@@ -1,0 +1,15 @@
+#
+#
+#
+
+set scrfn "testcases/example.script"
+
+set scrf [open $scrfn r]
+
+while {[gets $scrf line] >= 0} {
+	send_user -- "$line\n"
+}
+
+close $scrf
+unset scrfn
+unset scrf

@@ -1,0 +1,45 @@
+#
+#
+# This is a skeleton TC definition file
+# generated from UBootCmdGroupExec.tg
+#
+#
+
+
+duts_tc UBootAutoscrHelp {
+ 	Type u-boot
+ 	Commands {
+		"help autoscr" ".*"
+	}
+}
+
+duts_tc UBootAutoscrScript {
+ 	Type u-boot
+ 	Commands {
+		"!testcases/userScr.exp"
+	}
+}
+
+duts_tc UBootAutoscr {
+ 	Type u-boot
+ 	Commands {
+		"tftp 100000 /tftpboot/amcc/example.img" ".*"
+		"imi" ".*"
+		"autoscr 100000" ".*"
+	}
+}
+
+duts_tc UBootBootmHelp {
+ 	Type u-boot
+ 	Commands {
+		"help bootm" ".*"
+	}
+}
+
+duts_tc UBootGoHelp {
+ 	Type u-boot
+ 	Commands {
+		"help go" ".*"
+	}
+}
+

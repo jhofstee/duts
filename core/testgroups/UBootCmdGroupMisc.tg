@@ -1,0 +1,12 @@
+duts_tg UBootCmdGroupMisc {
+UBootDateHelp
+UBootDate
+UBootEchoHelp
+UBootEcho
+UBootResetHelp
+UBootReset
+UBootSleepHelp
+UBootSleep
+UBootVersionHelp
+UBootVersion
+}
