@@ -216,10 +216,10 @@ proc tc_prologue {tc} {
 	if {$connected != "yes"} {
 
 		# local VL
-		#connect local
+		connect local
 
 		# remote
-		connect remote 
+		#connect remote 
 	}
 }
 
