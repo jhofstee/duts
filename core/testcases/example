@@ -77,6 +77,48 @@ duts_tc UBootBase {
 	}
 
 	######################################################################
+	# section Pre, optional
+	#
+	# describes flow of commands to be executed in the test case BEFORE
+	# the proper Commands section (described above) with identical syntax.
+	# Allows for execution of certain preliminary commands before the
+	# proper test cases flow.
+	#
+	# Note the output from execution in this flow in NOT recorded to a log
+	# file.
+	######################################################################
+	Pre {
+		"base 100000" ".*"
+	}
+
+	######################################################################
+	# section Post, optional
+	#
+	# describes flow of commands to be executed in the test case AFTER the
+	# proper Commands section (described above) with identical syntax.
+	# Allows for execution of certain commands after the proper test cases
+	# flow.
+	#
+	# Note the output from execution in this flow in NOT recorded to a log
+	# file.
+	######################################################################
+	Post {
+		"base 0" ".*"
+	}
+
+	######################################################################
+	# section Timeout, optional
+	#
+	# sets timeout period for response to a command when executing
+	# Commands/Pre/Post sections, as some test cases require it longer
+	# than the default. Has the scope of one test case i.e. consecutive
+	# test cases get default timeout again (if not overwritten with their
+	# Timeout section). 
+	# 
+	######################################################################
+	Timeout 300 
+	
+	######################################################################
 	# section Result, optional
 	# 
 	# indicates the desired outcome of the test case and influences the
