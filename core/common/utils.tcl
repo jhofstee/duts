@@ -121,11 +121,12 @@ proc run_external_tc {fn} {
 
 	set f [string trimleft $fn "!"]
 
-	if ![valid_file $fn] {
-		p_err "problems with accessing file: $fn"
+	if ![valid_file $f] {
+		p_err "problems with accessing file: $f"
 		return
 	}
 	p_verb "running external script $f"
+	source $f
 }
 
 
