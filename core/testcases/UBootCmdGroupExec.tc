@@ -23,7 +23,7 @@ duts_tc UBootAutoscrScript {
 duts_tc UBootAutoscr {
  	Type u-boot
  	Commands {
-		"tftp 100000 /tftpboot/amcc/example.img" ".*"
+		"tftp 100000 /tftpboot/tqm834x/example.img" ".*"
 		"imi" ".*"
 		"autoscr 100000" ".*"
 	}
