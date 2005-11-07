@@ -1,5 +1,5 @@
 #
-# mtest may take ages so we
+# mtest may take ages so we test for a specific pattern
 #
 
 set timeout 600

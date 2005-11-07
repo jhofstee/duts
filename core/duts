@@ -1,4 +1,4 @@
-#!/usr/bin/expect
+#!/bin/env expect
 #
 # this is the main script for the DENX Universal Test System (DUTS)
 #
