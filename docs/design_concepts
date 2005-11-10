@@ -1,0 +1,183 @@
+1. Intro.
+
+This summary decribes the basics of DUTS, the DENX Universal Test System, a
+framework for testing U-Boot and Linux kernel in the embedded environment.
+
+Terminology note: test framework (or just framework), test system are all
+equivalent to DUTS if not stated otherwise. TC = test case, TG = test group.
+
+General assumptions.
+
+* geared towards command line interface testing
+
+* easy to use and flexible (user can run selected test case(s) against a given
+board or a set of boards)
+
+* extensible i.e. easy to add a new test case, modify existing etc.
+
+* scalable (easy to run against a set of boards, simultaneously if needed)
+
+* uses custom scripts system based on expect/Tcl
+
+
+2. Overview.
+
+Within the framework the central entity is the test case (TC): a sequential
+execution flow of chosen commands in logical association, for example writing
+to memory and sebsequent reading for verification. Quite often a "sequence"
+has only one command in the flow.
+
+Test group (TG) is simply a list of certain test cases, that must be
+implemented before "grouping"; for example TG 'eeprom' groups a number of test
+cases, each performing read, write and other operations on the device. Please
+refer to testgroups/example.test_group for an example.
+
+Test cases can be executed individually as well as a test group (list)
+sequence. In the latter case TCs are executed in the order of the TG. Test
+groups are meant to help group TCs and ease automation; it can also stand a
+simple mechanism for supporting user-defined hierarchy, but are not required
+for operation. 
+
+Note that all references to 'execution' of test cases and groups throughout
+this summary are meant in the context of the test framework and via the
+end-user tool (refer to p.4). Test cases are not proper (standalone)
+executable scripts (but can use external standalone executables, more on this
+feature in 3.2).
+
+
+3. Test cases basics.
+
+3.1. Sections.
+
+Each test case it described by a series of sections, with a mandatory set
+required in every TC. Plese refer to tescases/example.test_case for detailed
+descriptions of ALL sections and their attributes, below are highlighted only
+the commonly used.
+
+The most important sections from the perspective of a test system
+developer/user are the following:
+
+  Commands (mandatory)
+  Pre (optional)
+  Post (optional)
+
+There can be only one of each of these per TC and each contains a series of
+commands and expected outputs, or specifies an external executable to be
+invoked by the framework. Actions specified in Pre and Post sections are
+performed before and after actions in Commands section, respectively.
+Additional feature of Pre/Post is their flows are not logged to the TC's log
+file (see 2.3). They are meant to allow for preparation before the proper TC
+actions and cleaning up afterwards.
+
+
+3.2. External executables.
+
+Instead of specyfing test cases flow by the sequence of inputs and expected
+outputs as decribed earlier, the user can provide a pointer to external
+executable with custom contents that is invoked by the framework. This allows
+for more non standard test cases and extending the framework.
+
+There can be only one external executable specified in a given Pre, Commands,
+Post section.
+
+3.3. Logging.
+
+The flow of each test case (inputs sent and outputs received during TC's
+execution) is captured in a log file, by default named after the test case's
+name (this can be changed by a Logfile section): each test case is thus
+accompanied by a log file with its execution record.
+
+
+4. Implementation notes
+
+4.1. Test system directories outline
+
+<duts dir>/
+          /common
+          /testcases/
+	            /tc1
+		    /tc2
+		    
+          /testgroups/
+	             /tg1
+		     /tg2
+          duts <-- the main tool
+
+
+
+4.2. Configuration
+TODO
+
+
+5. Usage
+
+When the main 'duts' tool is ordered to run test cases, they are executed
+against a certain device (board), and while many TCs are supposed to be
+uniform across different boards and CPU architectures, some may require
+board-specific handling (and hence proprietary implementation). 
+
+Upon startup 'duts' searches the default test cases directory (this can be
+changed with option) and reads in all definitions found, then builds internal
+representation for further processing; when a sub-directory is found with the
+name of the current board target it is also searched for board-specific test
+cases, and if exist they are also included.
+
+Note DUTS does not check for test cases' names (definitions) conflicts: if
+multiple definitions of a TC exist with the same name, the last one prevails.
+This allows for some form of overloading, e.g. there can be a generic test
+case used for most of the boards, with a custom implementation for some, all
+with just one name the operator can use for all boards, in a test group etc.
+
+
+5.1. End user operation
+
+The central point from usability perspective is the highest level
+user-executable (script) tool which is the only interface the test system
+consumer is given for using the framework. Among other tasks it allows the
+operator to do the following:
+
+- run test case (list of TCs) against a specified board
+- list implemented test cases
+- list available/supported boards
+- list configuration for a given board (board name, addresses, path to images 
+location etc.)
+
+5.2. Commands and options
+
+  * list implemented test cases
+  ./duts [options] lt [group]
+
+  * display config details for a given board
+  ./duts [options] c <board name>
+
+  * list available/supported boards
+  ./duts [options] c
+
+  * run test cases
+
+    individually selected
+    ./duts [options] t <board name> -c <tc1> <tc2> <tc3> ... <tcN>
+
+    all defined TCs
+    ./duts [options] t <board name>
+
+    from filelist (test group)
+    ./duts [options] t <board name> <text file 1>...<text file N> 
+
+
+  options:
+    -d <alternative dir to test cases/board descr files>
+
+    -l <alt dir for log storage> only for "t" command i.e. only when there is
+    something to log
+
+
+5.3. Adding a new TC
+
+For a new test case the test developer is required to use a skeleton/example
+and place it in the TCs directory; from now on it can be accessed via the
+end-user script tool.
+
+5.4. Adding support for a new board
+TODO
+
