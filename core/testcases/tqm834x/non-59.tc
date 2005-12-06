@@ -11,8 +11,8 @@ duts_tc InstallKernelTftp {
 		"era 80060000 8015ffff" ".*"
 		"tftp 100000 /tftpboot/tqm834x/uImage" ".*"
 		"imi 100000" ".*"
-		{cp.b 100000 $(kernel_addr) $(filesize)} ".*"
-		{iminfo $(kernel_addr)} ".*"
+		{cp.b 100000 ${kernel_addr} ${filesize}} ".*"
+		{iminfo ${kernel_addr}} ".*"
 	}
 }
 
@@ -23,10 +23,10 @@ duts_tc UBootInstallRamdisk {
 		"tftp 100000 /tftpboot/tqm834x/uRamdisk" ".*"
 		"imi 100000" ".*"
 		"setenv ramdisk_addr 80160000" ".*"
-		"prot off $(ramdisk_addr) +$(filesize)" ".*"
-		"era $(ramdisk_addr) +$(filesize)" ".*"
-		{cp.b 100000 $(ramdisk_addr) $(filesize)} ".*"
-		{imi $(ramdisk_addr)} ".*"
+		"prot off ${ramdisk_addr} +${filesize}" ".*"
+		"era ${ramdisk_addr} +${filesize}" ".*"
+		{cp.b 100000 ${ramdisk_addr} ${filesize}} ".*"
+		{imi ${ramdisk_addr}} ".*"
 	}
 }
 

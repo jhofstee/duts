@@ -10,8 +10,8 @@ duts_tc InstallKernelTftp {
 		"era ff800000 ff8fffff" ".*"
 		"tftp 100000 /tftpboot/ocotea/uImage" ".*"
 		"imi 100000" ".*"
-		{cp.b 100000 $(kernel_addr) $(filesize)} ".*"
-		{iminfo $(kernel_addr)} ".*"
+		{cp.b 100000 ${kernel_addr} ${filesize}} ".*"
+		{iminfo ${kernel_addr}} ".*"
 	}
 }
 
@@ -23,8 +23,8 @@ duts_tc UBootInstallRamdisk {
 		"era ffa00000 ffbfffff" ".*"
 		"tftp 100000 /tftpboot/amcc/uRamdisk" ".*"
 		"imi 100000" ".*"
-		{cp.b 100000 $(ramdisk_addr) $(filesize)} ".*"
-		{imi $(ramdisk_addr)} ".*"
+		{cp.b 100000 ${ramdisk_addr} ${filesize}} ".*"
+		{imi ${ramdisk_addr}} ".*"
 	}
 }
 

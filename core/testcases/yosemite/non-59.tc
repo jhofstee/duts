@@ -11,8 +11,8 @@ duts_tc InstallKernelTftp {
 		"era fc000000 fc1fffff" ".*"
 		"tftp 100000 /tftpboot/yosemite/uImage" ".*"
 		"imi 100000" ".*"
-		{cp.b 100000 $(kernel_addr) $(filesize)} ".*"
-		{iminfo $(kernel_addr)} ".*"
+		{cp.b 100000 ${kernel_addr} ${filesize}} ".*"
+		{iminfo ${kernel_addr}} ".*"
 	}
 }
 
@@ -24,8 +24,8 @@ duts_tc UBootInstallRamdisk {
 		"era fc200000 fc3fffff" ".*"
 		"tftp 100000 /tftpboot/amcc/uRamdisk" ".*"
 		"imi 100000" ".*"
-		{cp.b 100000 $(ramdisk_addr) $(filesize)} ".*"
-		{imi $(ramdisk_addr)} ".*"
+		{cp.b 100000 ${ramdisk_addr} ${filesize}} ".*"
+		{imi ${ramdisk_addr}} ".*"
 	}
 }
 

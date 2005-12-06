@@ -21,7 +21,7 @@ duts_tc InstallUBootUsingUBoot {
 	tftp 100000 /tftpboot/uboot.bin
 	protect off 40000000 4003FFFF
 	era 40000000 4003FFFF
-	cp.b 100000 40000000 $(filesize)
+	cp.b 100000 40000000 ${filesize}
 	setenv filesize
 	saveenv
 	reset
@@ -125,8 +125,8 @@ duts_tc UBootInstallKernelTftp {
 		"tftp $CFG_RAM_WS_BASE /tftpboot/$BOARD/uImage" ".*"
 		"imi $CFG_RAM_WS_BASE" ".*"
 		"setenv ram_ws $CFG_RAM_WS_BASE" ".*"
-		{cp.b $(ram_ws) $(kernel_addr) $(filesize)} ".*"
-		{iminfo $(kernel_addr)} ".*"
+		{cp.b ${ram_ws} ${kernel_addr} ${filesize}} ".*"
+		{iminfo ${kernel_addr}} ".*"
 	}
 }
 
@@ -139,7 +139,7 @@ duts_tc UBootInstallRamdisk {
 		"era $CFG_RAMDISK_START $CFG_RAMDISK_END" ".*"
 		"tftp $CFG_RAM_WS_BASE /tftpboot/$BOARD/uRamdisk" ".*"
 		"imi $CFG_RAM_WS_BASE" ".*"
-		{cp.b $(ram_ws) $(ramdisk_addr) $(filesize)} ".*"
-		{imi $(ramdisk_addr)} ".*"
+		{cp.b ${ram_ws} ${ramdisk_addr} ${filesize}} ".*"
+		{imi ${ramdisk_addr}} ".*"
 	}
 }

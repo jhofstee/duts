@@ -56,7 +56,7 @@ duts_tc UBootIminfoHelp {
 duts_tc UBootIminfo {
  	Type u-boot
 	Pre {
-		{tftp 200000 $(bootfile)} ".*"
+		{tftp 200000 ${bootfile}} ".*"
 	}
  	Commands {
 		"imi 200000" ".*"

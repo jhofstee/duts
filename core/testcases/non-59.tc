@@ -21,7 +21,7 @@ duts_tc InstallUBootUsingUBoot {
 	tftp 100000 /tftpboot/uboot.bin
 	protect off 40000000 4003FFFF
 	era 40000000 4003FFFF
-	cp.b 100000 40000000 $(filesize)
+	cp.b 100000 40000000 ${filesize}
 	setenv filesize
 	saveenv
 	reset
