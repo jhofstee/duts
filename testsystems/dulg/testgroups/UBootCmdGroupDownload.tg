@@ -1,0 +1,8 @@
+duts_tg UBootCmdGroupDownload { 
+UBootBootpHelp
+UBootDhcpHelp
+UBootLoadbHelp
+UBootLoadsHelp
+UBootRarpHelp
+UBootTftpHelp
+}

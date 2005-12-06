@@ -1,0 +1,7 @@
+duts_tg UBootCmdGroupSpecial {
+UBootI2cHelp
+UBootIdeHelp
+UBootDiskbootHelp
+UBootDocHelp
+UBootDocbootHelp
+}

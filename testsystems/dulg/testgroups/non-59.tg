@@ -1,0 +1,20 @@
+duts_tg non-59 {
+UBootInstallUBootKernelTftp
+InstallUBootUsingFirmware
+InstallUBootUsingLinux
+#InstallUBootUsingUBoot
+LinuxBootNfs
+LinuxBootSelf
+LinuxMtdDump
+LinuxMtdErase
+LinuxMtdMap
+LinuxMtdWrite
+LinuxProcMtd
+UBootBoot
+UBootHelp
+UBootHelpAbbrev
+UBootHelpLong
+UBootInstallRamdisk
+UBootPrintenvBoardID
+UBootSetSerial
+}

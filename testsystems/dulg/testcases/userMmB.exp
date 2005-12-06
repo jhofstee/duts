@@ -1,0 +1,21 @@
+#
+# interactively modify memory and display result
+#
+global _context_firmware_prompt
+
+expect "*"
+send -s "mm.b 100000\r"
+expect "?"
+
+foreach v {48 65 6c 6c 6f 20 20 20} {
+	send -s "$v\r"
+	sleep 0.25
+	expect "?"
+}
+
+send -s ".\r"
+expect $_context_firmware_prompt
+unset v
+
+_context_firmware_command "md 100000 10" ".*"
+

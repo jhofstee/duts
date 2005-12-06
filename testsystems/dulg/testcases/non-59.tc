@@ -1,0 +1,145 @@
+#
+#
+#
+#
+
+
+duts_tc InstallUBootUsingLinux {
+ 	Type u-boot
+ 	Commands {
+		"" ".*"
+	}
+}
+
+duts_tc InstallUBootUsingUBoot {
+ 	Type u-boot
+ 	Commands {
+		"" ".*"
+	}
+	Info {
+	5.4.3. Installation using U-Boot
+	tftp 100000 /tftpboot/uboot.bin
+	protect off 40000000 4003FFFF
+	era 40000000 4003FFFF
+	cp.b 100000 40000000 $(filesize)
+	setenv filesize
+	saveenv
+	reset
+	}
+}
+
+duts_tc LinuxBootNfs {
+ 	Type u-boot
+	Commands "!testcases/userLinuxBootNfs.exp"
+}
+
+duts_tc LinuxBootNetNfs {
+ 	Type u-boot
+ 	Commands "!testcases/userLinuxBootNetNfs.exp"
+}
+
+duts_tc LinuxBootSelf {
+ 	Type u-boot
+ 	Commands "!testcases/userLinuxBootSelf.exp"
+}
+
+duts_tc LinuxMtdDump {
+ 	Type linux 
+ 	Commands {
+		"xxd /dev/mtd0 | head -4" ".*"
+	}
+}
+
+duts_tc LinuxMtdErase {
+ 	Type linux
+ 	Commands {
+		"" ".*"
+	}
+	Info {
+		"eraseall /dev/$CFG_MTD_ERASE_DEVICE" ".*"
+		"date > /dev/$CFG_MTD_ERASE_DEVICE" ".*"
+		"head -1 /dev/$CFG_MTD_ERASE_DEVICE" ".*"
+	}
+}
+
+duts_tc LinuxMtdWrite {
+ 	Type linux
+ 	Commands {
+		"" ".*"
+	}
+	Info {
+		"date > /dev/$CFG_MTD_ERASE_DEVICE" ".*"
+		"head -1 /dev/$CFG_MTD_ERASE_DEVICE" ".*"
+		"date > /dev/$CFG_MTD_ERASE_DEVICE" ".*"
+	}
+}
+
+duts_tc LinuxProcMtd {
+ 	Type linux
+ 	Commands {
+		"cat /proc/mtd" ".*"
+	}
+}
+
+duts_tc UBootBoot {
+ 	Type u-boot
+ 	Commands {
+		"" ".*"
+	}
+}
+
+duts_tc UBootHelp {
+ 	Type u-boot
+ 	Commands {
+		"help" ".*"
+	}
+}
+
+duts_tc UBootHelpAbbrev {
+ 	Type u-boot
+ 	Commands {
+		"help fli tftp" ".*"
+	}
+}
+
+duts_tc UBootHelpLong {
+ 	Type u-boot
+ 	Commands {
+		"help tftpboot" ".*"
+		"help setenv printenv" ".*"
+	}
+}
+
+duts_tc UBootPrintenvBoardID {
+ 	Type u-boot
+ 	Commands {
+		"printenv serial# ethaddr" ".*"
+	}
+}
+
+duts_tc UBootInstallKernelTftp {
+ 	Type u-boot
+	Timeout 600
+ 	Commands {
+		"era $CFG_KERNEL_START $CFG_KERNEL_END" ".*"
+		"tftp $CFG_RAM_WS_BASE /tftpboot/$BOARD/uImage" ".*"
+		"imi $CFG_RAM_WS_BASE" ".*"
+		"setenv ram_ws $CFG_RAM_WS_BASE" ".*"
+		{cp.b $(ram_ws) $(kernel_addr) $(filesize)} ".*"
+		{iminfo $(kernel_addr)} ".*"
+	}
+}
+
+duts_tc UBootInstallRamdisk {
+ 	Type u-boot
+	Timeout 600
+ 	Commands {
+		"setenv ramdisk_addr $CFG_RAMDISK_START" ".*"
+		"setenv ram_ws $CFG_RAM_WS_BASE" ".*"
+		"era $CFG_RAMDISK_START $CFG_RAMDISK_END" ".*"
+		"tftp $CFG_RAM_WS_BASE /tftpboot/$BOARD/uRamdisk" ".*"
+		"imi $CFG_RAM_WS_BASE" ".*"
+		{cp.b $(ram_ws) $(ramdisk_addr) $(filesize)} ".*"
+		{imi $(ramdisk_addr)} ".*"
+	}
+}

@@ -1,0 +1,14 @@
+#
+# mtest may take ages so we test for a specific pattern
+#
+global _context_firmware_prompt
+
+set timeout 600
+
+send -s "mtest 100000 200000\r"
+expect "0000000F"
+send -s "\003"
+expect $_context_firmware_prompt
+
+set timeout 10 
+

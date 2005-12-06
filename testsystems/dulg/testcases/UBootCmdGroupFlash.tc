@@ -1,0 +1,116 @@
+#
+#
+#
+#
+
+duts_tc UBootCpHelp {
+	Type u-boot
+	Commands {
+		"help cp" ".*"
+	}
+}
+
+duts_tc UBootFlinfo {
+	Type u-boot
+	Commands {
+		"fli" ".*"
+	}
+}
+
+duts_tc UBootEraseHelp {
+	Type u-boot
+	Commands {
+		"help era" ".*"
+	}
+}
+
+duts_tc UBootProtectHelp {
+	Type u-boot
+	Commands {
+		"help protect" ".*"
+	}
+}
+
+duts_tc UBootCpFlash {
+	Type u-boot
+	Timeout 300
+	Pre {
+		"prot off $CFG_FLASH_TST_START $CFG_FLASH_TST_END" ".*"
+		"era $CFG_FLASH_TST_START $CFG_FLASH_TST_END" ".*"
+	}
+	Commands {
+		"cp.b $CFG_RAM_WS_BASE $CFG_FLASH_TST_START $CFG_FLASH_TST_SIZE" ".*"
+	}
+}
+
+duts_tc UBootCpFlashErrors {
+	Type u-boot
+	Timeout 300
+	Pre {
+		"prot on $CFG_FLASH_TST_START $CFG_FLASH_TST_END" ".*"
+	}
+	Commands {
+		"cp.b $CFG_RAM_WS_BASE $CFG_FLASH_TST_START $CFG_FLASH_TST_SIZE" ".*"
+	}
+}
+
+duts_tc UBootEraseStartEnd {
+	Type u-boot
+	Timeout 300
+	Pre {
+		"prot off $CFG_FLASH_TST_START $CFG_FLASH_TST_END" ".*"
+	}
+	Commands {
+		"era $CFG_FLASH_ERASE_START $CFG_FLASH_ERASE_END" ".*"
+	}
+}
+
+duts_tc UBootEraseSectors {
+	Type u-boot
+	Timeout 300
+	Pre {
+		"prot off $CFG_FLASH_TST_START $CFG_FLASH_TST_END" ".*"
+	}
+	Commands {
+		"era $CFG_FLASH_ERASE_SECT" ".*"
+	}
+}
+
+duts_tc UBootEraseBank {
+	Type u-boot
+	Timeout 300
+	Pre {
+		"prot on $CFG_FLASH_PROT1_START $CFG_FLASH_PROT1_END" ".*"
+	}
+	Commands {
+		"era bank $CFG_FLASH_ERASE_BANK" ".*"
+	}
+}
+
+duts_tc UBootEraseAll {
+	Type u-boot
+	Timeout 300
+	Pre {
+		"prot on $CFG_FLASH_PROT1_START $CFG_FLASH_PROT1_END" ".*"
+	}
+	Commands {
+		"era all" ".*"
+	}
+}
+
+duts_tc UBootProtect {
+	Type u-boot
+	Timeout 300
+	Pre {
+		"prot off $CFG_FLASH_TST_START $CFG_FLASH_TST_END" ".*"
+	}
+	Commands {
+		"fli" ".*"
+		"prot on $CFG_FLASH_TST_START $CFG_FLASH_TST_END" ".*"
+		"fli" ".*"
+		"era $CFG_FLASH_TST_START $CFG_FLASH_TST_END" ".*"
+		"prot off $CFG_FLASH_TST_SECT" ".*"
+		"fli" ".*"
+		"era $CFG_FLASH_TST_SECT" ".*"
+	}
+}

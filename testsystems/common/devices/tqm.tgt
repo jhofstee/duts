@@ -1,0 +1,17 @@
+#
+# 
+#
+# duts_device <name> {
+# 
+#
+# }
+#
+#
+
+duts_device tqm834x {
+	Vars {
+		CFG_KERNEL_START 80060000
+		CFG_KERNEL_END 8015ffff
+		CFG_RAMDISK_START 80160000
+	}
+}

@@ -1,0 +1,79 @@
+#
+#
+#
+#
+
+
+duts_tc UBootDateHelp {
+ 	Type u-boot
+ 	Commands {
+		"help date" ".*"
+	}
+}
+
+duts_tc UBootDate {
+ 	Type u-boot
+ 	Commands {
+		"date" "Date:.*"
+#		"date 091223352005" ".*"
+#		"date reset" ".*"
+	}
+}
+
+duts_tc UBootEchoHelp {
+ 	Type u-boot
+ 	Commands {
+		"help echo" ".*"
+	}
+}
+
+duts_tc UBootEcho {
+ 	Type u-boot
+ 	Commands {
+		"echo The quick brown fox jumped over the lazy dog." ".*"
+	}
+}
+
+duts_tc UBootResetHelp {
+ 	Type u-boot
+ 	Commands {
+		"help reset" ".*"
+	}
+}
+
+duts_tc UBootReset {
+ 	Type u-boot
+ 	Commands {
+		"" ".*"
+	}
+	Info {Heh, executing reboots the board...}
+}
+
+duts_tc UBootSleepHelp {
+ 	Type u-boot
+ 	Commands {
+		"help sleep" ".*"
+	}
+}
+
+duts_tc UBootSleep {
+ 	Type u-boot
+ 	Commands {
+		"date ; sleep 5 ; date" ".*"
+	}
+}
+
+duts_tc UBootVersionHelp {
+ 	Type u-boot
+ 	Commands {
+		"help version" ".*"
+	}
+}
+
+duts_tc UBootVersion {
+ 	Type u-boot
+ 	Commands {
+		"version" ".*"
+	}
+}
+

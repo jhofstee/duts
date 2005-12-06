@@ -1,6 +1,6 @@
 1. Intro.
 
-This summary decribes the basics of DUTS, the DENX Universal Test System, a
+This summary describes the basics of DUTS, the DENX Universal Test System, a
 framework for testing U-Boot and Linux kernel in the embedded environment.
 
 Terminology note: test framework (or just framework), test system are all
@@ -24,7 +24,7 @@ board or a set of boards)
 
 Within the framework the central entity is the test case (TC): a sequential
 execution flow of chosen commands in logical association, for example writing
-to memory and sebsequent reading for verification. Quite often a "sequence"
+to memory and subsequent reading for verification. Quite often a "sequence"
 has only one command in the flow.
 
 Test group (TG) is simply a list of certain test cases, that must be
@@ -40,8 +40,8 @@ for operation.
 
 Note that all references to 'execution' of test cases and groups throughout
 this summary are meant in the context of the test framework and via the
-end-user tool (refer to p.4). Test cases are not proper (standalone)
-executable scripts (but can use external standalone executables, more on this
+end-user tool (refer to p.4). Test cases are not proper (stand alone)
+executable scripts (but can use external stand alone executables, more on this
 feature in 3.2).
 
 
@@ -50,7 +50,7 @@ feature in 3.2).
 3.1. Sections.
 
 Each test case it described by a series of sections, with a mandatory set
-required in every TC. Plese refer to tescases/example.test_case for detailed
+required in every TC. Please refer to tescases/example.test_case for detailed
 descriptions of ALL sections and their attributes, below are highlighted only
 the commonly used.
 
@@ -73,7 +73,7 @@ actions and cleaning up afterwards.
 3.2. External executables.
 
 Instead of specyfing test cases flow by the sequence of inputs and expected
-outputs as decribed earlier, the user can provide a pointer to external
+outputs as decried earlier, the user can provide a pointer to external
 executable with custom contents that is invoked by the framework. This allows
 for more non standard test cases and extending the framework.
 
@@ -145,13 +145,16 @@ location etc.)
 5.2. Commands and options
 
   * list implemented test cases
-  ./duts [options] lt [group]
+  ./duts [options] lt [board name]
+
+  when board name is supplied lists board-specific TCs, without parameter
+  common (shared) test cases are listed
 
   * display config details for a given board
-  ./duts [options] c <board name>
+  ./duts [options] b <board name>
 
   * list available/supported boards
-  ./duts [options] c
+  ./duts [options] b
 
   * run test cases
 
@@ -180,4 +183,18 @@ end-user script tool.
 
 5.4. Adding support for a new board
 TODO
+
+
+MISC
+====
+dopisac par. na temat przetwarzania plikow w TC oraz TG - ze moze byc dowolna
+liczba takich plikow, w kazadym pliku dowolna liczba definicji TC/TG, wszsttko
+zostanie wciagniete i dolaczone do wew listy
+
+jw dla pliku z opisem targetu
+
+roznica w obsludze gdy jest INIT i np busybox
+
+skrypt do tworzenia szkieletu struktury config na podst pliku config.h karty w
+kodzie ubota
 

@@ -1,0 +1,266 @@
+###############################################################################
+##
+## device processing routines
+##
+###############################################################################
+
+set was_common_device "no"
+set device_errors 0
+
+#
+# called when .tgt file is source'd
+#
+proc duts_device {name args} {
+
+	global cur_device was_common_device DEVICE_COMMON_NAME
+	global l_boards a_devices device_errors
+
+	set cur_device $name
+	
+	if {$name == $DEVICE_COMMON_NAME} {
+		if {$was_common_device == "yes"} {
+			p_warn "$DEVICE_COMMON_NAME re-defined?!"
+		} else {
+			set was_common_device "yes"
+		}
+	}
+
+	lappend l_boards $name
+	
+	p_verb "Loading device description for: $cur_device"
+	uplevel 1 [lindex $args end]
+
+	if {$device_errors > 0} {
+		exit1
+	}
+}
+
+
+#
+# processes Internals section in duts_device decription
+#
+# p: path to the tcl script with implementation of required methods, note the
+# path is relative to $working_dir
+#
+proc Internals {p} {
+	global cur_device a_devices device_errors working_dir
+	
+	##
+	## validate file
+	##
+	set f "$working_dir/$p"
+	if ![valid_file $f] {
+		p_err "problems validating file: $f"
+		set device_errors 1
+	} else {
+		# is this needed?
+		set a_devices($cur_device,internals) $p
+		
+		set err ""
+		if [catch {source $f} err] {
+			p_err "problems with source'ing '$f'?!"
+			puts "  $err"
+			set device_errors 1
+		}
+	}
+}
+
+
+#
+# processes Vars section in duts_device description
+#
+proc Vars {vars} {
+
+	global board_name cur_device DEVICE_COMMON_NAME a_devices
+
+	if {($cur_device != $board_name) && 
+	    ($cur_device != $DEVICE_COMMON_NAME)} {
+		# do not parse and set global vars for boards other than
+		# currently selected or _common
+		return
+	}
+
+	##
+	## parse Vars section, all definitions are converted to global
+	## variables that are (potentially) later used
+	##
+
+	# numer of lines in the section
+	set max [expr [llength $vars] - 1]
+
+	# TODO verify max is even, otherwise the Vars section is broken
+
+	set l_vars ""
+	for {set i 0} {$i < $max} {incr i 2} {
+		# var name 
+		set var [lindex $vars $i]
+
+		# value assigned
+		set val [lindex $vars [expr $i + 1]]
+
+#puts "varname $var\t value $val"
+		global $var
+		set $var $val
+		lappend l_vars $var
+	}
+	
+	p_verb "set globals: $l_vars"
+	
+	##
+	## save the list of [global] vars set for this board, so we can
+	## retrieve them later
+	##
+	if [llength $l_vars] {
+		set a_devices($cur_device,varlist) $l_vars
+	}
+}
+
+#
+# checks if entry $ent for _common section is defined in a_devices array,
+# returns 1 if found, 0 otherwise
+#
+proc is_device_common_defined {ent} {
+	global a_devices DEVICE_COMMON_NAME
+
+	set rv 0
+	if {[in_array a_devices "$DEVICE_COMMON_NAME,$ent"]} {
+		set rv 1
+	}
+
+	return $rv
+}
+
+#
+# checks if entry $ent for board $b is defined in
+# a_devices array, returns 1 if found, 0 otherwise
+#
+proc is_device_board_defined {b ent} {
+	global a_devices
+
+	set rv 0
+	if {[in_array a_devices "$b,$ent"]} {
+		set rv 1
+	}
+
+	return $rv
+}
+
+
+#
+# validates devices are consistent:
+#
+# - if mandatory device methods are implemented
+# - if all boards have Vars sections - warn, this may turn to problems later
+#
+proc valid_devices {} {
+
+	global a_devices l_boards DEVICE_COMMON_NAME board_name
+	global remote
+
+	set rv 1
+
+	set mandatory_methods {_device_power_on _device_power_off\
+	_device_connect_target _device_connect_host}
+
+	foreach mm $mandatory_methods {
+		if ![proc_exists $mm] {
+			p_err "method '$mm' not found?!"
+			set rv 0
+		} else {
+			p_verb "method '$mm' found, OK"
+		}
+	}
+
+	foreach b $l_boards {
+		##
+		## warn about possible problems (not mandatory sections etc.)
+		##
+		if ![is_device_board_defined $b "varlist"] {
+			if ![is_device_common_defined "varlist"] {
+				p_warn "no section Vars (or empty)!?"
+			}
+		}
+	}
+
+	return $rv
+}
+
+#
+# loads device description files
+# 
+# e: extension
+#
+proc load_all_devices {{e ""}} {
+
+	global working_dir board_name l_boards
+	global DEVICE_DESCR_DIR DEVICE_DESCR_EXT
+	
+	set d "$working_dir/$DEVICE_DESCR_DIR"
+	if ![valid_dir $d] {
+		p_err "Invalid device dir: $d" 1
+	}
+
+	set e [ expr {($e == "") ? $DEVICE_DESCR_EXT : $e}]
+	
+	foreach f [ find_files $d $e ] {
+		p_verb "loading devices from $f"
+
+		# just sourcing the file does the trick - a_devices hash
+		# will contain details of all device descriptions in the
+		# files
+		set err ""
+		if [catch {source $f} err] {
+			p_err "problems with parsing '$f'?!"
+			puts "  $err"
+			exit1
+		}
+	}
+
+	set n [llength $l_boards]
+	if {$n > 0} {
+		p_verb "loaded $n device decriptions"
+		
+		##
+		## validate devices
+		##
+		if ![valid_devices] {
+			exit1
+		}
+		
+	} else {
+		p_err "No device descriptions found in '$d' dir?!" 1
+	}
+}
+
+
+proc list_all_devices {} {
+	global l_boards DEVICE_COMMON_NAME
+
+	puts "Defined configurations for the devices:"
+	foreach b $l_boards {
+		if {$b == $DEVICE_COMMON_NAME} {
+			# don't show the shared device on the list
+			continue
+		}
+		puts "  $b"
+	}
+	puts ""
+}
+
+
+#
+# shows device details for the $board_name
+#
+proc show_device {} {
+	global board_name a_devices
+
+	set con_target [get_device_connect "target"]
+
+	puts "Configuration for board: $board_name"
+	if [catch {set vl $a_devices($board_name,varlist)}] {
+		set vl ""
+	}
+	puts "  vars set: $vl"
+	puts "  target connect: $con_target"
+	puts ""
+}

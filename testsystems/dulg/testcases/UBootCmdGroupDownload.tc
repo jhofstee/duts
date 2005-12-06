@@ -1,0 +1,47 @@
+#
+#
+#
+
+
+duts_tc UBootBootpHelp {
+ 	Type u-boot
+ 	Commands {
+		"help bootp" ".*"
+	}
+}
+
+duts_tc UBootDhcpHelp {
+ 	Type u-boot
+ 	Commands {
+		"help dhcp" ".*"
+	}
+}
+
+duts_tc UBootLoadbHelp {
+ 	Type u-boot
+ 	Commands {
+		"help loadb" ".*"
+	}
+}
+
+duts_tc UBootLoadsHelp {
+ 	Type u-boot
+ 	Commands {
+		"help loads" ".*"
+	}
+}
+
+duts_tc UBootRarpHelp {
+ 	Type u-boot
+ 	Commands {
+		"help rarp" ".*"
+	}
+}
+
+duts_tc UBootTftpHelp {
+ 	Type u-boot
+ 	Commands {
+		"help tftp" ".*"
+	}
+}
+

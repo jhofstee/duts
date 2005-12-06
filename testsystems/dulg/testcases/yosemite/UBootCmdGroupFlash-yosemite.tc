@@ -1,0 +1,21 @@
+#
+#
+#
+#
+
+duts_tc UBootProtect {
+	Type u-boot
+	Timeout 300
+	Pre {
+		"prot off $CFG_FLASH_PROT2_START $CFG_FLASH_PROT2_END" ".*"
+	}
+	Commands {
+		"fli" ".*"
+		"prot on $CFG_FLASH_PROT2_START $CFG_FLASH_PROT2_END" ".*"
+		"fli" ".*"
+		"era $CFG_FLASH_PROT2_START $CFG_FLASH_PROT2_END" ".*"
+		"prot off $CFG_FLASH_TST_SECT" ".*"
+		"fli" ".*"
+		"era $CFG_FLASH_TST_SECT" ".*"
+	}	
+}

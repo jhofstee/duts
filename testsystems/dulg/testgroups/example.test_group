@@ -1,0 +1,14 @@
+#
+#
+#
+
+#duts_tg Testgroup01 {
+#	UBootDate
+#	UBootVersion
+#}
+
+duts_tg Testgroup02 {
+UBootDate
+UBootVersion
+}
+
