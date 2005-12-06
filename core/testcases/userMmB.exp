@@ -16,5 +16,4 @@ send -s ".\r"
 expect "=>"
 unset v
 
-send_cmd "md 100000 10" ".*"
-
+cmd_uboot "md 100000 10" ".*"
