@@ -254,13 +254,11 @@ proc list_all_devices {} {
 proc show_device {} {
 	global board_name a_devices
 
-	set con_target [get_device_connect "target"]
-
 	puts "Configuration for board: $board_name"
 	if [catch {set vl $a_devices($board_name,varlist)}] {
 		set vl ""
 	}
 	puts "  vars set: $vl"
-	puts "  target connect: $con_target"
 	puts ""
+	#TODO show other params, methods etc.
 }

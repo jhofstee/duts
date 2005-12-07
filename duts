@@ -8,7 +8,7 @@
 #
 #
 
-set BASE_DIR "/home/raj/tmp/duts"
+set BASE_DIR "./"
 set verbose "no"
 set debugging "yes"
 

@@ -175,20 +175,22 @@ proc run_cmds {cmds ctx} {
 		# $ vars defined and used for commands
 		#
 
+		set subst_ok 1
 		foreach v $l_vars {
-		if [string match "*$v*" $cmd] {
-			p_verb "at least one VAR found, force subst"
+			if [string match "*$v*" $cmd] {
+				p_verb "at least one VAR found, force subst"
 		
-			if [catch {set cmd [subst $cmd]}] {
-				p_err "substitution failed on the following:"
-				puts ""
-				puts "  $cmd"
-				puts ""
-				puts "check if variables set and come back..." 
-				exit1
+				if [catch {set cmd [subst $cmd]}] {
+					p_err "substitution failed on the following:"
+					puts "  $cmd"
+					set subst_ok 0
+					continue
+				}
+				break
 			}
-			break
-			}
+		}
+		if {!$subst_ok} {
+			p_err "check if variable(s) set and come back" 1
 		}
 
 		##
@@ -306,6 +308,7 @@ proc run_tc {tc} {
 	##
 	if {[in_array a_testcases "$tc,pre"]} {
 #		puts "  $a_testcases($tc,pre)"
+		p_verb "running commands from Pre section"
 		run_cmds a_testcases($tc,pre) $context
 	} else {
 		p_verb "no Pre section for test case '$tc'"
@@ -389,8 +392,6 @@ proc run_tc_list {ln} {
 		set spawn_id $console_con
 	}
 
-
-
 	## 
 	## try identify if the declared cur_context is really what device
 	## actually is, this might be not easy at all...
@@ -401,7 +402,6 @@ proc run_tc_list {ln} {
 		set cur_context $real_context
 	}
 
-	
 	##
 	## run TCs from the list
 	##

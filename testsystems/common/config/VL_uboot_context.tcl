@@ -14,7 +14,6 @@ proc _context_firmware_handler {} {
 #p_banner "U-Boot context handler" 
 
 	expect "*"
-
 	#
 	# the following cases are possible:
 	# 1. device is off
@@ -28,6 +27,8 @@ proc _context_firmware_handler {} {
 	#	-verify we have linux prompt
 	#	-reboot
 	#
+
+	
 	if [is_powered_on] {
 		# we're powered on
 		if {$cur_context == "kernel"} {
@@ -50,7 +51,7 @@ proc _context_firmware_handler {} {
 
 	#
 	# get "Hit any key to stop autoboot"
-	# space
+	# key press 
 	# get prompt
 	#
 	if {$cur_context == "off"} {
@@ -59,10 +60,10 @@ proc _context_firmware_handler {} {
 				p_err "timed out while waiting for autoboot prompt" 1
 			}
 			"Hit any key to stop" {
-				send -s " \r"
+				send -s "\r"
 			}
 		}
-		sleep 2
+#		sleep 2
 	}
 
 	send -s " \r"

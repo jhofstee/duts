@@ -151,11 +151,6 @@ proc cmd_t {a} {
 		# check if the required TCs are defined
 		check_tc_list l_runlist
 
-#		if {[llength $l_runlist] == 0} {
-#			p_err "No test cases selected..?!"
-#			cmd_t_usage
-#		}
-
 	} else {
 		# no params after 'board_name' so let's run all defined test
 		# cases using default config
@@ -176,13 +171,7 @@ proc cmd_t {a} {
 	## run selected TCs
 	## 
 	puts "List of selected test cases:\n$l_runlist\n"
-	set timeout -1
-	send_user "confirm to start execution? \[y] "
-	expect_user -re "(.*)\n" { set ans $expect_out(1,string) }
-	if {$ans != "y" && $ans != ""} {
-		exit
-	}
-	set timeout 10
+	ask_yesno "confirm to start execution? "
 
 	run_tc_list l_runlist
 }

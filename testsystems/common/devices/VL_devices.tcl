@@ -52,6 +52,7 @@ proc _device_power_on {} {
 			p_verb "powered on, OK"
 		}
 	}
+	expect eof
 }
 
 
@@ -74,24 +75,22 @@ proc _device_connect_target {} {
 	set send_slow {1 .050}
 	set con_cmd "connect"
 	
+	expect "*"
 	if {$remote == "yes"} {
 
 		# we're remote so a connection to the host must be established
 		set spawn_id [_device_connect_host] 
+		send -s "$con_cmd $board_name\r"
 
 	} else {
 #TODO check if not already connected (connected global)	
 		# we're locally in the VL so need to spawn "connect" command
-		if [catch {spawn $con_cmd $board_name}] {
+		if [catch {spawn -noecho $con_cmd $board_name}] {
 			p_err "couldn't spawn 'connect'?! Maybe -r option\
 			(remote VL) needed..?" 1
 		}
 		
 	}
-
-	send -s "$con_cmd $board_name\r"
-	expect {
-
 	# TODO when the port is occupied by another connection it is not
 	# reliably detected and handled
 
@@ -99,18 +98,19 @@ proc _device_connect_target {} {
 	#			p_err "XXXXXX"
 	#			exit1
 	#		}
-
+	expect {
+		timeout {
+			puts ""
+			p_err "timed out during connection to target\
+			'$board_name'?!" 1
+		}
 		"Unknown target:" {
 			puts ""
 			p_err "unknown target '$board_name'?!" 1
 		}
 		"Usage:" {
 			puts ""
-			p_err "no board name given?!" 1 
-		} timeout {
-			puts ""
-			p_err "timed out during connection to target\
-			'$board_name'?!" 1
+			p_err "no board name given?!" 1
 		}
 		"using command"	{
 			p_verb "connection OK"
@@ -195,14 +195,15 @@ proc is_powered_on {} {
 #
 proc _device_current_context {} {
 	global remote console_con _context_firmware_prompt
-	global _context_kernel_prompt
-	
+	global _context_kernel_prompt connected
+
 	set ctx "off"
 	set spawn_id $console_con
 
-#TODO recover from login should really be elswhere as is context-specific
+#TODO recover from Linux login should really be elsewhere as is context-specific
+
 	if [is_powered_on] {
-		send -s " \r"
+		send -s " \r" 
 		expect {
 			timeout {
 				p_err "timed out - context unknown..?!" 1

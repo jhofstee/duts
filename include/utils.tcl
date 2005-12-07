@@ -110,7 +110,8 @@ proc p_banner {msg {p "* "}} {
 	set len [expr 5 + [string length $msg]]
 	set i 0
 	set p_len [string length $p]
-	
+
+	puts ""
 	while {$i + $p_len <= $len} {
 		puts -nonewline $p
 		incr i $p_len
