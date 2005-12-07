@@ -110,7 +110,7 @@ proc cmd_t {a} {
 	global CONFIG_DEFAULT_NAME
 
 	if {[llength $a] < 1} {
-		p_err "no board name given..?! Use 'c' command for list of\
+		p_err "no board name given..?! Use 'b' command for list of\
 		supported boards"
 		cmd_t_usage
 	}

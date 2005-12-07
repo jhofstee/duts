@@ -2,7 +2,7 @@
 #
 #
 
-set scrfn "testcases/example.script"
+set scrfn "testsystems/dulg/testcases/example.script"
 
 set scrf [open $scrfn r]
 

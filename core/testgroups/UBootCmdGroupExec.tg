@@ -1,8 +1,0 @@
-duts_tg UBootCmdGroupExec {
-UBootAutoscrHelp
-UBootAutoscrScript
-UBootAutoscrMkimage
-UBootAutoscr
-UBootBootmHelp
-UBootGoHelp
-}
