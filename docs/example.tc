@@ -10,21 +10,23 @@
 #	...
 # }
 #
-#   Note - <name> of a test case must be unique within the scope of the whole
-#   framework; there's no checking against this and in case of a duplicate the
-#   most recent entry prevails
+# Note that <name> of a test case must be unique within the scope of the whole
+# framework; there's no checking against this and in case of a duplicate the
+# most recent entry prevails
 #
-
 
 duts_tc UBootBase {
 	######################################################################
 	# section Type, mandatory
 	#
-	# defines a TC's prerequisite and can be:
+	# points to a context required by the TC like:
 	#	u-boot
-	#	linux-console
-	#	linux-ssh
-	#	linux-telnet
+	#	linux
+	#	etc.
+	#
+	# please note the context specified here needs to be defined in a
+	# respective duts_config structure (/<testsystem_dir>/config/*.cfg 
+	# files) in order for the TC to execute
 	######################################################################
 	Type u-boot
 
@@ -66,6 +68,14 @@ duts_tc UBootBase {
 	# Example: Commands
 	# !/some/path/to/custom/script/or/program/please_execute_me
 	#
+	# ** IMPORTANT RESTRICTION ** when using variables from Vars section:
+	# it is not allowed to put both DUTS and U-Boot vars in the same
+	# command line because when using U-Boot vars they must NOT be
+	# substituted (and delimited with {} brackets, not "")! Please refer
+	# to UBootInstallRamdisk TC for example how to handle this
+	# (testsystems/dulg/testcases/non-59.tc file)
+	#
+	# ** THE ABOVE NOTICE APPLIES TO Pre AND Post SECTIONS ALSO! **
 	######################################################################
 	Commands {
 		"base" "Base Address: .*"
@@ -110,7 +120,7 @@ duts_tc UBootBase {
 	# sets timeout period for response to a command when executing
 	# Commands/Pre/Post sections, as some test cases require it longer
 	# than the default. Has the scope of one test case i.e. consecutive
-	# test cases get default timeout again (if not overwritten with their
+	# test cases get default timeout again (unless overwritten with their
 	# Timeout section). 
 	# 
 	######################################################################

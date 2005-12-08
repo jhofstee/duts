@@ -1,0 +1,8 @@
+#
+# This file is an example of test group (list)
+#
+
+duts_tg Testgroup02 {
+	UBootDate
+	UBootVersion
+}

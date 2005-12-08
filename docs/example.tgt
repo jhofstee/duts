@@ -1,0 +1,104 @@
+#
+# This file contains abstractions that represent physical target devices.
+#
+# An individual device is described by the duts_device structure
+#
+# duts_device <name> {
+#	Internals ...
+#	Vars {
+#		...
+#	}
+#
+# A duts_device of <name> _common is handled specially: it is supposed to
+# contain params/entries shared by all devices within a given testsystem, for
+# example Internals pointer will often be generic and there is no need to
+# repeat such entry in every device's section, similarly some Vars can be
+# shared between devices. When _common exists, individual device's sections
+# can still overwrite entries (Vars etc.) with their own values.
+#
+# Per current convention, files containing duts_device descriptions
+# should have names with .tgt suffix and be placed in
+# testsystems/<testsystem_dir>/devices sub-dir in order for DUTS to recognize
+# and read them in.
+# 
+# Each .tgt file can have any number of duts_device structures and there can
+# by any number of .tgt files in 'devices' sub-directory.
+#
+
+duts_device _common {
+	######################################################################
+	# section Internals, mandatory (must be defined in either _common or
+	#				board-dedicated duts_device structure)
+	#
+	# points to a file with implementation of device's operations
+	# (methods); the mandatory procedures to be implemented are:
+	#
+	# _device_power_on
+	# _device_power_off
+	# _device_connect_target
+	# _device_connect_host (if remote VL access is required)
+	# _device_current_context
+	#
+	# Please refer to default implementation of the above for DENX VL in
+	# testsystems/common/devices/VL_devices.tcl file
+	######################################################################
+	Internals "devices/VL_devices.tcl"
+
+	######################################################################
+	# section Vars, optional
+	#
+	# defines user-provided variables that can be used in test cases'
+	# sections Commands, Pre and Post. When setting Vars please follow 
+	# guidelines and notes:
+	#
+	# 1. there are no restrictions for varnames, the important notice is
+	# they are converted internally to globals and there's no checking for
+	# conflicts with other globals; it is therefore recommended to use
+	# some prefix, the suggested convention is CFG_<SOMETHING> (all
+	# uppercase); to minimize such conflicts it is also recommended not to
+	# use var names starting with an underscore "_" as this is often used
+	# internally by the framework.
+	#
+	# 2. built-in vars:
+	# - BOARD (it is subsituted with the currently selected board name)
+	# (only one built-in var currently exists)
+	#
+	# 3. once defined in Vars section variables (or the built-ins) can be 
+	# used everywhere in TC Commands, Pre and Post sections' bodies
+	#
+	# 4. important restriction applies when using *U-Boot* vars in
+	# commands - we want these to be NOT substituted (by using {} brackets
+	# instead of "" as delimiters), so it's not allowed to use both DUTS
+	# and U-Boot vars in the same command line - please visit TC
+	# UBootInstallRamdisk for example (testsystems/dulg/testcases/non-59.tc)
+	######################################################################
+	Vars {
+		CFG_RAM_WS_BASE 100000
+		CFG_MTD_ERASE_DEVICE "mtd6"
+	}
+}
+
+duts_device bamboo {
+	Vars {
+		CFG_KERNEL_START ffc00000
+		CFG_KERNEL_END	 ffd7ffff
+		CFG_RAMDISK_START ffd80000
+		CFG_RAMDISK_END	  fff4ffff
+
+		CFG_FLASH_TST_START 87f00000
+		CFG_FLASH_TST_END 87f7ffff
+		CFG_FLASH_ERASE_START 87f00000
+		CFG_FLASH_ERASE_END 87f2ffff
+		CFG_FLASH_TST_SIZE 10000
+
+		CFG_FLASH_PROT1_START 87f60000
+		CFG_FLASH_PROT1_END 87f7ffff
+
+		CFG_FLASH_PROT2_START fff80000
+		CFG_FLASH_PROT2_END ffffffff
+
+		CFG_FLASH_ERASE_SECT "1:0-1"
+		CFG_FLASH_ERASE_BANK "1"
+		CFG_FLASH_TST_SECT "1:0"
+	}
+}
