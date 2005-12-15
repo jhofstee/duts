@@ -2,13 +2,34 @@
 # 
 #
 
+global _context_kernel_prompt cur_context
+
 expect "*"
 
-set timeout 300
 send -s "run net_nfs\r"
-expect "login: "
+expect {
+	timeout {
+		p_err "timed out after 'bootcmd'"
+		return
+	}
+	"Bad Magic Number" {
+		p_err "problems finding image?!"
+		return
+	}
+	"Linux version" {
+		set cur_context "kernel"
+		set timeout 300
+		expect "login: "
 
-set timeout 10
-send -s "root\r"
-expect "#"
-
+		set timeout 10
+		send -s "root\r"
+		expect {
+			timeout {
+				p_err "timed out while waiting for kernel prompt"
+				return
+			}
+			"$_context_kernel_prompt" {
+			}
+		}	
+	}
+}

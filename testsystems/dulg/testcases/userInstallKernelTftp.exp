@@ -1,0 +1,27 @@
+#
+# install kernel image in flash 
+#
+
+global board_name
+
+##
+## check if we have the file to install
+##
+# TODO this will only work locally in VL, add support for remote access
+if ![valid_file "/tftpboot/$board_name/uImage"] {
+	p_err "problems with kernel file?!"
+	return
+}
+
+set user_commands {
+	"era $CFG_KERNEL_START $CFG_KERNEL_END" ".*"
+	"tftp $CFG_RAM_WS_BASE /tftpboot/$BOARD/uImage" ".*"
+	"imi $CFG_RAM_WS_BASE" ".*"
+	"setenv ram_ws $CFG_RAM_WS_BASE" ".*"
+	{cp.b ${ram_ws} ${kernel_addr} ${filesize}} ".*"
+	{iminfo ${kernel_addr}} ".*"
+}
+
+run_cmds user_commands "firmware"
+
+unset user_commands

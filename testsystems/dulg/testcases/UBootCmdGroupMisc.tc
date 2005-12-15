@@ -14,7 +14,7 @@ duts_tc UBootDateHelp {
 duts_tc UBootDate {
  	Type u-boot
  	Commands {
-		"date" "Date:.*"
+		"date" ".*"
 #		"date 091223352005" ".*"
 #		"date reset" ".*"
 	}

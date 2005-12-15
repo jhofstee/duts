@@ -174,23 +174,15 @@ proc run_cmds {cmds ctx} {
 		# we need to force vars substitution (subst) as there can be 
 		# $ vars defined and used for commands
 		#
-
-		set subst_ok 1
-		foreach v $l_vars {
-			if [string match "*$v*" $cmd] {
-				p_verb "at least one VAR found, force subst"
-		
-				if [catch {set cmd [subst $cmd]}] {
-					p_err "substitution failed on the following:"
-					puts "  $cmd"
-					set subst_ok 0
-					continue
-				}
-				break
+		if [string match "*$\{*" $cmd] {
+			p_verb "U-Boot vars found, skip forced substitution"
+		} else {
+			# try force subst - we may have VARs used in command
+			if [catch {set cmd [subst $cmd]}] {
+				p_err "substitution failed on the following:"
+				puts "  $cmd"
+				continue
 			}
-		}
-		if {!$subst_ok} {
-			p_err "check if variable(s) set and come back" 1
 		}
 
 		##

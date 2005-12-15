@@ -120,7 +120,8 @@ duts_tc UBootPrintenvBoardID {
 duts_tc UBootInstallKernelTftp {
  	Type u-boot
 	Timeout 600
- 	Commands {
+	Commands "!testcases/userInstallKernelTftp.exp"
+ 	Info {
 		"era $CFG_KERNEL_START $CFG_KERNEL_END" ".*"
 		"tftp $CFG_RAM_WS_BASE /tftpboot/$BOARD/uImage" ".*"
 		"imi $CFG_RAM_WS_BASE" ".*"
@@ -133,7 +134,8 @@ duts_tc UBootInstallKernelTftp {
 duts_tc UBootInstallRamdisk {
  	Type u-boot
 	Timeout 600
- 	Commands {
+	Commands "!testcases/userInstallRamdisk.exp"
+ 	Info {
 		"setenv ramdisk_addr $CFG_RAMDISK_START" ".*"
 		"setenv ram_ws $CFG_RAM_WS_BASE" ".*"
 		"era $CFG_RAMDISK_START $CFG_RAMDISK_END" ".*"
