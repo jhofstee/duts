@@ -1,12 +1,16 @@
 #
-# 
+# Definitions for TQ Component boards
 #
-# duts_device <name> {
-# 
-#
-# }
-#
-#
+
+duts_device _common {
+
+	Internals "devices/VL_devices.tcl"
+
+	Vars {
+		CFG_RAM_WS_BASE 100000
+##		CFG_MTD_ERASE_DEVICE "mtd6"
+	}
+}
 
 duts_device tqm834x {
 	Vars {
@@ -19,7 +23,25 @@ duts_device tqm834x {
 duts_device tqm8560 {
 	Vars {
 		CFG_KERNEL_START	FE000000
-		CFG_KERNEL_END		FE1FFFFF
-		CFG_RAMDISK_START	FE200000
+		CFG_KERNEL_END		FE17FFFF
+		CFG_RAMDISK_START	FE180000
+		CFG_RAMDISK_END		FE37FFFF
+
+		CFG_FLASH_TST_START	FFE20000
+		CFG_FLASH_TST_END	FFE3FFFF
+
+		CFG_FLASH_ERASE_START	FFE20000
+		CFG_FLASH_ERASE_END	FFE3FFFF
+		CFG_FLASH_TST_SIZE	10000
+
+		CFG_FLASH_PROT1_START	FFE20000
+		CFG_FLASH_PROT1_END	FFE3FFFF
+
+#		CFG_FLASH_PROT2_START fff80000
+#		CFG_FLASH_PROT2_END ffffffff
+
+		CFG_FLASH_ERASE_SECT "1:241"
+		CFG_FLASH_ERASE_BANK "1"
+		CFG_FLASH_TST_SECT "1:241"
 	}
 }
