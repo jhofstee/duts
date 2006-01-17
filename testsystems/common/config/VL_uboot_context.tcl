@@ -54,16 +54,13 @@ proc _context_firmware_handler {} {
 	# key press 
 	# get prompt
 	#
-	if {$cur_context == "off"} {
-		expect {
-			timeout {
-				p_err "timed out while waiting for autoboot prompt" 1
-			}
-			"Hit any key to stop" {
-				send -s "\r"
-			}
+	expect {
+		timeout {
+			p_err "timed out while waiting for autoboot prompt" 1
 		}
-#		sleep 2
+		"Hit any key to stop" {
+			send -s "\r"
+		}
 	}
 
 	send -s " \r"
@@ -79,7 +76,7 @@ proc _context_firmware_handler {} {
 #
 # this method implements sending command and receiving response
 #
-proc _context_firmware_command {cmd rsp {slp 0.25}} {
+proc _context_firmware_command {cmd rsp {slp 0.35}} {
 
 	global _context_firmware_prompt
 
@@ -97,9 +94,15 @@ proc _context_firmware_command {cmd rsp {slp 0.25}} {
 #	send -s "$c\r"
 
 	sleep $slp
-#"($rsp)$p"	
 	expect {
-		-re "($rsp)" { }
+		-re "($rsp)" {
+			expect {
+				$p { }
+				timeout {
+					p_err "timed out after U-boot command" 1
+				}	
+			}
+		}
 		timeout {
 			p_err "timed out while waiting on cmd '$cmd'... Sure\
 			the board is alive?"
@@ -108,11 +111,5 @@ proc _context_firmware_command {cmd rsp {slp 0.25}} {
 		#called, but we need to return result value first
 			ask_yesno "do you want to continue? "
 		}
-	}
-	expect {
-		$p { }
-		timeout {
-			p_err "timed out after U-boot command" 1
-		}	
 	}
 }	
