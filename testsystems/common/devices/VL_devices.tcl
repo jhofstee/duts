@@ -34,10 +34,6 @@ proc _device_power_on {} {
 		if [catch {spawn -noecho $cmd $board_name "on"}] {
 			p_err "couldn't spawn '$cmd'" 1
 		}
-
-#		if [catch {spawn -noecho $cmd}] {
-#			p_err "couldn't spawn '$cmd'" 1
-#		}	
 	}
 
 	expect {

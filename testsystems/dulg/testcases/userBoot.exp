@@ -1,0 +1,31 @@
+#
+# 
+#
+
+global _context_firmware_prompt
+
+expect "*"
+
+send -s "reset\r"
+
+#
+# get "Hit any key to stop autoboot"
+# key press 
+# get prompt
+#
+expect {
+	timeout {
+		p_err "timed out while waiting for autoboot prompt" 1
+	}
+	"Hit any key to stop" {
+		send -s "\r"
+	}
+}
+
+send -s " \r"
+expect {
+	timeout {
+		p_err "timed out while waiting for U-Boot prompt" 1
+	}
+	$_context_firmware_prompt { }
+}

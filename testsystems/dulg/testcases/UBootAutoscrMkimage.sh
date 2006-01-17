@@ -11,5 +11,3 @@ echo "> -d example.script /tftpboot/$1/example.img"
 mkimage -A ppc -O linux -T script -C none -a 0 -e 0 \
 -n "autoscr example script" \
 -d example.script /tftpboot/$1/example.img
-
-

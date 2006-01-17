@@ -6,10 +6,10 @@ global _context_kernel_prompt cur_context
 
 expect "*"
 
-send -s "run bootcmd\r"
+send -s "run flash_self\r"
 expect {
 	timeout {
-		p_err "timed out after 'bootcmd'" 1
+		p_err "timed out after 'flash_self'" 1
 	}
 	"Bad Magic Number" {
 		p_err "problems finding image?!"
@@ -18,10 +18,10 @@ expect {
 	"Linux version" {
 		set cur_context "kernel"
 		set timeout 300
-		expect "login: "
+		expect "BusyBox"
 
 		set timeout 10
-		send -s "root\r"
+		send -s "\r"
 		expect {
 			timeout {
 				p_err "timed out while waiting for kernel prompt"

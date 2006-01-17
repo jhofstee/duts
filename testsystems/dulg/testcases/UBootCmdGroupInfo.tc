@@ -41,6 +41,7 @@ duts_tc UBootFlinfoHelp {
 
 duts_tc UBootFlinfo {
  	Type u-boot
+	Timeout 60
  	Commands {
 		"fli" ".*"
 	}
