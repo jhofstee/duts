@@ -2,20 +2,43 @@
 # install kernel image in flash 
 #
 
-global board_name
+global a_devices _context_kernel_image board_name
+
+# NOTICE: because we want to use kernel image file name from current
+# configuration view and we cannot mix DUTS vars (used in 'tftp' command) and
+# local Tcl vars, we need to work around this by adding kernel image filename
+# to device's var list
+
+# set global var with kernel image
+global CFG_KERNEL_IMAGE
+set CFG_KERNEL_IMAGE $_context_kernel_image
+# add varname to the device's var list
+lappend a_devices($board_name,varlist) "CFG_KERNEL_IMAGE"
+
+
+# TODO remove element from list of device's vars as it's most probably
+# not needed any longer
+#
+#set last_el [llength $a_devices($board_name,varlist)]
+#lreplace $a_devices($board_name,varlist) $last_el $last_el 
+#puts $a_devices($board_name,varlist)
+
 
 ##
 ## check if we have the file to install
 ##
 # TODO this will only work locally in VL, add support for remote access
-if ![valid_file "/tftpboot/$board_name/uImage"] {
+if ![valid_file $_context_kernel_image] {
 	p_err "problems with kernel file?!"
 	return
 }
 
 set user_commands {
+}
+
+set user_commands {
 	"era $CFG_KERNEL_START $CFG_KERNEL_END" ".*"
-	"tftp $CFG_RAM_WS_BASE /tftpboot/$BOARD/uImage" ".*"
+	"tftp $CFG_RAM_WS_BASE $CFG_KERNEL_IMAGE" ".*"
 	"imi $CFG_RAM_WS_BASE" ".*"
 	"setenv ram_ws $CFG_RAM_WS_BASE" ".*"
 	{cp.b ${ram_ws} ${kernel_addr} ${filesize}} ".*"
