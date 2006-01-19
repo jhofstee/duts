@@ -52,10 +52,8 @@ duts_tc LinuxMtdDump {
 
 duts_tc LinuxMtdErase {
  	Type linux
- 	Commands {
-		"" ".*"
-	}
-	Info {
+	Timeout 60
+	Commands {
 		"eraseall /dev/$CFG_MTD_ERASE_DEVICE" ".*"
 		"date > /dev/$CFG_MTD_ERASE_DEVICE" ".*"
 		"head -1 /dev/$CFG_MTD_ERASE_DEVICE" ".*"
@@ -64,10 +62,11 @@ duts_tc LinuxMtdErase {
 
 duts_tc LinuxMtdWrite {
  	Type linux
- 	Commands {
-		"" ".*"
+	Timeout 60
+	Pre {
+		"eraseall /dev/$CFG_MTD_ERASE_DEVICE" ".*"
 	}
-	Info {
+	Commands {
 		"date > /dev/$CFG_MTD_ERASE_DEVICE" ".*"
 		"head -1 /dev/$CFG_MTD_ERASE_DEVICE" ".*"
 		"date > /dev/$CFG_MTD_ERASE_DEVICE" ".*"
