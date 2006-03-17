@@ -152,10 +152,8 @@ proc run_cmds {cmds ctx} {
 		# there's only one argument - check if we have an external
 		# script to execute
 		if [regexp {^\!.*} $c] {
-			if {$dry_run != "yes"} {
-				run_external_script $c
-				# we allow only one special (external) TC
-			}
+			run_external_script $c
+			# we allow only one special (external) TC
 			return
 
 		} else {
@@ -190,7 +188,7 @@ proc run_cmds {cmds ctx} {
 		##
 		set rsp [lindex $c [expr $i + 1]]
 		
-		if [ regexp {^#.*} $cmd] {
+		if [regexp {^#.*} $cmd] {
 			# commented line starts with a hash
 			incr i
 #			puts "skipping..."
@@ -212,12 +210,14 @@ proc run_cmds {cmds ctx} {
 		##
 		## time to execute command
 		##
-
 		if {$ctx == "firmware"} {
 			_context_firmware_command $cmd $rsp
 			
 		} elseif {$ctx == "kernel"} {
 			_context_kernel_command $cmd $rsp
+
+		} elseif {$ctx == "host"} {
+			_context_host_command $cmd $rsp
 
 		} else {
 			p_err "unknown context '$ctx' required?!" 1
@@ -235,16 +235,65 @@ proc run_cmds {cmds ctx} {
 proc tc_prologue {tc ctx} {
 
 	global dry_run 
-	global cur_context
 
 #	if {$dry_run == "yes"} {
 #		return
 #	}
 
+	global cur_context send_slow spawn_id
+	global remote connected console_con control_con
+
+	set send_slow {1 .050}
+
+	if {$ctx == "host"} {
+		set cur_context $ctx
+
+		# we don't need to connect to target or switch device's 
+		# contexts in case of operations on host, so we're done with 
+		# the prologue
+		return
+	}
+
+	##
+	## establish console/control connection(s)
+	##
+	if {$connected != "yes"} {
+
+		if {$remote == "yes"} {
+			# in a remote VL setup we need a 'control' connection
+			# i.e. a connection to host machine for powering on/off
+			# and other operations on device
+#p_banner "CTRL connection"	
+			set control_con [_device_connect_host]
+#			p_verb "CTRL connection set, OK"
+		}
+
+#p_banner "CONS connection"
+
+		# connect to devices' console
+		set console_con [_device_connect_target]
+#		p_verb "CONS connection set, OK"
+
+		set connected "yes"
+		
+		# have console connection spawn_id be the global default
+		set spawn_id $console_con
+	}
+
+	## 
+	## try identify if the declared cur_context is really what device
+	## actually is, this might be not easy at all...
+	##
+	set real_context [_device_current_context]
+	if {$real_context != $cur_context} {
+		p_verb "adjusting current context to: '$real_context'"
+		set cur_context $real_context
+	}
+
+
 	##
 	## bring the board to the required state
 	##
-
 	if {$ctx != $cur_context} {
 		context_switch $ctx
 	} else {
@@ -275,9 +324,9 @@ proc run_tc {tc} {
 	##
 	set ctx $a_testcases($tc,type)
 	
-	# get class of the context [implementation] required by the TC (as the
+	# get _class_ of the context [implementation] required by the TC (as the
 	# state machine only knows the classes like firmware and kernel, not
-	# their current implementation)
+	# their current implementation like u-boot/linux)
 	set context [context_class $ctx]
 	p_verb "current context: '$cur_context', required by the TC:\
 	'$ctx \($context\)'"
@@ -352,53 +401,12 @@ proc run_tc {tc} {
 #
 proc run_tc_list {ln} {
 
-	global cur_context send_slow spawn_id
-	global remote connected console_con control_con
 	upvar $ln l
-
-	set send_slow {1 .050}
-
-	##
-	## establish console/control connection(s)
-	##
-	if {$connected != "yes"} {
-
-		if {$remote == "yes"} {
-			# in a remote VL setup we need a 'control' connection
-			# i.e. a connection to host machine for powering on/off
-			# and other operations on device
-#p_banner "CTRL connection"	
-			set control_con [_device_connect_host]
-#			p_verb "CTRL connection set, OK"
-		}
-
-#p_banner "CONS connection"
-
-		# connect to devices' console
-		set console_con [_device_connect_target]
-#		p_verb "CONS connection set, OK"
-
-		set connected "yes"
-		
-		# have console connection spawn_id be the global default
-		set spawn_id $console_con
-	}
-
-	## 
-	## try identify if the declared cur_context is really what device
-	## actually is, this might be not easy at all...
-	##
-	set real_context [_device_current_context]
-	if {$real_context != $cur_context} {
-		p_verb "adjusting current context to: '$real_context'"
-		set cur_context $real_context
-	}
 
 	##
 	## run TCs from the list
 	##
 	foreach tc $l {
-	#	puts "  $tc"
 		run_tc $tc
 	}
 

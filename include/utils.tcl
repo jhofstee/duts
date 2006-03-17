@@ -11,7 +11,6 @@ proc logging {onoff {lf ""} {p ""}} {
 	
 	if {$onoff == "on"} {
 		log_file -noappend $lf
-		send_user -- "$p "
 
 	} elseif {$onoff == "off"} {
 		send_user -- "\n"
@@ -64,7 +63,7 @@ proc valid_board_name {{bn ""}} {
 		set bn $board_name
 	}
 	if {[lsearch $l_boards $bn] < 0} {
-		p_err "board $board_name NOT known?! Use 'c' command for list\
+		p_err "board $board_name NOT known?! Use 'b' command for list\
 		       of supported devices"
 	} else {
 		p_verb "board $board_name found, OK"
@@ -323,7 +322,7 @@ proc valid_file {f} {
 # fn: filename with respect to the DUTS working dir
 #
 proc run_external_script {fn} {
-	global working_dir
+	global working_dir dry_run
 
 	set f [string trimleft $fn "!"]
 	set f "$working_dir/$f"
@@ -333,10 +332,14 @@ proc run_external_script {fn} {
 	}
 
 	p_verb "running external script $f"
-	set err ""
-	if [catch {source $f} err] {
-		p_err "problems with source'ing '$f'?!"
-		puts "  $err"
-		exit1
+	if  {$dry_run == "yes"} {
+		puts "dry run activated, skipping execution of '$f'"
+	} else {
+		set err ""
+		if [catch {source $f} err] {
+			p_err "problems with source'ing '$f'?!"
+			puts "  $err"
+			exit1
+		}
 	}
 }

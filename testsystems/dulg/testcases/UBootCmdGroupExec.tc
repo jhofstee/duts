@@ -18,10 +18,10 @@ duts_tc UBootAutoscrScript {
 	}
 }
 
-#duts_tc UBootAutoscrMkimage {
-#	Type u-boot
-#	Commands "!testcases/userAutoscrMkimage.exp"
-#}
+duts_tc UBootAutoscrMkimage {
+	Type host
+	Commands "!testcases/userAutoscrMkimage.exp"
+}
 
 duts_tc UBootAutoscr {
  	Type u-boot

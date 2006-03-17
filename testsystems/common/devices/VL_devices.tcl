@@ -66,9 +66,8 @@ proc _device_power_off {} {
 # to the target. returns spawn_id of the process connected to the target
 #
 proc _device_connect_target {} {
-	global remote board_name send_slow
+	global remote board_name
 
-	set send_slow {1 .050}
 	set con_cmd "connect"
 	
 	expect "*"
@@ -123,6 +122,7 @@ proc _device_connect_target {} {
 # 
 proc _device_connect_host {} {
 
+#TODO redesign so username/prompt are not hard-coded...
 	set ssh_cmd "/usr/bin/ssh"
 	set ssh_exp "raj]"
 	set host "pollux"
@@ -184,6 +184,7 @@ proc is_powered_on {} {
 #	p_verb "power status: $rv"
 	return $rv
 }
+
 
 #
 # returns device's current context [class], we assume console/control

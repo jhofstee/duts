@@ -105,18 +105,10 @@ proc _context_kernel_command {cmd rsp {slp 0.25}} {
 
 	sleep $slp
 	expect {
-		-re "($rsp)" {
+		-re "($rsp)(.*)$p" {
 		}
 		timeout {
-			p_err "timed out while kernel command '$cmd'" 1
+			p_err "timed out after Linux command '$cmd'" 1
 		}
-	}
-	
-#	sleep 0.25
-	expect {
-		$p { }
-		timeout {
-			p_err "timed out after Linux command" 1
-		}	
 	}
 }

@@ -22,6 +22,7 @@ duts_tc UBootBase {
 	# points to a context required by the TC like:
 	#	u-boot
 	#	linux
+	#	host
 	#	etc.
 	#
 	# please note the context specified here needs to be defined in a
@@ -167,15 +168,14 @@ duts_tc UBootCrcStore {
 	Info {This is a CRC test case comment}
 }
 
-
-duts_tc UBootMd {
-	Type u-boot
-	Commands !/bin/ls
-}
-
-
-duts_tc "aa bb aa" {
-	Type linux-ssh
+#
+# this is an example of test case that executes commands on the host (not the
+# target!) - note the 'host' Type - Commands section can also have the
+# "!path_to_custom_expect_script" form and execute user-defined expect scripts
+#
+duts_tc ls_on_host {
+	Type host
 	Commands {
+		"ls -l" ".*"
 	}
 }

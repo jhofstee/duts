@@ -1,0 +1,18 @@
+#
+# create example Autoscr image (and put it in /tftpboot dir)
+#
+
+global working_dir BASE_DIR board_name
+
+set cur_dir [pwd]
+set cmd "./UBootAutoscrMkimage.sh"
+
+cd $BASE_DIR/$working_dir/testcases
+
+if [catch {set o [exec $cmd $board_name]}] {
+	p_err "couldn't execute '$cmd'" 1
+}
+send_user $o
+
+cd $cur_dir
+unset cur_dir

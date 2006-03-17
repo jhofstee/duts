@@ -1,11 +1,6 @@
 #
-#
-#
-#
-
-#
 # this method is the firmware context handler - it is executed upon entering
-# this context
+# this context (i.e. changing from some other context)
 #
 proc _context_firmware_handler {} {
 
@@ -28,7 +23,6 @@ proc _context_firmware_handler {} {
 	#	-reboot
 	#
 
-	
 	if [is_powered_on] {
 		# we're powered on
 		if {$cur_context == "kernel"} {
@@ -48,7 +42,6 @@ proc _context_firmware_handler {} {
 		_device_power_on
 	}
 
-
 	#
 	# get "Hit any key to stop autoboot"
 	# key press 
@@ -63,13 +56,12 @@ proc _context_firmware_handler {} {
 		}
 	}
 
-	send -s " \r"
 	expect {
 		timeout {
 			p_err "timed out while waiting for U-Boot prompt" 1
 		}
-		$_context_firmware_prompt { }
-		$_context_kernel_prompt { }
+		-re (.*)$_context_firmware_prompt { }
+		-re (.*)$_context_kernel_prompt { }
 	}
 }
 
@@ -83,26 +75,21 @@ proc _context_firmware_command {cmd rsp {slp 0.35}} {
 	set p $_context_firmware_prompt
 	set ok 1
 
-#p_verb "CMD $cmd, RSP '$rsp'"
+p_verb "CMD '$cmd', RSP '$rsp'"
 
 	# clear expect's internal buffer
-	expect "*"
+#	expect "*"
 
 #	set c {$cmd}
 
+	# put the prompt string in log
+	send_user $p
+
 	send -s "$cmd\r"
-#	send -s "$c\r"
 
 	sleep $slp
 	expect {
-		-re "($rsp)" {
-			expect {
-				$p { }
-				timeout {
-					p_err "timed out after U-boot command" 1
-				}	
-			}
-		}
+		-re "($rsp)(.*)$p" { p_verb "firmware prompt OK" }
 		timeout {
 			p_err "timed out while waiting on cmd '$cmd'... Sure\
 			the board is alive?"

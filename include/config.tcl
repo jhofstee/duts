@@ -66,9 +66,10 @@ set _context_firmware_image ""
 #
 proc context {type name c} {
 	global cur_config config_errors working_dir
-	global _context_kernel _context_firmware
+	global _context_kernel _context_firmware _context_host
 	global _context_kernel_prompt _context_kernel_image
 	global _context_firmware_prompt _context_firmware_image
+	global _context_host_prompt _context_host_shell
 	global board_name
 	
 	# numer of elements in context section
@@ -85,7 +86,7 @@ proc context {type name c} {
 			p_warn "empty value for field '$f' in '$name' context?!"
 			continue
 		}
-		
+
 		switch $f {
 			"prompt" {
 				set _context_${type}_prompt $val
@@ -94,8 +95,6 @@ proc context {type name c} {
 				# possible variable here, so need to make an
 				# explicit substitution
 				set BOARD $board_name
-#				set image_path [subst $val]
-#				puts "XXXXXXX $image_path, $board_name"
 				set _context_${type}_image [subst $val] 
 			}
 			"descr" {
@@ -115,6 +114,12 @@ proc context {type name c} {
 					set config_errors 1
 				}
 			}
+			"shell" {
+				# path to the shell - only used for the host
+				# context
+				# TODO validate if we have this shell
+				set _context_${type}_shell $val
+			}
 			default {
 				p_err "unknown field '$f' in '$name' context\
 				section?!"
@@ -123,14 +128,13 @@ proc context {type name c} {
 		}
 	}	
 
-	# set global name for sourced implementation of firmware/kernel
-	# context
+	# set global name for the sourced context implementation
 	set _context_$type $name
 }
 
 
 #
-#
+# these context types (classes) are currently implemented
 #
 proc context_firmware {name c} {
 	context "firmware" $name $c
@@ -138,6 +142,16 @@ proc context_firmware {name c} {
 
 proc context_kernel {name c} {
 	context "kernel" $name $c
+}
+
+#
+# this is a special context NOT associated with operations on target devices,
+# but the host machine; it allows for "test cases" that do some preparation on
+# the host like code building, creating image, copying into /tftpboot location
+# etc.
+#
+proc context_host {name c} {
+	context "host" $name $c
 }
 
 
@@ -220,15 +234,17 @@ proc show_config {} {
 
 
 #
-# returns class (firwmare/kernel) of context $ctx
+# returns class (firwmare/kernel/host) of context $ctx
 #
 proc context_class {ctx} {
-	global _context_firmware _context_kernel
+	global _context_firmware _context_kernel _context_host
 
 	if {$_context_firmware == $ctx} {
 		set class "firmware"
 	} elseif {$_context_kernel == $ctx} {
 		set class "kernel"
+	} elseif {$_context_host == $ctx} {
+		set class "host"
 	} else {
 		p_err "couldn't translate context '$ctx'?!" 1
 	}
