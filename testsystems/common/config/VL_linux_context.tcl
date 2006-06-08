@@ -42,7 +42,7 @@ proc valid_kernel_file {f} {
 # this context. assume we start from 'firmware' context
 #
 proc _context_kernel_handler {} {
-	global _context_kernel_prompt _context_kernel_image
+	global _context_kernel_prompt _context_kernel_image TIMEOUT
 
 	set p $_context_kernel_prompt
 
@@ -80,7 +80,7 @@ proc _context_kernel_handler {} {
 	set timeout 300
 	expect "login: "
 
-	set timeout 10
+	set timeout $TIMEOUT 
 	send -s "root\r"
 	expect {
 		$p { }

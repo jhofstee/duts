@@ -22,3 +22,5 @@ set CONFIG_DESCR_EXT "cfg"
 # name of the default config section
 set CONFIG_DEFAULT_NAME "_default"
 
+# default timeout for response to come (in sec)
+set TIMEOUT 10

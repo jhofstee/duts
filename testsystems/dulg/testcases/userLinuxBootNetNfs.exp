@@ -2,7 +2,7 @@
 # 
 #
 
-global _context_kernel_prompt cur_context
+global _context_kernel_prompt cur_context TIMEOUT
 
 expect "*"
 
@@ -21,7 +21,7 @@ expect {
 		set timeout 300
 		expect "login: "
 
-		set timeout 10
+		set timeout $TIMEOUT 
 		send -s "root\r"
 		expect {
 			timeout {

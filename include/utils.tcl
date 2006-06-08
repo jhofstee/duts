@@ -7,7 +7,7 @@
 #
 # p: prompt (only needed when turning ON)
 #
-proc logging {onoff {lf ""} {p ""}} {
+proc logging {onoff {lf ""}} {
 	
 	if {$onoff == "on"} {
 		log_file -noappend $lf
@@ -38,7 +38,6 @@ proc logname {tc {ext "log"}} {
 	}
 	set logs [file dirname $logs_location]
 	# TODO - check if dir exists, we have access etc.
-#	debug "log filename: $logs/$lf"
 
 	return "$logs/$lf"
 }
@@ -130,6 +129,8 @@ proc p_banner {msg {p "* "}} {
 #
 #
 proc ask_yesno {msg} {
+	global TIMEOUT
+	
 	set timeout -1
 	send_user "$msg\[y] "
 	expect_user -re "(.*)\n" {
@@ -138,7 +139,7 @@ proc ask_yesno {msg} {
 	if {$ans != "y" && $ans != ""} {
 		exit
 	}
-	set timeout 10
+	set timeout $TIMEOUT 
 }
 
 #
@@ -209,11 +210,9 @@ proc proc_exists {p} {
 proc in_array {a k} {
 	upvar $a ar
 	
-	set rv 1
-	if {[ array get ar $k ] > 0} {
-#		p_verb "key '$k' found, OK"
+	if {[array get ar $k] > 0} {
+		set rv 1
 	} else {
-#		p_verb "key '$k' not found in array"
 		set rv 0
 	}
 	return $rv
@@ -224,12 +223,11 @@ proc in_array {a k} {
 #
 proc on_list {l e} {
 	upvar $l list
-	set rv 1
+
 	if {[lsearch $list $e] < 0} {
-#		p_verb "element '$e' not found on list"
 		set rv 0
 	} else {
-#		p_verb "element '$e' found, OK"
+		set rv 1
 	}
 	return $rv
 }
@@ -333,7 +331,7 @@ proc run_external_script {fn} {
 
 	p_verb "running external script $f"
 	if  {$dry_run == "yes"} {
-		puts "dry run activated, skipping execution of '$f'"
+		p_warn "dry run activated, skipping execution of '$f'"
 	} else {
 		set err ""
 		if [catch {source $f} err] {

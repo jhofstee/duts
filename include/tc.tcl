@@ -1,9 +1,9 @@
 ###############################################################################
 #
-# test cases (TC) processing 
+# test cases (TC) processing routines 
 #
 # the following globals are required to exist (must be created by the "calling"
-# context)
+# layer)
 #
 # l_testcases 
 # a_testcases 
@@ -12,7 +12,7 @@
 ###############################################################################
 
 proc duts_tc {name args} {
-	global cur_tc l_testcases a_testcases
+	global cur_tc l_testcases a_testcases tc_filename
 	set cur_tc $name
 
 	lappend l_testcases $name
@@ -23,6 +23,9 @@ proc duts_tc {name args} {
 	if {![in_array a_testcases "$name,commands"]} {
 		p_err "section 'Commands' NOT defined for '$name' TC?!" 1
 	}
+
+	# save the filename the TC lives in
+	set a_testcases($cur_tc,filename) $tc_filename
 }
 
 proc Type {type} {
@@ -105,7 +108,31 @@ proc show_tc_list {} {
 	puts -nonewline "\n"
 }
 
+#
+# shows details of a testcase
+#
+# tc: name of a TC
+#
+proc show_tc_details {tc} {
 
+	global l_testcases a_testcases
+
+	##
+	## look for this TC name
+	##
+	if { [lsearch $l_testcases $tc] < 0 } {
+		# not found..
+		p_err "  test case \"$tc\" NOT found?!" 1
+	}
+
+	##
+	## show TC details
+	##
+	puts "Testcase '$tc' details:"
+	puts "  Type:\t\t$a_testcases($tc,type)"
+	puts "  Commands:\t$a_testcases($tc,commands)"
+	puts "  Filename:\t$a_testcases($tc,filename)"
+}
 
 #
 # runs a sequence of commands for a TC
@@ -191,14 +218,13 @@ proc run_cmds {cmds ctx} {
 		if [regexp {^#.*} $cmd] {
 			# commented line starts with a hash
 			incr i
-#			puts "skipping..."
 			continue
 		}
 
 #puts [format "  CMD: %s, RSP: %s" $cmd $rsp]
 
 		if {$dry_run == "yes"} {
-			# no op
+			p_warn "dry run activated, skipping '$cmd' command"
 			continue	
 		}
 
@@ -308,8 +334,7 @@ proc tc_prologue {tc ctx} {
 #
 proc run_tc {tc} {
 
-	global l_testcases
-	global a_testcases
+	global l_testcases a_testcases TIMEOUT
 
 	global timeout cur_context _context_firmware_prompt
 	global _context_kernel_prompt
@@ -348,7 +373,6 @@ proc run_tc {tc} {
 	## pre-commands (are not logged)
 	##
 	if {[in_array a_testcases "$tc,pre"]} {
-#		puts "  $a_testcases($tc,pre)"
 		p_verb "running commands from Pre section"
 		run_cmds a_testcases($tc,pre) $context
 	} else {
@@ -360,14 +384,7 @@ proc run_tc {tc} {
 	## turn on logging
 	##
 	set log [logname $tc]
-#	p_verb "log file for a TC: $log"
-	# we need prompt for current TC
-	if {$context == "firmware"} {
-		set prompt $_context_firmware_prompt
-	} else {
-		set prompt $_context_kernel_prompt
-	}
-	logging "on" $log $prompt
+	logging "on" $log
 
 	##
 	## proper TC commands
@@ -383,14 +400,13 @@ proc run_tc {tc} {
 	## post-commands
 	##
 	if {[in_array a_testcases "$tc,post"]} {
-#		puts "  $a_testcases($tc,post)"
 		run_cmds a_testcases($tc,post) $context
 	} else {
 		p_verb "no Post section for test case '$tc'"
 	}
 
 	# reset default timeout
-	set timeout 10
+	set timeout $TIMEOUT 
 }
 
 
@@ -417,7 +433,9 @@ proc run_tc_list {ln} {
 
 
 ###############################################################################
+#
 # test groups processing
+#
 ###############################################################################
 
 proc duts_tg {name tcs} {
@@ -505,11 +523,15 @@ proc check_tc_list {list} {
 
 proc load_tc_files {d {e ""}} {
 	
+	global tc_filename
 	global TC_DESCR_EXT
 	set e [ expr {($e == "") ? $TC_DESCR_EXT : $e}]
 	
 	foreach f [ find_files $d $e ] {
 		p_verb "loading TCs from $f"
+
+		# some areas make use of current TC name
+		set tc_filename $f
 
 		# just sourcing the file does the trick - a_testcases hash
 		# will contain details of all test cases described in the
@@ -520,6 +542,7 @@ proc load_tc_files {d {e ""}} {
 			puts "  $err"
 			exit1
 		}
+
 	}
 }
 
@@ -553,16 +576,18 @@ proc load_tcs {} {
 #
 # load board-specific TC files
 #
-proc load_custom_tcs {} {
+proc load_custom_tcs {{b ""}} {
 
 	global board_name working_dir l_testcases TC_DESCR_DIR
+
+	set b [ expr {($b == "") ? $board_name : $b}]
 
 	##
 	## load board specific TCs, if exitst
 	##
-	set d "$working_dir/$TC_DESCR_DIR/$board_name"
+	set d "$working_dir/$TC_DESCR_DIR/$b"
 	if ![valid_dir $d] {
-		p_verb "no target specific TCs for $board_name"	
+		p_verb "no target specific TCs for $b"	
 	} else {
 		load_tc_files $d
 
@@ -571,12 +596,4 @@ proc load_custom_tcs {} {
 			p_verb "loaded $n test cases decriptions"
 		} 
 	}
-}
-
-
-#
-# load TCs including custom for _all_ supported boards
-#
-proc load_all_tcs {} {
-	#TODO
 }

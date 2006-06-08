@@ -1,5 +1,12 @@
+###############################################################################
+##
+## user interface routines
+##
+###############################################################################
 
-
+#
+# DUTS usage
+#
 proc usage {} {
 	global argv0
 	global duts_cmds
@@ -29,6 +36,7 @@ proc usage {} {
 #
 set duts_cmds {
 	{ cmd_lt "lt" "list test cases"}
+	{ cmd_dt "dt" "display details for a test case" }
 	{ cmd_b "b" "display details for a target board" }
 	{ cmd_t "t" "run test case(s)" }
 }
@@ -42,13 +50,8 @@ proc cmd_lt {a} {
 	global board_name l_testcases
 
 	set bn [lindex $a 0]
-	if {$bn == ""} {
-		##
-		## load common (without board-specific) TCs files
-		##
-		load_tcs
 
-	} else {
+	if {$bn != ""} {
 		set board_name $bn
 
 		##
@@ -57,13 +60,18 @@ proc cmd_lt {a} {
 		load_all_devices
 		
 		##
-		## load only board-specific TCs
+		## load board-specific TCs
 		##
 		if ![valid_board_name] {
 			exit1
-#			p_err "Invalid board name: $bn" 1
 		}
 		load_custom_tcs
+	} else {
+
+		##
+		## load common (without board-specific) TCs files
+		##
+		load_tcs
 	}
 
 	if {[llength $l_testcases] > 0} {
@@ -77,6 +85,67 @@ proc cmd_lt {a} {
 	show_tc_list
 }
 
+
+proc cmd_dt_usage {} {
+	
+	global argv0
+	
+	puts "usage: "
+	puts "$argv0 \[options\] dt <TC name> \[<board name>\]"
+	puts " "
+	puts "  If <board name> is present test case <TC name> is searched in\
+	        the board's custom TC list and details are shown when found."
+	puts ""
+	puts "  If <board name> is empty <TC name> is searched in the common\
+	        test cases list and details shown."
+	puts " "
+	exit 1
+}
+
+#
+# command 'dt' - test case description
+#
+proc cmd_dt {a} {
+
+	global l_boards board_name
+	
+	if {[llength $a] < 1} {
+		p_err "no TC name given..?! Use 'lt' command for a list of\
+		available test cases."
+		cmd_dt_usage
+	}
+
+	##
+	## get TC and board name
+	##
+	set tc [lindex $a 0]
+	set bn [lindex $a 1]
+
+	if {$bn != ""} {
+		set board_name $bn
+
+		##
+		## load config descriptions
+		##
+		load_all_devices
+		
+		##
+		## load board-specific TCs
+		##
+		if ![valid_board_name] {
+			exit1
+		}
+		load_custom_tcs
+
+	} else {
+		##
+		## load common TCs
+		##
+		load_tcs
+	}
+
+	show_tc_details $tc
+}
 
 proc cmd_t_usage {} {
 	
