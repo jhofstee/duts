@@ -32,7 +32,16 @@ source "$BASE_DIR/include/config.tcl"
 set argc [llength $argv]
 
 # working directory, may be overwritten with user-supplied -d option
-set working_dir "testsystems/dulg"
+set DEFAULT_DIR "testsystems/dulg"
+if {[in_array env DUTS_DIR]} {
+	if { $env(DUTS_DIR) != "" } {
+		set working_dir $env(DUTS_DIR)
+	} else {
+		set working_dir $DEFAULT_DIR 
+	}
+} else {
+	set working_dir $DEFAULT_DIR
+}
 
 # global list of testcases
 set l_testcases [list]
