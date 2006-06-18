@@ -1,0 +1,26 @@
+#
+# Definitions for MPC boards 
+#
+
+duts_device _common {
+
+	Internals "devices/VL_devices.tcl"
+
+	Vars {
+		CFG_RAM_WS_BASE 100000
+	}
+}
+
+duts_device mpc8349emds {
+	Vars {
+		CFG_KERNEL_START	80060000
+		CFG_KERNEL_END		8015ffff
+		CFG_RAMDISK_START	80160000
+	}
+}
+
+duts_device lite5200b {
+	MakeTarget "lite5200b"
+	MakeArch "ppc"
+	MakeCompile "ppc_6xx-"
+}
