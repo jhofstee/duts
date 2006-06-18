@@ -35,7 +35,6 @@ proc _device_power_on {} {
 			p_err "couldn't spawn '$cmd'" 1
 		}
 	}
-
 	expect {
 		timeout {
 			 p_err "timed out while trying to power on the\
@@ -44,11 +43,12 @@ proc _device_power_on {} {
 		"ERROR" {
 			p_err "couldn't power on the device?!" 1
 		}
-		"Power on" {
+		-re ".*Power on.*$board_name: OK.*" {
 			p_verb "powered on, OK"
 		}
 	}
-	expect eof
+#	expect eof
+	expect "*"
 }
 
 
@@ -107,7 +107,7 @@ proc _device_connect_target {} {
 			puts ""
 			p_err "no board name given?!" 1
 		}
-		"using command"	{
+		-re ".*using command.*$board_name.*" {
 			p_verb "connection OK"
 		}
 	}

@@ -304,6 +304,7 @@ proc tc_prologue {tc ctx} {
 		
 		# have console connection spawn_id be the global default
 		set spawn_id $console_con
+		expect "*"
 	}
 
 	## 

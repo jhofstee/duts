@@ -5,10 +5,12 @@
 proc _context_firmware_handler {} {
 
 	global cur_context _context_firmware_prompt _context_kernel_prompt
+	global TIMEOUT
 
 #p_banner "U-Boot context handler" 
 
-	expect "*"
+#	expect "*"
+
 	#
 	# the following cases are possible:
 	# 1. device is off
@@ -22,6 +24,8 @@ proc _context_firmware_handler {} {
 	#	-verify we have linux prompt
 	#	-reboot
 	#
+
+#exp_internal 1
 
 	if [is_powered_on] {
 		# we're powered on
@@ -42,6 +46,7 @@ proc _context_firmware_handler {} {
 		_device_power_on
 	}
 
+	set timeout 20
 	#
 	# get "Hit any key to stop autoboot"
 	# key press 
@@ -51,11 +56,12 @@ proc _context_firmware_handler {} {
 		timeout {
 			p_err "timed out while waiting for autoboot prompt" 1
 		}
-		"Hit any key to stop" {
+		-re ".*any key to stop.*" {
 			send -s "\r"
 		}
 	}
-
+	
+	set timeout $TIMEOUT
 	expect {
 		timeout {
 			p_err "timed out while waiting for U-Boot prompt" 1
@@ -70,17 +76,12 @@ proc _context_firmware_handler {} {
 #
 proc _context_firmware_command {cmd rsp {slp 0.35}} {
 
-	global _context_firmware_prompt
+	global _context_firmware_prompt dry_run
 
 	set p $_context_firmware_prompt
 	set ok 1
 
 p_verb "CMD '$cmd', RSP '$rsp'"
-
-	# clear expect's internal buffer
-#	expect "*"
-
-#	set c {$cmd}
 
 	# put the prompt string in log
 	send_user $p
