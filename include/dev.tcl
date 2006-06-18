@@ -53,7 +53,7 @@ proc Internals {p} {
 		p_err "problems validating file: $f"
 		set device_errors 1
 	} else {
-		# is this needed?
+		# is this used anywhere later?
 		set a_devices($cur_device,internals) $p
 		
 		set err ""
@@ -63,6 +63,27 @@ proc Internals {p} {
 			set device_errors 1
 		}
 	}
+}
+
+#
+# processes MakeTarget/Arch/Compile section in duts_device description
+#
+proc make {type p} {
+	global cur_device a_devices
+
+	set a_devices($cur_device,make$type) $p
+}
+
+proc MakeTarget {p} {
+	make "target" $p
+}
+
+proc MakeArch {p} {
+	make "arch" $p
+}
+
+proc MakeCompile {p} {
+	make "compile" $p
 }
 
 
@@ -182,6 +203,19 @@ proc valid_devices {} {
 		}
 	}
 
+	##
+	## verify make params are present
+	##
+	set makeparams {MakeTarget MakeArch MakeCompile}
+	foreach mp $makeparams {
+		set mpp [string tolower $mp]
+		if [in_array a_devices "$board_name,$mpp" ] {
+			p_verb "make param '$mp' found, OK"
+		} else {
+			p_warn "make param '$mp' not found?!"
+		}
+	}
+
 	return $rv
 }
 
@@ -258,7 +292,17 @@ proc show_device {} {
 	if [catch {set vl $a_devices($board_name,varlist)}] {
 		set vl ""
 	}
+	if [catch {set t $a_devices($board_name,maketarget)}] {
+		set t ""
+	}
+	if [catch {set a $a_devices($board_name,makearch)}] {
+		set a ""
+	}
+	if [catch {set c $a_devices($board_name,makecompile)}] {
+		set c ""
+	}
 	puts "  vars set: $vl"
 	puts ""
-	#TODO show other params, methods etc.
+	puts "  make params: target '$t' arch '$a' ccompile '$c'"
+	puts ""
 }
