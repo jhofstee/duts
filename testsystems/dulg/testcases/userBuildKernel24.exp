@@ -1,0 +1,152 @@
+#
+# Build 2.4 kernel 
+#
+
+global _context_host_prompt _context_host_shell TIMEOUT
+global board_name a_devices timeout
+
+set prompt $_context_host_prompt
+set p [string map {"]" "\\]" "$" "\\$" " " "\\ "} $prompt]
+set shell $_context_host_shell
+
+##
+## get make target name for our board
+##
+set target $a_devices($board_name,maketarget) 
+
+##
+## set env vars for the build: ARCH, CROSS_COMPILE
+##
+global env
+set env(ARCH) $a_devices($board_name,makearch)
+set env(CROSS_COMPILE) $a_devices($board_name,makecompile)
+
+##
+## change dir to kernel src tree
+##
+set cur_dir [pwd]
+set kernel_src "~/git/linuxppc_2_4_devel"
+if ![valid_dir $kernel_src] {
+	p_err "Problems accessing '$kernel_src' dir..?!"
+	return
+}
+cd $kernel_src
+
+##
+## mrproper
+##
+set timeout 180
+_context_host_command "make mrproper" ".*Leaving directory.*Documentation/DocBook.*"
+
+
+##
+## make ..._config
+##
+set timeout $TIMEOUT 
+_context_host_command "make ${target}_config" ".*cp -f.*arch/.*/defconfig.*"
+
+
+##
+## make oldconfig
+##
+expect "*"
+if [catch {spawn $shell}] {
+	p_err "couldn't spawn '$shell' command" 1
+}
+expect {
+	$prompt { p_verb "shell prompt OK" }
+	timeout {
+		p_err "couldn't get '$prompt' shell prompt"
+		set timeout $TIMEOUT
+		return
+	}
+}
+
+set cmd "make oldconfig"
+set timeout 120
+send -s "$cmd\r"
+#exp_internal 1
+expect {
+	-re ".*End of Linux kernel configuration.*$p" {
+		p_verb "'$cmd' OK"
+	}
+	-re ".*\\ \\(NEW\\)\\ " {
+		send -s "\r"
+		exp_continue	
+	}
+	timeout {
+		p_err "Timed out after '$cmd'"
+		set timeout $TIMEOUT
+		return
+	}
+}
+
+
+##
+## make dep
+##
+set timeout 300
+set cmd "make dep"
+send -s "$cmd\r"
+
+# closing strings are:
+# scripts/mkdep -- init/*.c > .depend
+# + shell prompt 
+expect {
+	-re ".*scripts/mkdep\\ --\\ init/\\*\\.c\\ >\\ \\.depend.*$p" {
+		p_verb "'$cmd' OK"
+	}
+	timeout {
+		p_err "Timed out after '$cmd'"
+		set timeout $TIMEOUT
+		return
+	}
+}
+
+##
+## make uImage
+##
+
+set timeout 600
+set cmd "make uImage"
+send -s "$cmd\r"
+
+# closing strings are: 
+#
+# ln -sf vmlinux.UBoot images/uImage
+# rm -f ./mkuboot
+# make[1]: Leaving directory `/.automount/castor-vlab/root/home/raj/git/linuxppc_2
+# _4_devel/arch/ppc/boot'
+#
+# errror strings:
+#
+# host/ehci-q.c:185: error: invalid storage class for func
+# make[3]: *** [host/ehci-hcd.o] Error 1
+expect {
+	-re ".*ln\\ -sf\\ vmlinux\\.UBoot\\ images/uImage.*$p" {
+		p_verb "'$cmd' OK"
+	}
+	-re ".*:\\ error:.*" {
+		p_err "failed in '$cmd'"
+		set timeout $TIMEOUT
+		return
+	}
+	-re ".*make.*\\ Error\\ .*" {
+		p_err "failed in '$cmd'"
+		set timeout $TIMEOUT
+		return
+	}
+	timeout {
+		p_err "Timed out after '$cmd'"
+		set timeout $TIMEOUT
+		return
+	}
+}
+
+cd $cur_dir
+unset cur_dir
+unset prompt
+
+# reset default timeout
+set timeout $TIMEOUT
+return

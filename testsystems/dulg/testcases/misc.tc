@@ -1,0 +1,9 @@
+#
+#
+#
+#
+
+duts_tc Kernel24Build {
+	Type host
+	Commands "!testcases/userBuildKernel24.exp"
+}
