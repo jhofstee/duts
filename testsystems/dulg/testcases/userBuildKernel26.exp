@@ -1,5 +1,5 @@
 #
-# Build 2.4 kernel 
+# Build 2.6 kernel 
 #
 
 global _context_host_prompt _context_host_shell TIMEOUT
@@ -24,12 +24,14 @@ set env(CROSS_COMPILE) $a_devices($board_name,makecompile)
 ##
 ## set PATH so the desired ELDK toolchain is selected
 ##
-set eldk_path "/opt/eldk-3.1.1/usr/bin/"
+set eldk_path "/opt/eldk-4.0/usr/bin/"
 if ![valid_dir $eldk_path] {
 	p_err "Problems accessing '$eldk_path' dir..?!"
 	return
 }
 set path $env(PATH)
+
+#puts "'$path'"
 
 set pl [split $path ":"]
 set pl_new {}
@@ -52,36 +54,29 @@ if [llength $pl_new] {
 }
 # now we can set the [new] PATH
 set env(PATH) $path_new
+#puts "'$path_new'"
 
 
 ##
 ## change dir to kernel src tree
 ##
 set cur_dir [pwd]
-set kernel_src "~/git/linuxppc_2_4_devel"
+set kernel_src "~/git/linux-2.6-denx"
 if ![valid_dir $kernel_src] {
 	p_err "Problems accessing '$kernel_src' dir..?!"
 	return
 }
 cd $kernel_src
 
+
 ##
 ## mrproper
 ##
 set timeout 180
-_context_host_command "make mrproper" ".*Leaving directory.*Documentation/DocBook.*"
+_context_host_command "make mrproper" ".*"
 
 
-##
-## make ..._config
-##
-set timeout $TIMEOUT 
-_context_host_command "make ${target}_config" ".*cp -f.*arch/.*/defconfig.*"
-
-
-##
-## make oldconfig
-##
+set timeout 120
 expect "*"
 if [catch {spawn $shell}] {
 	p_err "couldn't spawn '$shell' command" 1
@@ -95,12 +90,16 @@ expect {
 	}
 }
 
-set cmd "make oldconfig"
-set timeout 120
+
+##
+## make ..._defconfig
+##
+#_context_host_command "make ${target}_defconfig" ".*"
+set cmd "make ${target}_defconfig"
 send -s "$cmd\r"
 #exp_internal 1
 expect {
-	-re ".*End of Linux kernel configuration.*$p" {
+	-re ".*$p" {
 		p_verb "'$cmd' OK"
 	}
 	-re ".*\\ \\(NEW\\)\\ " {
@@ -113,50 +112,46 @@ expect {
 		return
 	}
 }
-
+set timeout $TIMEOUT 
 
 ##
 ## make dep
 ##
-set timeout 300
-set cmd "make dep"
-send -s "$cmd\r"
+#set timeout 300
+#set cmd "make dep"
+#send -s "$cmd\r"
 
 # closing strings are:
 # scripts/mkdep -- init/*.c > .depend
 # + shell prompt 
-expect {
-	-re ".*scripts/mkdep\\ --\\ init/\\*\\.c\\ >\\ \\.depend.*$p" {
-		p_verb "'$cmd' OK"
-	}
-	timeout {
-		p_err "Timed out after '$cmd'"
-		set timeout $TIMEOUT
-		return
-	}
-}
+#expect {
+#	-re ".*scripts/mkdep\\ --\\ init/\\*\\.c\\ >\\ \\.depend.*$p" {
+#		p_verb "'$cmd' OK"
+#	}
+#	timeout {
+#		p_err "Timed out after '$cmd'"
+#		set timeout $TIMEOUT
+#		return
+#	}
+#}
 
 ##
 ## make uImage
 ##
-
 set timeout 600
 set cmd "make uImage"
 send -s "$cmd\r"
 
 # closing strings are: 
 #
-# ln -sf vmlinux.UBoot images/uImage
-# rm -f ./mkuboot
-# make[1]: Leaving directory `/.automount/castor-vlab/root/home/raj/git/linuxppc_2
-# _4_devel/arch/ppc/boot'
+#  Image: arch/ppc/boot/images/uImage is ready
 #
 # errror strings:
 #
 # host/ehci-q.c:185: error: invalid storage class for func
 # make[3]: *** [host/ehci-hcd.o] Error 1
 expect {
-	-re ".*ln\\ -sf\\ vmlinux\\.UBoot\\ images/uImage.*$p" {
+	-re ".*boot/images/uImage\\ is\\ ready.*$p" {
 		p_verb "'$cmd' OK"
 	}
 	-re ".*:\\ error:.*" {
@@ -177,10 +172,10 @@ expect {
 }
 
 ##
-## copy image to tftpboot dir
+## copy image to /tftpboot location
 ##
 set dest_dir "/tftpboot/$board_name/"
-set dest_name "uImage-24-duts"
+set dest_name "uImage-26-duts"
 if ![valid_dir $dest_dir] {
 	p_err "Problems with '$dest_dir' image directory?!"
 	return
@@ -190,7 +185,6 @@ if [catch {set o [eval exec $cmd]}] {
         p_err "couldn't execute '$cmd'" 1
 }
 send_user $o
-
 
 cd $cur_dir
 unset cur_dir
