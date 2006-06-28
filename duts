@@ -71,9 +71,11 @@ set cur_device ""
 set board_name ""
 
 # global list of defined configuration views
+set l_configs [list]
+array set a_configs ""
 set cur_config ""
-
 set selected_config ""
+
 
 # current TC context (state)
 set cur_context "off"

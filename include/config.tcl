@@ -20,12 +20,15 @@ proc duts_config {name args} {
 
 	global cur_config CONFIG_DEFAULT_NAME was_selected_config
 	global config_errors was_default_config selected_config configs_no
+	global l_configs
 
 	set cur_config $name
-	
+
+	lappend l_configs $name
+
 	if {$name == $CONFIG_DEFAULT_NAME} {
 		if {$was_default_config == "yes"} {
-			p_warn "$CONFIG_DEFAULT_NAME re-defined?!"
+			p_verb "$CONFIG_DEFAULT_NAME re-defined?!"
 		} else {
 			set was_default_config "yes"
 		}
@@ -70,8 +73,10 @@ proc context {type name c} {
 	global _context_kernel_prompt _context_kernel_image
 	global _context_firmware_prompt _context_firmware_image
 	global _context_host_prompt _context_host_shell
-	global board_name
-	
+	global board_name a_configs
+
+	set a_configs($cur_config,$name) $c
+
 	# numer of elements in context section
 	set max [expr [llength $c] - 1]
 	# TODO verify max is even, otherwise section is broken

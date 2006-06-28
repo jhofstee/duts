@@ -39,6 +39,7 @@ set duts_cmds {
 	{ cmd_dt "dt" "display details for a test case" }
 	{ cmd_b "b" "display details for a target board" }
 	{ cmd_t "t" "run test case(s)" }
+	{ cmd_c "c" "display details for configuration view"}
 }
 
 
@@ -319,7 +320,6 @@ proc cmd_t_parse_params {a} {
 }
 
 
-
 #
 # command 'b'
 #
@@ -353,6 +353,51 @@ proc cmd_b {a} {
 			exit1
 		}
 		show_device
+	}
+}
+
+
+#
+# command 'c'
+#
+proc cmd_c {a} {
+	global cur_config selected_config CONFIG_DEFAULT_NAME l_configs
+	global a_configs _context_kernel _context_firmware
+
+	##
+	## config name
+	##
+	set cn [lindex $a 0]
+	if {$cn == ""} {
+		set selected_config $CONFIG_DEFAULT_NAME
+	} else {
+		set selected_config $cn
+	}
+	load_configs
+
+	if {$cn == ""} {
+		puts "Defined configuration views:"
+		foreach c $l_configs {
+			puts "  $c"
+		}
+		puts ""
+	} else {
+		if ![on_list l_configs $cn] {
+			p_err "Config view '$cn' not defined?!" 1
+		}
+		puts "Details for configuration view '$cn'"
+		if [in_array a_configs "$cn,$_context_kernel"] {
+			puts "Kernel context '$_context_kernel'"
+			puts $a_configs($cn,$_context_kernel)
+		}
+		if [in_array a_configs "$cn,$_context_firmware"] {
+			puts "Firmware context '$_context_firmware'"
+			puts $a_configs($cn,$_context_firmware)
+		}
+		if [in_array a_configs "$cn,host"] {
+			puts "Host context 'host'"
+			puts $a_configs($cn,host)
+		}
 	}
 }
 

@@ -207,6 +207,8 @@ proc proc_exists {p} {
 # a: name of array (NOT the array itself!)
 # k: key
 #
+# example:  if [in_array a_configs "$c,$_context_kernel"] { ... }
+#
 proc in_array {a k} {
 	upvar $a ar
 	
@@ -220,6 +222,8 @@ proc in_array {a k} {
 
 #
 # checks if element $e is found on the list $l, returns 0 if not
+#
+# example: if ![on_list l_configs $cn] { ... }
 #
 proc on_list {l e} {
 	upvar $l list

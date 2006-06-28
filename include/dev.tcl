@@ -19,7 +19,7 @@ proc duts_device {name args} {
 	
 	if {$name == $DEVICE_COMMON_NAME} {
 		if {$was_common_device == "yes"} {
-			p_warn "$DEVICE_COMMON_NAME re-defined?!"
+			p_verb "$DEVICE_COMMON_NAME re-defined?!"
 		} else {
 			set was_common_device "yes"
 		}
@@ -212,7 +212,7 @@ proc valid_devices {} {
 		if [in_array a_devices "$board_name,$mpp" ] {
 			p_verb "make param '$mp' found, OK"
 		} else {
-			p_warn "make param '$mp' not found?!"
+			p_verb "make param '$mp' not found?!"
 		}
 	}
 
