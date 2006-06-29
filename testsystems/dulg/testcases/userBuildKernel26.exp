@@ -3,11 +3,57 @@
 #
 
 global _context_host_prompt _context_host_shell TIMEOUT
-global board_name a_devices timeout
+global board_name a_devices timeout env
 
 set prompt $_context_host_prompt
 set p [string map {"]" "\\]" "$" "\\$" " " "\\ "} $prompt]
 set shell $_context_host_shell
+
+set eldk_path "/opt/eldk-4.0/usr/bin/"
+
+set kernel_dir "linux-2.6-denx"
+set kernel_repo "/home/git/$kernel_dir"
+set kernel_src "~/git/$kernel_dir-duts"
+
+##
+## spawn shell
+##
+expect "*"
+if [catch {spawn $shell}] {
+	p_err "couldn't spawn '$shell' command" 1
+}
+expect {
+	$prompt { p_verb "shell prompt OK" }
+	timeout {
+		p_err "couldn't get '$prompt' shell prompt"
+		set timeout $TIMEOUT
+		return
+	}
+}
+
+##
+## clone kernel tree repo
+##
+
+# closing strings:
+# Cloned to linuxppc_2_4_devel/ (origin /home/git/linuxppc_2_4_devel available as branch "origin")
+set cmd "cg-clone $kernel_repo $kernel_src"
+# note cloning 2.6 tree can be veeeeery time consuming...
+set timeout 1500
+send -s "$cmd\r"
+expect {
+	-re ".*Cloned\\ to\\ .*$p" {
+		p_verb "'$cmd' OK"
+	}
+	-re ".*already\\ exists.*$p" {
+		p_warn "Repo '$kernel_src' exists!"
+	}
+	timeout {
+		p_err "Timed out after '$cmd'"
+		set timeout $TIMEOUT
+		return
+	}
+}
 
 ##
 ## get make target name for our board
@@ -17,21 +63,17 @@ set target $a_devices($board_name,maketarget)
 ##
 ## set env vars for the build: ARCH, CROSS_COMPILE
 ##
-global env
 set env(ARCH) $a_devices($board_name,makearch)
 set env(CROSS_COMPILE) $a_devices($board_name,makecompile)
 
 ##
 ## set PATH so the desired ELDK toolchain is selected
 ##
-set eldk_path "/opt/eldk-4.0/usr/bin/"
 if ![valid_dir $eldk_path] {
 	p_err "Problems accessing '$eldk_path' dir..?!"
 	return
 }
 set path $env(PATH)
-
-#puts "'$path'"
 
 set pl [split $path ":"]
 set pl_new {}
@@ -54,14 +96,11 @@ if [llength $pl_new] {
 }
 # now we can set the [new] PATH
 set env(PATH) $path_new
-#puts "'$path_new'"
-
 
 ##
 ## change dir to kernel src tree
 ##
 set cur_dir [pwd]
-set kernel_src "~/git/linux-2.6-denx"
 if ![valid_dir $kernel_src] {
 	p_err "Problems accessing '$kernel_src' dir..?!"
 	return
@@ -76,6 +115,10 @@ set timeout 180
 _context_host_command "make mrproper" ".*"
 
 
+##
+## spawn shell - this is a second shell as we changed dir to the newly cloned 
+## dir and the previously spawned shell wouldn't know about it
+##
 set timeout 120
 expect "*"
 if [catch {spawn $shell}] {
@@ -89,7 +132,6 @@ expect {
 		return
 	}
 }
-
 
 ##
 ## make ..._defconfig
@@ -114,26 +156,6 @@ expect {
 }
 set timeout $TIMEOUT 
 
-##
-## make dep
-##
-#set timeout 300
-#set cmd "make dep"
-#send -s "$cmd\r"
-
-# closing strings are:
-# scripts/mkdep -- init/*.c > .depend
-# + shell prompt 
-#expect {
-#	-re ".*scripts/mkdep\\ --\\ init/\\*\\.c\\ >\\ \\.depend.*$p" {
-#		p_verb "'$cmd' OK"
-#	}
-#	timeout {
-#		p_err "Timed out after '$cmd'"
-#		set timeout $TIMEOUT
-#		return
-#	}
-#}
 
 ##
 ## make uImage

@@ -3,11 +3,58 @@
 #
 
 global _context_host_prompt _context_host_shell TIMEOUT
-global board_name a_devices timeout
+global board_name a_devices timeout env
+
+set eldk_path "/opt/eldk-3.1.1/usr/bin/"
+
+set kernel_dir "linuxppc_2_4_devel"
+set kernel_repo "/home/git/$kernel_dir"
+set kernel_src "~/git/$kernel_dir-duts"
+
+set cur_dir [pwd]
 
 set prompt $_context_host_prompt
 set p [string map {"]" "\\]" "$" "\\$" " " "\\ "} $prompt]
 set shell $_context_host_shell
+
+##
+## spawn shell
+##
+expect "*"
+if [catch {spawn $shell}] {
+	p_err "couldn't spawn '$shell' command" 1
+}
+expect {
+	$prompt { p_verb "shell prompt OK" }
+	timeout {
+		p_err "couldn't get '$prompt' shell prompt"
+		set timeout $TIMEOUT
+		return
+	}
+}
+
+##
+## clone kernel tree repo
+##
+
+# closing strings:
+# Cloned to linuxppc_2_4_devel/ (origin /home/git/linuxppc_2_4_devel available as branch "origin")
+set cmd "cg-clone $kernel_repo $kernel_src"
+set timeout 300
+send -s "$cmd\r"
+expect {
+	-re ".*Cloned\\ to\\ .*$p" {
+		p_verb "'$cmd' OK"
+	}
+	-re ".*already\\ exists.*$p" {
+		p_warn "Repo '$kernel_src' exists!"
+	}
+	timeout {
+		p_err "Timed out after '$cmd'"
+		set timeout $TIMEOUT
+		return
+	}
+}
 
 ##
 ## get make target name for our board
@@ -17,14 +64,12 @@ set target $a_devices($board_name,maketarget)
 ##
 ## set env vars for the build: ARCH, CROSS_COMPILE
 ##
-global env
 set env(ARCH) $a_devices($board_name,makearch)
 set env(CROSS_COMPILE) $a_devices($board_name,makecompile)
 
 ##
 ## set PATH so the desired ELDK toolchain is selected
 ##
-set eldk_path "/opt/eldk-3.1.1/usr/bin/"
 if ![valid_dir $eldk_path] {
 	p_err "Problems accessing '$eldk_path' dir..?!"
 	return
@@ -57,8 +102,6 @@ set env(PATH) $path_new
 ##
 ## change dir to kernel src tree
 ##
-set cur_dir [pwd]
-set kernel_src "~/git/linuxppc_2_4_devel"
 if ![valid_dir $kernel_src] {
 	p_err "Problems accessing '$kernel_src' dir..?!"
 	return
@@ -80,7 +123,8 @@ _context_host_command "make ${target}_config" ".*cp -f.*arch/.*/defconfig.*"
 
 
 ##
-## make oldconfig
+## spawn shell - this is a second shell as we changed dir to the newly cloned 
+## dir and the previously spawned shell wouldn't know about it
 ##
 expect "*"
 if [catch {spawn $shell}] {
@@ -95,6 +139,9 @@ expect {
 	}
 }
 
+##
+## make oldconfig
+##
 set cmd "make oldconfig"
 set timeout 120
 send -s "$cmd\r"
@@ -106,6 +153,11 @@ expect {
 	-re ".*\\ \\(NEW\\)\\ " {
 		send -s "\r"
 		exp_continue	
+	}
+	-re ".*No\\ rule\\ to\\ make\\ target.*Stop.*" {
+		p_err "No rule?!"
+		set timeout $TIMEOUT
+		return
 	}
 	timeout {
 		p_err "Timed out after '$cmd'"
