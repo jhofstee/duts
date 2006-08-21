@@ -4,6 +4,7 @@
 
 global _context_host_prompt _context_host_shell TIMEOUT
 global board_name a_devices timeout env
+global _context_kernel_image
 
 set prompt $_context_host_prompt
 set p [string map {"]" "\\]" "$" "\\$" " " "\\ "} $prompt]
@@ -39,7 +40,7 @@ expect {
 # Cloned to linuxppc_2_4_devel/ (origin /home/git/linuxppc_2_4_devel available as branch "origin")
 set cmd "cg-clone $kernel_repo $kernel_src"
 # note cloning 2.6 tree can be veeeeery time consuming...
-set timeout 1500
+set timeout 2000
 send -s "$cmd\r"
 expect {
 	-re ".*Cloned\\ to\\ .*$p" {
@@ -168,7 +169,7 @@ send -s "$cmd\r"
 #
 #  Image: arch/ppc/boot/images/uImage is ready
 #
-# errror strings:
+# error strings:
 #
 # host/ehci-q.c:185: error: invalid storage class for func
 # make[3]: *** [host/ehci-hcd.o] Error 1
@@ -196,13 +197,12 @@ expect {
 ##
 ## copy image to /tftpboot location
 ##
-set dest_dir "/tftpboot/$board_name/"
-set dest_name "uImage-26-duts"
+set dest_dir [file dirname $_context_kernel_image]
 if ![valid_dir $dest_dir] {
 	p_err "Problems with '$dest_dir' image directory?!"
 	return
 }
-set cmd "cp arch/$a_devices($board_name,makearch)/boot/images/uImage $dest_dir/$dest_name"
+set cmd "cp arch/$a_devices($board_name,makearch)/boot/images/uImage $_context_kernel_image"
 if [catch {set o [eval exec $cmd]}] {
         p_err "couldn't execute '$cmd'" 1
 }

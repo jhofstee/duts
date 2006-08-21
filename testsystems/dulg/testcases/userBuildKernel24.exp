@@ -4,6 +4,7 @@
 
 global _context_host_prompt _context_host_shell TIMEOUT
 global board_name a_devices timeout env
+global _context_kernel_image
 
 set eldk_path "/opt/eldk-3.1.1/usr/bin/"
 
@@ -231,13 +232,12 @@ expect {
 ##
 ## copy image to tftpboot dir
 ##
-set dest_dir "/tftpboot/$board_name/"
-set dest_name "uImage-24-duts"
+set dest_dir [file dirname $_context_kernel_image]
 if ![valid_dir $dest_dir] {
 	p_err "Problems with '$dest_dir' image directory?!"
 	return
 }
-set cmd "cp arch/$a_devices($board_name,makearch)/boot/images/uImage $dest_dir/$dest_name"
+set cmd "cp arch/$a_devices($board_name,makearch)/boot/images/uImage $_context_kernel_image"
 if [catch {set o [eval exec $cmd]}] {
         p_err "couldn't execute '$cmd'" 1
 }
