@@ -1,0 +1,454 @@
+#!/bin/env expect
+#
+# (C) Copyright 2006
+# Wolfgang Denk, DENX Software Engineering, wd@denx.de
+#
+#
+
+set BASE_DIR "/home/raj/git/duts/"
+
+
+##
+## include helper procedures
+##
+source "$BASE_DIR/include/lib.tcl"
+
+
+#
+# ./get_src [<config>] [-t <SCM type>] [-n <repo_name>] [-s <repo_src>] 
+#	[-d <repo_dst>] [-p <other params>] [-to <timeout>] [-nc]
+#
+# [<config>] - config label
+# [-t <SCM type>] - id of supported scm (git, cvs)
+# [-n <repo_name>] - name in the repot (u-boot, linuxppc_2_4_devel, linux-2.6-denx etc.)
+# [-s <repo_src>] - repo location (/home/git)
+# [-d <repo_dst>] - dest location (./u-boot_copy etc.)
+# [-p <other repo params>]
+# [-to <timeout>] - timeout in seconds for repo op to complete
+#
+# [-nc]	- no user confirmation
+# [-v]	- verbose
+#
+#
+#  examples:
+# ./get_src -n linuxppc_2_4_devel -t git -s /home/git/ -d linuxppc_2_4_devel_copy -p [branchID]
+#
+# ./get_src linux24 - uses 'linux24' predefined config
+# ./get_src [empty params] - uses default config
+#
+
+set verbose "no"
+set confirm "yes"
+
+set repo_type "git"
+set repo_name "u-boot"
+set repo_src "/home/git/"
+set repo_dst ""
+set repo_params ""
+
+
+set scm_config ""
+set scm_timeout 180
+set scm_handler ""
+
+# default timeout
+set TIMEOUT 10
+
+
+#
+# table of supported SCM schemes, each element is
+# {<handler_function> "<name>"}
+#
+# <name> is the label for use in '-t' command line option or 'scm_type' field 
+# in config file
+#
+set scm_supported {
+	{do_git "git"}
+	{do_cvs "cvs"}
+}
+
+#
+# dumps params
+#
+proc show_params {} {
+	
+	set globals {
+		repo_type repo_name repo_src repo_dst repo_params
+		scm_timeout confirm verbose
+	}
+
+	puts "--- Settings ---"
+	foreach g $globals {
+		global $g
+		puts "$g = '[subst $$g]'"
+	}
+}
+
+#
+# handler function to perform GIT operations to get local repo of
+# the sources
+#
+proc do_git {} {
+
+	global repo_type repo_name repo_src repo_dst repo_params
+	global scm_timeout confirm TIMEOUT
+
+#p_banner "git handler" "*"
+
+	set cmd_shell "bash"
+	# ignore user rc files so we can be sure of the default bash prompt
+	set cmd_shell_opt "--norc --noprofile"
+	set cmd_shell_prompt "\\$\\ "
+
+	set cmd_co "cg-clone"
+
+	##
+	## check tools availability:
+	##  - shell
+	##  - SCM (cogito)
+	##
+	set tools [list $cmd_shell $cmd_co]
+	set errors 0
+	foreach t $tools {
+		if ![valid_host_tool $t] {
+			p_err "command '$t' not available on host"
+			set errors 1
+		}
+	}
+	if {$errors > 0} {
+		exit1
+	}
+	p_verb "all tools in place, proceeding"
+
+	##
+	## validate git source repo location
+	##
+	if ![regexp {/$} $repo_src] {
+		set repo_src "$repo_src/"
+	}
+	set src $repo_src$repo_name
+	if ![valid_dir $src] {
+		p_err "Problems accessing source GIT repo?!" 1
+	}
+	p_verb "Working with source repo: '$src'"
+
+	##
+	## validate git destination location
+	## - already exists?
+	## - parent dir writable?
+	##
+	if {$repo_dst != ""} {
+		set dst_dir [file dirname $repo_dst]
+		set dst_file [file tail $repo_dst]
+		if ![valid_dir $dst_dir 1] {
+			p_err "problems accessing destination directory?!" 1
+		}
+		set tmp $repo_dst
+	} else {
+		set tmp [file tail $src]
+		set tmp "./$tmp"
+	}
+	if [file exists $tmp] {
+		p_err "destination location '$tmp' already exists!" 1
+	}
+
+	##
+	## ask user before proceeding
+	##
+	if {$confirm == "yes"} {
+		show_params
+		if ![ask_yesno "confirm to start execution? "] {
+			exit
+		}
+	}
+
+	##
+	## prepare cg-clone command: cg-clone <repo_src> <repo_dst>
+	##  
+	set c $cmd_co
+	set c_arg $src
+	if {$repo_dst != ""} {
+		set c_arg "$c_arg $repo_dst"
+	}
+	
+	##
+	## spawn host shell
+	##
+	set timeout $TIMEOUT
+	set send_slow {1 .050}
+	set p $cmd_shell_prompt
+
+	set spawn_id [process_spawn $cmd_shell $cmd_shell_opt]
+	if {$spawn_id < 0} {
+		p_err "problems spawning shell" 1
+	}
+	# Notice: we HAVE to wait for the initial prompt of the just spawned
+	# shell! otherwise we wouldn'w know when to issue the command...
+	expect {
+		-re "$p$" { p_verb "host shell prompt OK" }
+		timeout { p_err "timed out waiting for prompt: '$p'" 1 }
+	}
+
+	##
+	## execute command
+	##  
+	#
+	# strings:
+	# ...
+	#Fetching head...^M
+	#Fetching objects...^M
+	#Fetching tags...^M
+	#...
+	#New branch: f60ba0d35e13e9dcf839d4563f9436d07468b1ef^M
+	#Cloned to u-boot/ (origin /home/git/u-boot available as branch "origin")^M
+	#
+	#
+	#cg-clone: u-boot/ already exists
+	#
+
+	# expect buffer size
+	match_max 16384
+
+	set errors 0
+	set timeout $scm_timeout 
+	send -s "$c $c_arg\r"
+	expect {
+		timeout {
+			p_err "timed out after cg-clone"
+			set errors 1
+		}
+		-re "already exists.*$p$" {
+			#
+			# this actually shouldn't happen as we checked earlier
+			# for such condition, but let's handle it still - we're
+			# in a multi-user environment after all and things can
+			# happen behind our backs...
+			#
+			p_err "repo already cloned"
+			set errors 1
+		}
+		-re ".*Fetching\\ head\\.\\.\\." {
+			p_verb "fetching 1: heads"
+			expect {
+				timeout {
+					p_err "timed out on 'objects'"
+					set errors 1
+				}
+				-re ".*Fetching\\ objects\\.\\.\\." {
+					p_verb "fetching 2: objects"
+					expect {
+						timeout {
+							p_err "timed out on cloning"
+							set errors 1
+						}
+						-re ".*Cloned\\ to\\ .*$p$" {
+							p_verb "Cloning OK"
+						}
+					}
+				}
+			}
+		}
+	}
+
+	##
+	## close spawned process
+	##
+	process_close $spawn_id
+	set spawn_id -1
+
+	if {$errors > 0} {
+		exit1
+	}
+}
+
+
+proc do_cvs {} {
+	#TODO if required
+	p_err "Not implemented"
+	##
+	##
+	## [CVS]
+	## ...
+	## ...
+	##
+	##
+}
+
+
+#
+# searches $scm_supported table for $repo_typer SCM name and calls associated
+# handler, if found.
+#
+proc scm_handler {} {
+	global scm_supported repo_type
+	set found 0
+
+	foreach scm $scm_supported {
+		if {[lindex $scm 1] == $repo_type} {
+			set found 1
+			set h [lindex $scm 0]
+			p_verb "calling '$h' SCM handler"
+			$h
+		}
+	}
+	if {!$found} {
+		p_err "SCM type '$repo_type' not supported" 1
+	}
+}
+
+proc is_opt_empty {o} {
+	if {([regexp {^-.*} $o]) || ($o == "")} {
+		return 1
+	}
+	return 0
+}
+
+#
+# processes one option, returns 1 if successful, 0 when problems
+#
+# o_var: name of the global variable to be written with o_val (Note this is 
+#        the textual NAME of the global var, so we need to take additional
+#        handling to manipulate such vars
+# o_txt: option string e.g. "-X"
+# o_val: value to be stored in $o_var
+#
+proc process_opt {o_var o_txt o_val} {
+	
+	global $o_var
+
+	# we 'dereference' a variable by its name - hence the $ in set's 
+	# first argument is needed
+	set $o_var $o_val 
+	if [is_opt_empty $o_val] {
+		p_err "option '$o_txt' requires value"
+		return 0
+	}
+
+	# to get the var value we need to force substitution
+	p_verb "$o_txt = '[subst $$o_var]'"
+	return 1
+}
+
+#
+# parameters are taken from (highest to lowest prio):
+# 1. user-supplied in command line
+# 2. config file
+# 3. env vars
+# 4. built-in defaults
+#
+# TODO config file
+# TODO support for setting params via env vars
+# TODO built-in defaults
+
+
+#
+# parses command line parameters supplied by the user
+#
+# -t SCM type
+# -s source
+# -d dest
+# -n name
+# -p other params
+#
+#
+proc parse_params {} {
+
+	global argc argv
+	global scm_config
+
+	set errors 0
+
+	for {set i 0} {$i < $argc} {incr i} {
+		set arg [lindex $argv $i]
+
+		##
+		## get options
+		##
+		switch -- $arg "-t" {
+			incr i
+			if ![process_opt repo_type "-t" [lindex $argv $i]] {
+				set errors 1
+			}
+			continue
+
+		} "-s" {
+			incr i
+			if ![process_opt repo_src "-s" [lindex $argv $i]] {
+				set errors 1
+			}
+			continue
+
+		} "-n" {
+			incr i
+			if ![process_opt repo_name "-n" [lindex $argv $i]] {
+				set errors 1
+			}
+			continue
+
+		} "-d" {
+			incr i
+			if ![process_opt repo_dst "-d" [lindex $argv $i]] {
+				set errors 1
+			}
+			continue
+
+		} "-p" {
+			incr i
+			if ![process_opt repo_params "-p" [lindex $argv $i]] {
+				set errors 1
+			}
+			continue
+
+		} "-to" {
+			incr i
+			if ![process_opt scm_timeout "-to" [lindex $argv $i]] {
+				set errors 1
+			}
+			continue
+
+		} "-v" {
+			global verbose
+			set verbose "yes"
+			p_verb "verbose mode ON"
+			continue
+		} "-nc" {
+			global confirm
+			set confirm "no"
+			p_verb "no user confirmation"
+			continue
+		}
+
+		##
+		## get config name
+		##
+		set scm_config $arg
+		p_verb "config '$scm_config'"
+	}
+	if {$errors > 0} {
+		exit1
+	}
+
+	# TODO try loading _default config
+	if {$scm_config != ""} {
+		#TODO
+		# load config file
+	}
+}
+
+
+set argc [llength $argv]
+
+##
+## parse paramters
+##
+parse_params
+
+##
+## run SCM handler
+##
+scm_handler
+
+##
+## exit successfully if we got this far
+##
+exit
