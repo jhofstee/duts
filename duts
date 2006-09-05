@@ -20,6 +20,7 @@ source "$BASE_DIR/include/defs.tcl"
 ##
 ## include helper procedures
 ##
+source "$BASE_DIR/include/lib.tcl"
 source "$BASE_DIR/include/utils.tcl"
 source "$BASE_DIR/include/dev.tcl"
 source "$BASE_DIR/include/ui.tcl"

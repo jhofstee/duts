@@ -241,9 +241,9 @@ proc cmd_t {a} {
 	## run selected TCs
 	## 
 	puts "List of selected test cases:\n$l_runlist\n"
-	ask_yesno "confirm to start execution? "
-
-	run_tc_list l_runlist
+	if [ask_yesno "confirm to start execution? "] {
+		run_tc_list l_runlist
+	}
 }
 
 

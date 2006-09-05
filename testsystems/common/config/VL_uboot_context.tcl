@@ -97,7 +97,9 @@ p_verb "CMD '$cmd', RSP '$rsp'"
 
 		#TODO this should be lower i.e. where the cmd_uboot is 
 		#called, but we need to return result value first
-			ask_yesno "do you want to continue? "
+			if ![ask_yesno "do you want to continue? "] {
+				exit1
+			}
 		}
 	}
 }	
