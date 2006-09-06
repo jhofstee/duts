@@ -20,7 +20,7 @@ source "$BASE_DIR/include/lib.tcl"
 #
 # [<config>] - config label
 # [-t <SCM type>] - id of supported scm (git, cvs)
-# [-n <repo_name>] - name in the repot (u-boot, linuxppc_2_4_devel, linux-2.6-denx etc.)
+# [-n <repo_name>] - name in the repo (u-boot, linuxppc_2_4_devel, linux-2.6-denx etc.)
 # [-s <repo_src>] - repo location (/home/git)
 # [-d <repo_dst>] - dest location (./u-boot_copy etc.)
 # [-p <other repo params>]
@@ -37,23 +37,15 @@ source "$BASE_DIR/include/lib.tcl"
 # ./get_src [empty params] - uses default config
 #
 
+
+# default values
 set verbose "no"
 set confirm "yes"
 
-set repo_type "git"
-set repo_name "u-boot"
-set repo_src "/home/git/"
-set repo_dst ""
-set repo_params ""
-
-
 set scm_config ""
-set scm_timeout 180
 set scm_handler ""
 
-# default timeout
 set TIMEOUT 10
-
 
 #
 # table of supported SCM schemes, each element is
@@ -65,6 +57,19 @@ set TIMEOUT 10
 set scm_supported {
 	{do_git "git"}
 	{do_cvs "cvs"}
+	{do_local "local"}
+}
+
+#
+# table of user interface options, each element is
+# {<global_var_name> "<opt_string>" "<default_value>"}
+set opt_table {
+	{repo_type "t" "git"}
+	{repo_name "n" "u-boot"}
+	{repo_src "s" "/home/git/"}
+	{repo_dst "d" ""}
+	{repo_params "p" ""}
+	{scm_timeout  "to" "180"}
 }
 
 #
@@ -72,10 +77,17 @@ set scm_supported {
 #
 proc show_params {} {
 	
-	set globals {
-		repo_type repo_name repo_src repo_dst repo_params
-		scm_timeout confirm verbose
+	global opt_table
+	set globals [list]
+
+	# create list of global vars names from opt table
+	foreach o $opt_table {
+		set var_name [lindex $o 0]
+		lappend globals $var_name
 	}
+
+	# add other interesting global vars to the list
+	lappend globals "confirm" "verbose" "scm_config"
 
 	puts "--- Settings ---"
 	foreach g $globals {
@@ -128,7 +140,7 @@ proc do_git {} {
 	}
 	set src $repo_src$repo_name
 	if ![valid_dir $src] {
-		p_err "Problems accessing source GIT repo?!" 1
+		p_err "Problems accessing '$src' source GIT repo?!" 1
 	}
 	p_verb "Working with source repo: '$src'"
 
@@ -161,6 +173,7 @@ proc do_git {} {
 			exit
 		}
 	}
+	p_banner "Starting GIT operation, please wait..." "#"
 
 	##
 	## prepare cg-clone command: cg-clone <repo_src> <repo_dst>
@@ -183,7 +196,7 @@ proc do_git {} {
 		p_err "problems spawning shell" 1
 	}
 	# Notice: we HAVE to wait for the initial prompt of the just spawned
-	# shell! otherwise we wouldn'w know when to issue the command...
+	# shell! otherwise we wouldn't know when to issue the command...
 	expect {
 		-re "$p$" { p_verb "host shell prompt OK" }
 		timeout { p_err "timed out waiting for prompt: '$p'" 1 }
@@ -222,7 +235,7 @@ proc do_git {} {
 			# this actually shouldn't happen as we checked earlier
 			# for such condition, but let's handle it still - we're
 			# in a multi-user environment after all and things can
-			# happen behind our backs...
+			# happen behind our back...
 			#
 			p_err "repo already cloned"
 			set errors 1
@@ -259,8 +272,9 @@ proc do_git {} {
 	if {$errors > 0} {
 		exit1
 	}
-}
 
+	p_banner "Finished GIT operation, thanks for patience." "#"
+}
 
 proc do_cvs {} {
 	#TODO if required
@@ -268,6 +282,18 @@ proc do_cvs {} {
 	##
 	##
 	## [CVS]
+	## ...
+	## ...
+	##
+	##
+}
+
+proc do_local {} {
+	#TODO if required
+	p_err "Not implemented"
+	##
+	##
+	## cp -R <repo_src> <repo_dst>
 	## ...
 	## ...
 	##
@@ -296,39 +322,6 @@ proc scm_handler {} {
 	}
 }
 
-proc is_opt_empty {o} {
-	if {([regexp {^-.*} $o]) || ($o == "")} {
-		return 1
-	}
-	return 0
-}
-
-#
-# processes one option, returns 1 if successful, 0 when problems
-#
-# o_var: name of the global variable to be written with o_val (Note this is 
-#        the textual NAME of the global var, so we need to take additional
-#        handling to manipulate such vars
-# o_txt: option string e.g. "-X"
-# o_val: value to be stored in $o_var
-#
-proc process_opt {o_var o_txt o_val} {
-	
-	global $o_var
-
-	# we 'dereference' a variable by its name - hence the $ in set's 
-	# first argument is needed
-	set $o_var $o_val 
-	if [is_opt_empty $o_val] {
-		p_err "option '$o_txt' requires value"
-		return 0
-	}
-
-	# to get the var value we need to force substitution
-	p_verb "$o_txt = '[subst $$o_var]'"
-	return 1
-}
-
 #
 # parameters are taken from (highest to lowest prio):
 # 1. user-supplied in command line
@@ -355,66 +348,38 @@ proc parse_params {} {
 
 	global argc argv
 	global scm_config
+	global opt_table opt_list
 
 	set errors 0
 
 	for {set i 0} {$i < $argc} {incr i} {
-		set arg [lindex $argv $i]
+		set a [lindex $argv $i]
+		
+		# check if this is -<opt> element
+		if [regexp {^-.*} $a] {
+			# eat the leading "-"
+			set o [string trimleft $a "-"]
 
-		##
-		## get options
-		##
-		switch -- $arg "-t" {
-			incr i
-			if ![process_opt repo_type "-t" [lindex $argv $i]] {
-				set errors 1
+			if [on_list opt_list $o] {
+				# we have option from opt_table
+				incr i
+				if ![opt_process $o [lindex $argv $i]] {
+					set errors 1
+				}
+			} else {
+				# remaining -<opt> cases (special)
+				switch -- \
+				$o "v" {
+					global verbose
+					set verbose "yes"
+					p_verb "verbose mode ON"
+
+				} "nc" {
+					global confirm
+					set confirm "no"
+					p_verb "no user confirmation"
+				}
 			}
-			continue
-
-		} "-s" {
-			incr i
-			if ![process_opt repo_src "-s" [lindex $argv $i]] {
-				set errors 1
-			}
-			continue
-
-		} "-n" {
-			incr i
-			if ![process_opt repo_name "-n" [lindex $argv $i]] {
-				set errors 1
-			}
-			continue
-
-		} "-d" {
-			incr i
-			if ![process_opt repo_dst "-d" [lindex $argv $i]] {
-				set errors 1
-			}
-			continue
-
-		} "-p" {
-			incr i
-			if ![process_opt repo_params "-p" [lindex $argv $i]] {
-				set errors 1
-			}
-			continue
-
-		} "-to" {
-			incr i
-			if ![process_opt scm_timeout "-to" [lindex $argv $i]] {
-				set errors 1
-			}
-			continue
-
-		} "-v" {
-			global verbose
-			set verbose "yes"
-			p_verb "verbose mode ON"
-			continue
-		} "-nc" {
-			global confirm
-			set confirm "no"
-			p_verb "no user confirmation"
 			continue
 		}
 
@@ -437,6 +402,11 @@ proc parse_params {} {
 
 
 set argc [llength $argv]
+
+##
+## create global variables out of options table
+##
+opt_create_globals
 
 ##
 ## parse paramters
