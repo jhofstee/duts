@@ -348,3 +348,116 @@ proc process_close {sid} {
 	close -i $sid
 	wait -i $sid
 }
+
+###############################################################################
+# user interface options handling
+###############################################################################
+#
+# - there are two global structures required:
+# 
+#   1. opt_table -  table of user interface options, has to be created
+#   manually; each element is:
+#
+#   {<global_var_name> "<opt_string>" "<default_value>"}
+#
+#   2. opt_list - helper list of all options strings (<opt_string>'s from the
+#   opt_table), gets created automatically in opt_create_globals{}
+#
+#
+# - usage: 
+#
+#   1. provide opt_table structure
+#   2. call opt_create_globals{} to initialize everything
+#   3. use opt_process{} in your params parsing routine
+# 
+#
+
+#
+# options handling init routine, it creates:
+# - global variables from options table and assigns default values; vars do
+# not need to exist or be initialized on the global level as will get created
+# automatically here.
+#
+# - global list with option strings for further easier access to defined
+# options' strings
+#
+proc opt_create_globals {} {
+	global opt_table opt_list
+
+	foreach o $opt_table {
+		set var_name [lindex $o 0]
+		set opt_str [lindex $o 1]
+		set def_val [lindex $o 2]
+
+		# set global var - note we 'dereference' a variable by its 
+		# name - hence the $ in set's first argument is needed
+		global $var_name
+		set $var_name $def_val
+		
+		# add opt string to the list
+		lappend opt_list $opt_str
+	}
+}
+
+#
+# checks if option's value empty, returns 1 if so
+#
+proc opt_val_empty {o_val {pfx "-"}} {
+
+	set r "^$pfx.*"
+	if {([regexp $r $o_val]) || ($o_val == "")} {
+		return 1
+	}
+	return 0
+}
+
+#
+# processes one option: verifies the value $o_val to be assigned is valid, and
+# if so finds out a global var for this option and sets it to the value
+#
+# o_txt: option string - has to match <opt_string> from options table
+# o_val: value to be assigned for this option
+# check_list: if set checks if option found on the global list
+#
+# returns 1 if successful, 0 when problems
+#
+proc opt_process {o_txt o_val {check_list "0"}} {
+
+	global opt_table opt_list
+	set rv 1
+
+	# strip off possible leading "-"
+	if [regexp {^-.*} $o_txt] {
+		set o_txt [string trimleft $o_txt "-"]
+	}
+
+	if {$check_list} {
+		# return failed if option not recognized 
+		if ![on_list opt_list $o_txt] {
+			return 0
+		}
+	}
+
+	# get global var associated with option
+	foreach o $opt_table {
+		if {$o_txt == [lindex $o 1]} {
+			set o_var [lindex $o 0]
+			break
+		}
+	}
+
+	if [opt_val_empty $o_val] {
+		p_err "option '$o_txt' requires value"
+		set rv 0
+	}
+
+	# set the global with supplied value: we 'dereference' a variable by
+	# its name - hence the $ in argument is needed
+	global $o_var
+	set $o_var $o_val 
+
+	# to get the var value we need to force substitution
+	p_verb "$o_txt = '[subst $$o_var]'"
+
+	return $rv 
+}
