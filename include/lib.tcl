@@ -251,7 +251,7 @@ proc valid_dir {dir {check_write "0"}} {
 		}
 		
 	} else {
-		p_verb "no such directory: $dir"
+		p_err "no such directory: '$dir'"
 		set rv 0
 	}
 	return $rv
@@ -272,20 +272,24 @@ proc valid_file {f} {
 			if [file readable $f] {
 				p_verb "file exists and accessible, OK"
 			} else {
-				p_err "file not accessible..!?"
+				p_err "file '$f' not readable..!?"
 				set rv 0
 			}
 		} else {
-			p_err "file is not a plain file..?!"
+			p_err "file '$f' is not a plain file..?!"
 			set rv 0
 		}
 	} else {
-		p_err "file '$f' not found?!"
+		p_err "no such file: '$f'?!"
 		set rv 0
 	}
 	
 	return $rv
 }
+
+###############################################################################
+# operations on host environment
+###############################################################################
 
 #
 # locates tool command on the host
@@ -318,6 +322,93 @@ proc valid_host_tool {t} {
 	return $rv
 }
 
+#
+# checks if tools from list are available, returns logical 1/0 accordingly
+#
+# tools_list: NAME of the list with tools to find
+#
+proc check_host_tools {tools_list} {
+	
+	upvar $tools_list tools
+	
+	set rv 1
+	foreach t $tools {
+		if ![valid_host_tool $t] {
+			p_err "command '$t' not available on host"
+			set rv 0
+		}
+	}
+	return $rv
+}
+
+#
+# table of strings in the path identifying build tools similar to what we want
+# to set 
+#
+set alike {"eldk" "crosstool" "tool"}
+
+#
+# if a piece from $alike is found in $p returns 1, otherwise 0
+#
+proc is_similar_path {p} {
+	global alike 
+
+	set found 0
+	foreach a $alike {
+		if [string match *$a* $p] {
+			set found 1
+		}
+	}
+	return $found
+}
+
+#
+# validates path p and adds it to current PATH; if similar path already exists
+# it is replaced with p
+#
+proc set_host_tool_path {p} {
+
+	global env
+
+	if ![valid_dir $p] {
+	        return 0
+	}
+
+	##
+	## get current PATH and break it into pieces
+	##
+	set path $env(PATH)
+	set pl [split $path ":"]
+	set pl_new {}
+
+	##
+	## look for path to similar tools already present in the PATH, if we
+	## found such replace them with ours
+	##
+	set len [llength $pl]
+	for {set i 0} {$i < $len} {incr i} {
+        	set el [lindex $pl $i]
+		if [is_similar_path $el] {
+        	        # there's already a path to build tools - change it to
+			# our newly desired path
+                	set pl_new [lreplace $pl $i $i $p]
+			break
+        	}
+	}
+	if [llength $pl_new] {
+        	set path_new [join $pl_new ":"]
+	} else {
+        	# if there is no updated path list it means there was no other
+		# build tools path found in the current PATH so we need to add
+		# ours
+        	lappend pl $p
+	        set path_new [join $pl ":"]
+	}
+	# now we can set the [new] PATH
+	set env(PATH) $path_new
+
+	return 1
+}
 
 ###############################################################################
 # process mgmt 

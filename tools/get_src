@@ -105,29 +105,16 @@ proc do_git {} {
 	global repo_type repo_name repo_src repo_dst repo_params
 	global scm_timeout confirm TIMEOUT
 
-#p_banner "git handler" "*"
-
-	set cmd_shell "bash"
-	# ignore user rc files so we can be sure of the default bash prompt
-	set cmd_shell_opt "--norc --noprofile"
-	set cmd_shell_prompt "\\$\\ "
-
-	set cmd_co "cg-clone"
-
 	##
 	## check tools availability:
 	##  - shell
 	##  - SCM (cogito)
 	##
+	set cmd_shell "bash"
+	set cmd_co "cg-clone"
+
 	set tools [list $cmd_shell $cmd_co]
-	set errors 0
-	foreach t $tools {
-		if ![valid_host_tool $t] {
-			p_err "command '$t' not available on host"
-			set errors 1
-		}
-	}
-	if {$errors > 0} {
+	if ![check_host_tools tools] {
 		exit1
 	}
 	p_verb "all tools in place, proceeding"
@@ -183,7 +170,11 @@ proc do_git {} {
 	if {$repo_dst != ""} {
 		set c_arg "$c_arg $repo_dst"
 	}
-	
+
+	# ignore user rc files so we can be sure of the default bash prompt
+	set cmd_shell_opt "--norc --noprofile"
+	set cmd_shell_prompt "\\$\\ "
+
 	##
 	## spawn host shell
 	##
