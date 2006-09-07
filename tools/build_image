@@ -1,0 +1,767 @@
+#!/bin/env expect
+#
+# (C) Copyright 2006
+# Wolfgang Denk, DENX Software Engineering, wd@denx.de
+#
+#
+
+set BASE_DIR "/home/raj/git/duts/"
+
+
+##
+## include helper procedures
+##
+source "$BASE_DIR/include/lib.tcl"
+
+
+#
+# ./build_image is called with the following params:
+#
+# [<config>] - config label
+# [-t <build_type>] - id of supported build (linux-24, linux-26, uboot)
+# [-n <target_name>] - TQM834x_config, TQM834x_defconfig 
+# [-s <img_src>] - src tree location (/home/$USER/linuxppc_2_4_devel)
+# [-d <img_dst>] - dest image location: can be filename or directory (image is
+#                 copied there with default name i.e. uImage)
+#                 (/tftpboot/tqm834x/uImage-24-test, /tftpboot/tqm834x/)
+# [-to <timeout>] - timeout in seconds for build to complete
+#
+# [-m <build_tools>] - path to build tools (/opt/eldk-4.0/usr/bin/)
+# [-a <build_arch>] - build arch (ppc)
+# [-c <build_cross>] - cross build prefix (ppc_6xx-)
+#
+# [-o] - overwrite destination file, if exists
+# [-nc] - 'no clean' build - from already configured source (no mrproper, 
+#         config etc. targets, only uImage)
+#
+# [-b]	- batch mode, no user confirmation
+# [-v]	- verbose
+# [-h]  - help
+#
+#
+#  examples:
+# ./build_image -n TQM834x_config -t linux-24 -s /home/raj/linuxppc_2_4_devel \
+#               -d /tftpboot/tqm834x -to 600
+#
+# ./build_image -n TQM834x_defconfig -t linux-26 -s /home/raj/linux-2.6-denx \
+#               -d /tftpboot/tqm834x/uImage-26-raj -to 600
+#
+
+proc usage {} {
+	#TODO
+	p_banner "USAGE  "
+	exit
+}
+
+# default values
+set verbose "no"
+set confirm "yes"
+set overwrite "no"
+set no_clean "no"
+
+set build_config ""
+set build_handler ""
+
+set TIMEOUT 10
+
+#
+# table of supported build schemes, each element is
+# {<handler_function> "<name>"}
+#
+# <name> is the label for use in '-t' command line option or 'img_type' field 
+# in config file
+#
+set img_supported {
+	{do_linux26 "linux-26"}
+	{do_linux24 "linux-24"}
+	{do_uboot "uboot"}
+}
+
+#
+# table of user interface options, each element is
+# {<global_var_name> "<opt_string>" "<default_value>"}
+set opt_table {
+	{img_type "t" "linux-26"}
+	{img_name "n" "TQM834x_defconfig"}
+	{img_src "s" "~/linux-2.6-denx"}
+	{img_dst "d" "/tftpboot/tqm834x/uImage-26-raj"}
+
+	{build_timeout  "to" "600"}
+	{build_tools "m" "/opt/eldk-4.0/usr/bin/"}
+	{build_arch "a" "ppc"}
+	{build_cross "c" "ppc_6xx-"}
+}
+
+#
+# dumps params
+#
+proc show_params {} {
+	
+	global opt_table
+	set globals [list]
+
+	# create list of global vars names from opt table
+	foreach o $opt_table {
+		set var_name [lindex $o 0]
+		lappend globals $var_name
+	}
+
+	# add other interesting global vars to the list
+	lappend globals "build_config" "confirm" "verbose" "overwrite" "no_clean"
+
+	puts "--- Settings ---"
+	foreach g $globals {
+		global $g
+		puts "$g = '[subst $$g]'"
+	}
+}
+
+#
+# checks linux version tree: takes a peek in the main Makefile for version
+# strings; returns 0/1 if doesn't/match
+#
+# v: version
+# p: patchlevel
+#
+proc check_linux_ver {v p} {
+
+	global img_src
+
+	set rv 1
+	set cmd "grep"
+	set cmd_arg "-r \"VERSION = $v\" $img_src/Makefile"
+
+	if [catch {set o [eval exec $cmd $cmd_arg]}] {
+		p_verb "version does not match"
+        	set rv 0
+	}
+
+	set cmd_arg "-r \"PATCHLEVEL = $p\" $img_src/Makefile"
+	if [catch {set o [eval exec $cmd $cmd_arg]}] {
+		p_verb "patchlevel does not match"
+        	set rv 0
+	}
+
+	if {!$rv} {
+		p_verb "Linux version '$v.$p' do not match, check your sources"
+	} else {
+		p_verb "Linux tree version '$v.$p' OK"
+	}
+
+	return $rv
+}
+
+#
+# checks linux config file based on the config name core stored in $img_name,
+# returns 0/1 if not/found according file
+#
+proc check_linux_config {} {
+
+	global img_src img_name build_arch
+	set rv 1
+	
+	set c $img_name
+	append c "_defconfig"
+	set cf "$img_src/arch/$build_arch/configs/$c"
+	if {([file exists $cf]) && ([file readable $cf])} {
+		p_verb "found config file '$cf'"
+	} else {
+		p_verb "no kernel config file: '$cf'"
+		set rv 0
+	}
+
+	return $rv
+}
+
+#
+# validates specification of destination path:
+# 1. if exists: has to be (over)writable (file) dir
+# 2. if doesn'n exist: parent dir has to writable
+#
+# dst: destination path
+# ovr: applicable when existing endfile is specified in $dst - if 0 returns
+#      error, if 1 checks whether file is overwritable
+#
+proc check_dst {dst {ovr "0"}} {
+
+	if {$dst == ""} {
+		return 1
+	}
+	
+	set rv 1
+	if [file exists $dst] {
+		# for existing paths we're only interested in file or directory
+		set ft [file type $dst]
+		switch -- $ft "file" {
+			if {$ovr} {
+				# we want to overwrite image files
+				if ![file writable $dst] {
+					p_err "destination file not\
+					overwritable: '$dst'"
+					set rv 0
+				}
+				
+			} else {
+				p_err "destination file already exists:\
+				'$dst'; use -o to overwrite"
+				set rv 0
+			}
+
+		} "directory" {
+			if ![file writable $dst] {
+				p_err "destination dir not writable: '$dst'"
+				set rv 0
+			} else {
+				# dst specifies directory, so there can exist
+				# an image with default name - check for it
+				set d "$dst/uImage"
+				global overwrite
+				set o [expr {($overwrite == "yes") ? 1 : 0}]
+				set rv [check_dst $d $o]
+			}
+
+		} default {
+			p_err "file type '$ft' not supported: '$dst'"
+			set rv 0
+		}
+		
+	} else {
+		# supplied path does not exist: we only accept specification
+		# for a non-existing endfile (which will get created) but not
+		# directory.. 
+		if [regexp {/$} $dst] {
+			p_err "no such directory: '$dst'"
+			set rv 0
+		} else {
+			# check parent dir for the file
+			set pd [file dirname $dst]
+			if ![valid_dir $pd 1] {
+				p_err "parent dir in '$dst' not valid"
+				set rv 0
+			} else {
+				p_verb "destination '$dst' OK"
+			}
+		}
+	}
+
+	return $rv
+}
+
+
+proc make_mrproper {sid p {to 180}} {
+	
+	set spawn_id $sid
+	set rv 1
+
+	set timeout $to
+	set c "make mrproper"
+	send -s "$c\r"
+	#
+	# error strings:
+	# make: *** No rule to make target `dfdsf'.  Stop.
+	#
+	expect {
+		timeout {
+			p_err "timed out after '$c' command"
+			set rv 0
+		}
+		-re "No\\ rule\\ to\\ make\\ target.*Stop" {
+			p_err "no target"
+			set rv 0
+		}
+		-re ".*$p$" {
+			p_verb "command '$c' OK"
+		}
+	}
+
+	return $rv
+}
+
+#		-re ".*\\ \\(NEW\\)\\ " {
+#			send -s "\r"
+#			exp_continue
+#		}
+
+proc 26make_config {sid p {to 180}} {
+
+	global img_name
+	set spawn_id $sid
+	set rv 1
+
+	set timeout $to
+	
+	set c "make $img_name"
+	append c "_defconfig"
+	send -s "$c\r"
+	#
+	# closing strings:
+	# configuration written to .config
+	#
+	# error strings:
+	# make: *** No rule to make target `dfdsf'.  Stop.
+	#
+	expect {
+		timeout {
+			p_err "timed out after '$c' command"
+			set rv 0
+		}
+		-re "No\\ rule\\ to\\ make\\ target.*Stop" {
+			p_err "no target"
+			set rv 0
+		}
+		-re "configuration\\ written\\ to\\ \\.config.*$p$" {
+			p_verb "command '$c' OK"
+		}
+	}
+
+	return $rv
+}
+
+proc 26make_uimage {sid p {to 600}} {
+
+	global img_name
+	set spawn_id $sid
+	set rv 1
+
+	set timeout $to
+	
+	set c "make uImage"
+	send -s "$c\r"
+	#
+	# closing strings:
+	# Image: arch/ppc/boot/images/uImage is ready
+	# make[1]: `arch/ppc/boot/images/uImage' is up to date.
+	#
+	# error strings:
+	# make: *** No rule to make target `dfdsf'.  Stop.
+	# host/ehci-q.c:185: error: invalid storage class for func
+	# make[3]: *** [host/ehci-hcd.o] Error 1
+	#
+	# make[2]: *** [arch/powerpc/kernel/vdso32/gettimeofday.o] Error 1
+	# make[1]: *** [arch/powerpc/kernel/vdso32] Error 2
+	# make: *** [arch/powerpc/kernel] Error 2
+	#
+	expect {
+		timeout {
+			p_err "timed out after '$c' command"
+			set rv 0
+		}
+		-re "No\\ rule\\ to\\ make\\ target.*Stop" {
+			p_err "no target"
+			set rv 0
+		}
+		-re ".*:\\ error:.*" {
+			send_user -- "\n"
+			p_err "build failed"
+			set rv 0
+		}
+		-re ".*make.+\\ Error\\ .*" {
+			send_user -- "\n"
+			p_err "build failed"
+			set rv 0
+		}
+		-re ".*boot/images/uImage\\ is\\ ready.*$p$" {
+			p_verb "command '$c' OK"
+		}
+		-re ".*boot/images/uImage.*is\\ up\\ to\\ date.*$p$" {
+			 p_verb "command '$c' OK"
+		}
+	}
+
+	return $rv
+}
+
+#
+# validates environment for kernel build:
+#
+# 1. check tools
+#   - path makes sense, gcc, ld etc. exist?
+#
+# 2. check src dir
+#   - exists, writable?
+#   - looks like a kernel tree?
+#
+# 3. check dst
+#   - if dir: exists, writable?
+#   - if endfile: already exists?
+#
+# 4. check kernel config file
+#   - exists _defconfig
+#
+# v: version
+# p: patchlevel
+#
+proc valid_linux_env {v p} {
+
+	global img_type img_name img_src img_dst
+	global build_tools build_arch build_cross
+	global build_timeout confirm TIMEOUT overwrite
+	global env
+
+	## 1. check tools
+
+	##
+	## set env vars: ARCH, CROSS_COMPILE
+	##
+	set env(ARCH) $build_arch
+	set env(CROSS_COMPILE) $build_cross
+
+	##
+	## set PATH so the desired toolchain is available
+	##
+	if ![set_host_tool_path $build_tools] {
+        	p_err "path to the build tools not accessible: '$p'?!"
+		return 0
+	}
+
+	##
+	## check tools availability:
+	##  - a selected tool from cross build suite, let's have a look at 
+	##    gcc and ld
+	##
+	set cmd_gcc $build_cross
+	append cmd_gcc "gcc"
+	set cmd_ld $build_cross
+	append cmd_ld "ld"
+
+	set tools [list $cmd_gcc $cmd_ld]
+	if ![check_host_tools tools] {
+		return 0
+	}
+	p_verb "all tools in place, proceeding"
+
+
+	## 2. check src dir
+
+	##
+	## validate source dir
+	##
+	##  - exists, writable?
+	##  - looks like a kernel tree?
+	##
+
+	# strip trailing slash
+	set img_src [string trimright $img_src "/"]
+	if ![valid_dir $img_src 1] {
+		p_err "Problems accessing source dir?!"
+		return 0
+	}
+
+	if ![check_linux_ver $v $p] {
+		p_err "Doesn't look like Linux $v.$p source tree: '$img_src'?!"
+		return 0
+	}
+	p_verb "working with source dir: '$img_src'"
+
+	## 3. check dst
+
+	##
+	## validate  destination location
+	## - if dir: exists, writable?
+	## - if endfile: already exists?
+	##
+	set o [expr {($overwrite == "yes") ? 1 : 0}]
+	if ![check_dst $img_dst $o] {
+		return 0
+	}
+	
+	## 4. check kernel config file 
+	##
+	## - exists <name>_config, <name>_defconfig
+
+	#
+	# if user-provided kernel config name was '*.config' we only save the
+	# core of the name for further processing when it will be personalized
+	# with _config or _defconfig suffix depending on context. This is 
+	# mainly due to different handling of config name in Linux 2.4
+	# (make <name>_config) vs. 2.6 (make <name>_defconfig)
+	# e.g. for TQM834x_defconfig save only the 'TQM834x' part
+	#
+	regexp {(.+)(_.*config)} $img_name in1 in2 in3]
+	if [info exists in1] {
+		set img_name $in2
+	}
+
+	if ![check_linux_config] {
+		return 0
+	}
+	p_verb "using '$img_name' kernel config"
+
+	return 1
+	
+}
+
+
+#
+# 1. cd to <img_src>
+# 2. spawn bash shell
+# 3. make mrproper
+# 4. make <img_name>_defconfig
+# 5. make uImage
+# 6. copy to <img_dst>
+#
+proc do_build26 {} {
+
+	global send_slow build_timeout img_src img_dst no_clean dst_type
+	global build_arch
+
+	p_banner "Starting kernel build, please wait." #
+
+	set cur_dir [pwd]
+	cd $img_src
+
+	##
+	## check if we can skip configuration steps
+	##
+	set skip_config 0
+	if {$no_clean == "yes"} {
+		if [file exists .config] {
+			set skip_config 1
+		} else {
+			p_verb "'no-clean' build required but no .config\
+			file foung so doing full build anyway..."
+		}
+	}
+
+	##
+	## spawn bash shell on host
+	##
+	set p "\\$\\ "
+	set spawn_id [host_bash_shell]
+
+	set send_slow {1 .050}
+	# expect buffer size
+	match_max 16384
+
+	##
+	## mrproper
+	##
+	if {$skip_config} {
+		p_warn "skipping mrproper"
+	} else {
+		p_banner "make mrproper" *
+		if ![make_mrproper $spawn_id $p] {
+			exit1
+		}
+	}
+
+	##
+	## config
+	##
+	set s "make <img_image>_defconfig"
+	if {$skip_config} {
+		p_warn "skipping $s"
+	} else {
+		p_banner $s *
+		if ![26make_config $spawn_id $p] {
+			exit1
+		}
+	}
+
+	##
+	## uImage
+	##
+	p_banner "make uImage" *
+	if ![26make_uimage $spawn_id $p $build_timeout] {
+		exit1
+	}
+
+	##
+	## copy image to the desired location
+	##
+	p_banner "copy image to destination" *
+	set img_file "arch/$build_arch/boot/images/uImage"
+	if {$img_dst == ""} {
+		p_verb "no destination location specified, nothing to do.."
+	} else {
+		send_user -- "Copying image to '$img_dst'\n"
+		if ![host_copy $img_file $img_dst] {
+			exit1
+		}
+		p_verb "copied '$img_file' to '$img_dst'"
+	}
+
+	##
+	## close spawned shell process
+	##
+	process_close $spawn_id
+	set spawn_id -1
+
+	cd $cur_dir
+	p_banner "Finished kernel build, thanks for patience." #
+}
+
+
+#
+# handler function to perform Linux 2.6 build from sources
+#
+proc do_linux26 {} {
+
+	global confirm
+
+	##
+	## prerequisites
+	##
+	if ![valid_linux_env 2 6] {
+		exit1
+	}
+
+	##
+	## ask user before proceeding
+	##
+	if {$confirm == "yes"} {
+		show_params
+		if ![ask_yesno "confirm to start execution? "] {
+			exit
+		}
+	}
+
+	##
+	## build kernel
+	##
+	do_build26
+}
+
+
+proc do_linux24 {} {
+	#TODO
+	p_err "Not implemented"
+	##
+	##
+	##
+	##
+}
+
+
+proc do_uboot {} {
+	#TODO 
+	p_err "Not implemented"
+	##
+	##
+	##
+	##
+}
+
+#
+# searches $img_supported table for $img_type build type and calls associated
+# handler, if found.
+#
+proc build_handler {} {
+	global img_supported img_type
+	set found 0
+
+	foreach img $img_supported {
+		if {[lindex $img 1] == $img_type} {
+			set found 1
+			set h [lindex $img 0]
+			p_verb "calling '$h' build handler"
+			$h
+		}
+	}
+	if {!$found} {
+		p_err "build type '$img_type' not supported" 1
+	}
+}
+
+#
+# parameters are taken from (highest to lowest prio):
+# 1. user-supplied in command line
+# 2. config file
+# 3. env vars
+# 4. built-in defaults
+#
+# TODO config file
+# TODO support for setting params via env vars
+# TODO built-in defaults
+#
+
+#
+# parses command line parameters supplied by the user
+#
+proc parse_params {} {
+
+	global argc argv
+	global build_config
+	global opt_table opt_list
+
+	set errors 0
+
+	for {set i 0} {$i < $argc} {incr i} {
+		set a [lindex $argv $i]
+		
+		# check if this is -<opt> element
+		if [regexp {^-.*} $a] {
+			# eat the leading "-"
+			set o [string trimleft $a "-"]
+
+			if [on_list opt_list $o] {
+				# we have option from opt_table
+				incr i
+				if ![opt_process $o [lindex $argv $i]] {
+					set errors 1
+				}
+			} else {
+				# remaining -<opt> cases (special)
+				switch -- \
+				$o "v" {
+					global verbose
+					set verbose "yes"
+					p_verb "verbose mode ON"
+
+				} "b" {
+					global confirm
+					set confirm "no"
+					p_verb "no user confirmation"
+				} "o" {
+					global overwrite
+					set overwrite "yes"
+					p_verb "overwrite existing image file"
+				} "nc" {
+					global no_clean 
+					set no_clean "yes"
+				} "h" {
+					usage
+				}
+			}
+			continue
+		}
+
+		##
+		## get config name
+		##
+		set build_config $a
+		p_verb "config '$build_config'"
+	}
+	if {$errors > 0} {
+		exit1
+	}
+
+	# TODO try loading _default config
+	if {$build_config != ""} {
+		#TODO
+		# load config file
+	}
+}
+
+
+set argc [llength $argv]
+
+##
+## create global variables out of options table
+##
+opt_create_globals
+
+##
+## parse paramters
+##
+parse_params
+
+##
+## run build handler
+##
+build_handler
+
+##
+## exit successfully if we got this far
+##
+exit
