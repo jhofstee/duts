@@ -410,6 +410,61 @@ proc set_host_tool_path {p} {
 	return 1
 }
 
+#
+# spawns bash shell on host, returns its $spawn_id
+#
+proc host_bash_shell {{prompt ""} {opt ""}} {
+
+	# for bash shell ignore user rc files so we can be sure of the default
+	# prompt
+	set def_opt "--norc --noprofile"
+	set def_p "\\$\\ "
+
+	set c "bash"
+	if ![valid_host_tool $c] {
+		exit1
+	}
+	set o [expr {($opt == "") ? $def_opt : "$opt $def_opt"}]
+	set p [expr {($prompt == "") ? $def_p : "$prompt"}]
+
+	##
+	## spawn host shell
+	##
+	set timeout 4
+
+	set spawn_id [process_spawn $c $o]
+	if {$spawn_id < 0} {
+		p_err "problems spawning shell" 1
+	}
+	# Notice: we HAVE to wait for the initial prompt of the just spawned
+	# shell! otherwise we wouldn't know when to issue the command...
+	expect {
+		-re "$p$" { p_verb "host shell prompt OK" }
+		timeout { p_err "timed out waiting for prompt: '$p'" 1 }
+	}
+	send_user -- "\n"
+
+	return $spawn_id
+}
+
+#
+# copies $s to $d, conditions like access rights etc. are assumed to be checked
+# by the caller
+#
+proc host_copy {s d} {
+
+	if ![valid_file $s] {
+		return 0	
+	}
+	set c "cp $s $d"
+	if [catch {set o [eval exec $c]}] {
+		p_err "copy command failed: '$c'"
+		return 0
+	}
+	
+	return 1
+}
+
 ###############################################################################
 # process mgmt 
 ###############################################################################

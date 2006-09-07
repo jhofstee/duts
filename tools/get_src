@@ -26,7 +26,7 @@ source "$BASE_DIR/include/lib.tcl"
 # [-p <other repo params>]
 # [-to <timeout>] - timeout in seconds for repo op to complete
 #
-# [-nc]	- no user confirmation
+# [-b]	- batch mode, no user confirmation
 # [-v]	- verbose
 #
 #
@@ -107,13 +107,11 @@ proc do_git {} {
 
 	##
 	## check tools availability:
-	##  - shell
 	##  - SCM (cogito)
 	##
-	set cmd_shell "bash"
 	set cmd_co "cg-clone"
 
-	set tools [list $cmd_shell $cmd_co]
+	set tools [list $cmd_co]
 	if ![check_host_tools tools] {
 		exit1
 	}
@@ -171,27 +169,11 @@ proc do_git {} {
 		set c_arg "$c_arg $repo_dst"
 	}
 
-	# ignore user rc files so we can be sure of the default bash prompt
-	set cmd_shell_opt "--norc --noprofile"
-	set cmd_shell_prompt "\\$\\ "
-
 	##
 	## spawn host shell
 	##
-	set timeout $TIMEOUT
-	set send_slow {1 .050}
-	set p $cmd_shell_prompt
-
-	set spawn_id [process_spawn $cmd_shell $cmd_shell_opt]
-	if {$spawn_id < 0} {
-		p_err "problems spawning shell" 1
-	}
-	# Notice: we HAVE to wait for the initial prompt of the just spawned
-	# shell! otherwise we wouldn't know when to issue the command...
-	expect {
-		-re "$p$" { p_verb "host shell prompt OK" }
-		timeout { p_err "timed out waiting for prompt: '$p'" 1 }
-	}
+	set p "\\$\\ "
+	set spawn_id [host_bash_shell $p]
 
 	##
 	## execute command
@@ -212,6 +194,7 @@ proc do_git {} {
 
 	# expect buffer size
 	match_max 16384
+	set send_slow {1 .050}
 
 	set errors 0
 	set timeout $scm_timeout 
@@ -328,13 +311,6 @@ proc scm_handler {} {
 #
 # parses command line parameters supplied by the user
 #
-# -t SCM type
-# -s source
-# -d dest
-# -n name
-# -p other params
-#
-#
 proc parse_params {} {
 
 	global argc argv
@@ -365,7 +341,7 @@ proc parse_params {} {
 					set verbose "yes"
 					p_verb "verbose mode ON"
 
-				} "nc" {
+				} "b" {
 					global confirm
 					set confirm "no"
 					p_verb "no user confirmation"
@@ -377,7 +353,7 @@ proc parse_params {} {
 		##
 		## get config name
 		##
-		set scm_config $arg
+		set scm_config $a
 		p_verb "config '$scm_config'"
 	}
 	if {$errors > 0} {
