@@ -5,13 +5,13 @@
 #
 #
 
-set BASE_DIR "/home/raj/git/duts/"
+set BASE_DIR "/home/raj/git/duts/tools"
 
 
 ##
 ## include helper procedures
 ##
-source "$BASE_DIR/include/lib.tcl"
+source "$BASE_DIR/../include/lib.tcl"
 
 
 #
@@ -62,28 +62,19 @@ set no_clean "no"
 set build_config ""
 set build_handler ""
 
-set TIMEOUT 10
+set build_prompt ""
+set build_sid ""
 
-#
-# table of supported build schemes, each element is
-# {<handler_function> "<name>"}
-#
-# <name> is the label for use in '-t' command line option or 'img_type' field 
-# in config file
-#
-set img_supported {
-	{do_linux26 "linux-26"}
-	{do_linux24 "linux-24"}
-	{do_uboot "uboot"}
-}
+set TIMEOUT 10
 
 #
 # table of user interface options, each element is
 # {<global_var_name> "<opt_string>" "<default_value>"}
+#
 set opt_table {
 	{img_type "t" "linux-26"}
 	{img_name "n" "TQM834x_defconfig"}
-	{img_src "s" "~/linux-2.6-denx"}
+	{img_src "s" "linux-2.6-denx"}
 	{img_dst "d" "/tftpboot/tqm834x/uImage-26-raj"}
 
 	{build_timeout  "to" "600"}
@@ -114,6 +105,81 @@ proc show_params {} {
 		global $g
 		puts "$g = '[subst $$g]'"
 	}
+}
+
+#
+# validates specification of destination path:
+# 1. if exists: has to be (over)writable (file) dir
+# 2. if doesn'n exist: parent dir has to writable
+#
+# dst: destination path
+# ovr: applicable when existing endfile is specified in $dst - if 0 returns
+#      error, if 1 checks whether file is overwritable
+# dn:  default image name to look for
+#
+proc check_dst {dst {ovr "0"} {dn "uImage"}} {
+
+	if {$dst == ""} {
+		return 1
+	}
+	
+	set rv 1
+	if [file exists $dst] {
+		# for existing paths we're only interested in file or directory
+		set ft [file type $dst]
+		switch -- $ft "file" {
+			if {$ovr} {
+				# we want to overwrite image files
+				if ![file writable $dst] {
+					p_err "destination file not\
+					overwritable: '$dst'"
+					set rv 0
+				}
+				
+			} else {
+				p_err "destination file already exists:\
+				'$dst'; use -o to overwrite"
+				set rv 0
+			}
+
+		} "directory" {
+			if ![file writable $dst] {
+				p_err "destination dir not writable: '$dst'"
+				set rv 0
+			} else {
+				# dst specifies directory, so there can exist
+				# an image with default name - check for it
+				set d "$dst/$dn"
+				global overwrite
+				set o [expr {($overwrite == "yes") ? 1 : 0}]
+				set rv [check_dst $d $o]
+			}
+
+		} default {
+			p_err "file type '$ft' not supported: '$dst'"
+			set rv 0
+		}
+		
+	} else {
+		# supplied path does not exist: we only accept specification
+		# for a non-existing endfile (which will get created) but not
+		# directory.. 
+		if [regexp {/$} $dst] {
+			p_err "no such directory: '$dst'"
+			set rv 0
+		} else {
+			# check parent dir for the file
+			set pd [file dirname $dst]
+			if ![valid_dir $pd 1] {
+				p_err "parent dir in '$dst' not valid"
+				set rv 0
+			} else {
+				p_verb "destination '$dst' OK"
+			}
+		}
+	}
+
+	return $rv
 }
 
 #
@@ -166,206 +232,8 @@ proc check_linux_config {} {
 	if {([file exists $cf]) && ([file readable $cf])} {
 		p_verb "found config file '$cf'"
 	} else {
-		p_verb "no kernel config file: '$cf'"
+		p_err "no kernel config file: '$cf'"
 		set rv 0
-	}
-
-	return $rv
-}
-
-#
-# validates specification of destination path:
-# 1. if exists: has to be (over)writable (file) dir
-# 2. if doesn'n exist: parent dir has to writable
-#
-# dst: destination path
-# ovr: applicable when existing endfile is specified in $dst - if 0 returns
-#      error, if 1 checks whether file is overwritable
-#
-proc check_dst {dst {ovr "0"}} {
-
-	if {$dst == ""} {
-		return 1
-	}
-	
-	set rv 1
-	if [file exists $dst] {
-		# for existing paths we're only interested in file or directory
-		set ft [file type $dst]
-		switch -- $ft "file" {
-			if {$ovr} {
-				# we want to overwrite image files
-				if ![file writable $dst] {
-					p_err "destination file not\
-					overwritable: '$dst'"
-					set rv 0
-				}
-				
-			} else {
-				p_err "destination file already exists:\
-				'$dst'; use -o to overwrite"
-				set rv 0
-			}
-
-		} "directory" {
-			if ![file writable $dst] {
-				p_err "destination dir not writable: '$dst'"
-				set rv 0
-			} else {
-				# dst specifies directory, so there can exist
-				# an image with default name - check for it
-				set d "$dst/uImage"
-				global overwrite
-				set o [expr {($overwrite == "yes") ? 1 : 0}]
-				set rv [check_dst $d $o]
-			}
-
-		} default {
-			p_err "file type '$ft' not supported: '$dst'"
-			set rv 0
-		}
-		
-	} else {
-		# supplied path does not exist: we only accept specification
-		# for a non-existing endfile (which will get created) but not
-		# directory.. 
-		if [regexp {/$} $dst] {
-			p_err "no such directory: '$dst'"
-			set rv 0
-		} else {
-			# check parent dir for the file
-			set pd [file dirname $dst]
-			if ![valid_dir $pd 1] {
-				p_err "parent dir in '$dst' not valid"
-				set rv 0
-			} else {
-				p_verb "destination '$dst' OK"
-			}
-		}
-	}
-
-	return $rv
-}
-
-
-proc make_mrproper {sid p {to 180}} {
-	
-	set spawn_id $sid
-	set rv 1
-
-	set timeout $to
-	set c "make mrproper"
-	send -s "$c\r"
-	#
-	# error strings:
-	# make: *** No rule to make target `dfdsf'.  Stop.
-	#
-	expect {
-		timeout {
-			p_err "timed out after '$c' command"
-			set rv 0
-		}
-		-re "No\\ rule\\ to\\ make\\ target.*Stop" {
-			p_err "no target"
-			set rv 0
-		}
-		-re ".*$p$" {
-			p_verb "command '$c' OK"
-		}
-	}
-
-	return $rv
-}
-
-#		-re ".*\\ \\(NEW\\)\\ " {
-#			send -s "\r"
-#			exp_continue
-#		}
-
-proc 26make_config {sid p {to 180}} {
-
-	global img_name
-	set spawn_id $sid
-	set rv 1
-
-	set timeout $to
-	
-	set c "make $img_name"
-	append c "_defconfig"
-	send -s "$c\r"
-	#
-	# closing strings:
-	# configuration written to .config
-	#
-	# error strings:
-	# make: *** No rule to make target `dfdsf'.  Stop.
-	#
-	expect {
-		timeout {
-			p_err "timed out after '$c' command"
-			set rv 0
-		}
-		-re "No\\ rule\\ to\\ make\\ target.*Stop" {
-			p_err "no target"
-			set rv 0
-		}
-		-re "configuration\\ written\\ to\\ \\.config.*$p$" {
-			p_verb "command '$c' OK"
-		}
-	}
-
-	return $rv
-}
-
-proc 26make_uimage {sid p {to 600}} {
-
-	global img_name
-	set spawn_id $sid
-	set rv 1
-
-	set timeout $to
-	
-	set c "make uImage"
-	send -s "$c\r"
-	#
-	# closing strings:
-	# Image: arch/ppc/boot/images/uImage is ready
-	# make[1]: `arch/ppc/boot/images/uImage' is up to date.
-	#
-	# error strings:
-	# make: *** No rule to make target `dfdsf'.  Stop.
-	# host/ehci-q.c:185: error: invalid storage class for func
-	# make[3]: *** [host/ehci-hcd.o] Error 1
-	#
-	# make[2]: *** [arch/powerpc/kernel/vdso32/gettimeofday.o] Error 1
-	# make[1]: *** [arch/powerpc/kernel/vdso32] Error 2
-	# make: *** [arch/powerpc/kernel] Error 2
-	#
-	expect {
-		timeout {
-			p_err "timed out after '$c' command"
-			set rv 0
-		}
-		-re "No\\ rule\\ to\\ make\\ target.*Stop" {
-			p_err "no target"
-			set rv 0
-		}
-		-re ".*:\\ error:.*" {
-			send_user -- "\n"
-			p_err "build failed"
-			set rv 0
-		}
-		-re ".*make.+\\ Error\\ .*" {
-			send_user -- "\n"
-			p_err "build failed"
-			set rv 0
-		}
-		-re ".*boot/images/uImage\\ is\\ ready.*$p$" {
-			p_verb "command '$c' OK"
-		}
-		-re ".*boot/images/uImage.*is\\ up\\ to\\ date.*$p$" {
-			 p_verb "command '$c' OK"
-		}
 	}
 
 	return $rv
@@ -395,7 +263,7 @@ proc valid_linux_env {v p} {
 
 	global img_type img_name img_src img_dst
 	global build_tools build_arch build_cross
-	global build_timeout confirm TIMEOUT overwrite
+	global build_timeout TIMEOUT overwrite no_clean
 	global env
 
 	## 1. check tools
@@ -448,7 +316,8 @@ proc valid_linux_env {v p} {
 	}
 
 	if ![check_linux_ver $v $p] {
-		p_err "Doesn't look like Linux $v.$p source tree: '$img_src'?!"
+		p_err "Doesn't look like Linux $v.$p source tree: '$img_src'?!\
+		Check your -t value."
 		return 0
 	}
 	p_verb "working with source dir: '$img_src'"
@@ -486,181 +355,51 @@ proc valid_linux_env {v p} {
 		return 0
 	}
 	p_verb "using '$img_name' kernel config"
+	
+	##
+	## verify if we can skip configuration steps
+	##
+	if {$no_clean == "yes"} {
+		if [file exists $img_src/.config] {
+			p_verb "performing 'no-clean' build, config steps will\
+			be skipped"
+		} else {
+			p_verb "'no-clean' build specified but no .config\
+			file found so doing full build anyway..."
+			set no_clean "no"
+		}
+	}
 
 	return 1
+}
+
+proc make_mrproper {sid p {to 180}} {
 	
-}
+	set spawn_id $sid
+	set rv 1
 
-
-#
-# 1. cd to <img_src>
-# 2. spawn bash shell
-# 3. make mrproper
-# 4. make <img_name>_defconfig
-# 5. make uImage
-# 6. copy to <img_dst>
-#
-proc do_build26 {} {
-
-	global send_slow build_timeout img_src img_dst no_clean dst_type
-	global build_arch
-
-	p_banner "Starting kernel build, please wait." #
-
-	set cur_dir [pwd]
-	cd $img_src
-
-	##
-	## check if we can skip configuration steps
-	##
-	set skip_config 0
-	if {$no_clean == "yes"} {
-		if [file exists .config] {
-			set skip_config 1
-		} else {
-			p_verb "'no-clean' build required but no .config\
-			file foung so doing full build anyway..."
+	set timeout $to
+	set c "make mrproper"
+	send -s "$c\r"
+	#
+	# error strings:
+	# make: *** No rule to make target `dfdsf'.  Stop.
+	#
+	expect {
+		timeout {
+			p_err "timed out after '$c' command"
+			set rv 0
+		}
+		-re "No\\ rule\\ to\\ make\\ target.*Stop" {
+			p_err "no target"
+			set rv 0
+		}
+		-re ".*$p$" {
+			p_verb "command '$c' OK"
 		}
 	}
 
-	##
-	## spawn bash shell on host
-	##
-	set p "\\$\\ "
-	set spawn_id [host_bash_shell]
-
-	set send_slow {1 .050}
-	# expect buffer size
-	match_max 16384
-
-	##
-	## mrproper
-	##
-	if {$skip_config} {
-		p_warn "skipping mrproper"
-	} else {
-		p_banner "make mrproper" *
-		if ![make_mrproper $spawn_id $p] {
-			exit1
-		}
-	}
-
-	##
-	## config
-	##
-	set s "make <img_image>_defconfig"
-	if {$skip_config} {
-		p_warn "skipping $s"
-	} else {
-		p_banner $s *
-		if ![26make_config $spawn_id $p] {
-			exit1
-		}
-	}
-
-	##
-	## uImage
-	##
-	p_banner "make uImage" *
-	if ![26make_uimage $spawn_id $p $build_timeout] {
-		exit1
-	}
-
-	##
-	## copy image to the desired location
-	##
-	p_banner "copy image to destination" *
-	set img_file "arch/$build_arch/boot/images/uImage"
-	if {$img_dst == ""} {
-		p_verb "no destination location specified, nothing to do.."
-	} else {
-		send_user -- "Copying image to '$img_dst'\n"
-		if ![host_copy $img_file $img_dst] {
-			exit1
-		}
-		p_verb "copied '$img_file' to '$img_dst'"
-	}
-
-	##
-	## close spawned shell process
-	##
-	process_close $spawn_id
-	set spawn_id -1
-
-	cd $cur_dir
-	p_banner "Finished kernel build, thanks for patience." #
-}
-
-
-#
-# handler function to perform Linux 2.6 build from sources
-#
-proc do_linux26 {} {
-
-	global confirm
-
-	##
-	## prerequisites
-	##
-	if ![valid_linux_env 2 6] {
-		exit1
-	}
-
-	##
-	## ask user before proceeding
-	##
-	if {$confirm == "yes"} {
-		show_params
-		if ![ask_yesno "confirm to start execution? "] {
-			exit
-		}
-	}
-
-	##
-	## build kernel
-	##
-	do_build26
-}
-
-
-proc do_linux24 {} {
-	#TODO
-	p_err "Not implemented"
-	##
-	##
-	##
-	##
-}
-
-
-proc do_uboot {} {
-	#TODO 
-	p_err "Not implemented"
-	##
-	##
-	##
-	##
-}
-
-#
-# searches $img_supported table for $img_type build type and calls associated
-# handler, if found.
-#
-proc build_handler {} {
-	global img_supported img_type
-	set found 0
-
-	foreach img $img_supported {
-		if {[lindex $img 1] == $img_type} {
-			set found 1
-			set h [lindex $img 0]
-			p_verb "calling '$h' build handler"
-			$h
-		}
-	}
-	if {!$found} {
-		p_err "build type '$img_type' not supported" 1
-	}
+	return $rv
 }
 
 #
@@ -672,7 +411,6 @@ proc build_handler {} {
 #
 # TODO config file
 # TODO support for setting params via env vars
-# TODO built-in defaults
 #
 
 #
@@ -743,6 +481,179 @@ proc parse_params {} {
 	}
 }
 
+#
+# skeleton build routine - uses abstracted build methods that perform specific
+# steps for a given build type
+#
+# 1. cd to <img_src>
+# 2. spawn bash shell
+# 3. bld_pre (e.g. mrproper)
+# 4. bld_config (e.g. make <img_name>_defconfig)
+# 5. bld_image (e.g. make uImage)
+# 6. bld_post (e.g. copy to <img_dst>)
+# 7. close shell
+#
+proc build_main {} {
+
+	global confirm no_clean send_slow img_src
+	global build_prompt build_sid build_timeout
+
+	##
+	## validate build environment
+	##
+	if ![bld_valid_env] {
+		exit1
+	}
+	
+	##
+	## ask user before proceeding
+	##
+	if {$confirm == "yes"} {
+		show_params
+		if ![ask_yesno "confirm to start execution? "] {
+			return	
+		}
+	}
+
+	p_banner "Starting image build, please wait." #
+
+	set cur_dir [pwd]
+	cd $img_src
+
+	##
+	## spawn bash shell on host 
+	##
+	
+	# assign spawn_id to global var so the shell is available outside 
+	# this procedure, set other sending params
+	set build_prompt "\\$\\ "
+	set build_sid [host_bash_shell $build_prompt]
+	set send_slow {1 .050}
+	# expect buffer size
+	match_max 16384
+
+	##
+	## bld_pre
+	##
+	if {$no_clean == "yes"} {
+		p_warn "no-clean build: skipping build preparation phase"
+	} else {
+		if ![bld_pre] {
+			exit1
+		}
+	}
+
+	##
+	## bld_config
+	##
+	if {$no_clean == "yes"} {
+		p_warn "no-clean build: skipping build config phase"
+	} else {
+		if ![bld_config] {
+			exit1
+		}
+	}
+
+	##
+	## bld_image
+	##
+	if ![bld_image $build_timeout] {
+		exit1
+	}
+
+	# bld_post can possibly do different things on the host, so let's get
+	# back to our pwd once we're done with building the image
+	cd $cur_dir
+	
+	##
+	## bld_post
+	##
+	if ![bld_post] {
+		exit1
+	}
+
+	##
+	## close spawned shell process
+	##
+	process_close $build_sid
+
+	p_banner "Finished image build, thanks for patience." #
+}
+
+#
+# reads build methods implementation from external exp file: looks for
+# bld_<img_type>.exp file and source if exists
+#
+#
+# each method:
+#   - assumes the shell is already open and available via globals:
+#     $build_sid (spawn_id), $build_prompt
+#
+#   - returns 0/1 upon fail/success
+#
+#
+#
+# build methods:
+#
+# bld_valid_env
+#   valid_linux_env 2 4, valid_uboot_env etc.
+# 
+# bld_pre
+#   mrproper
+#
+# bld_config
+#   make ...config
+#   [make oldconfig]
+#   [make dep]
+#
+# bld_image
+#   make uImage
+#   make all
+#
+# bld_post
+#   copy to dest dir
+#
+# implementation of these methods is in individual files:
+#
+# bld_<img_type>.exp - e.g. bld_linux-26.exp, bld_linux-24.exp, bld_uboot.exp
+#
+proc read_build_methods {t} {
+	global BASE_DIR
+	set rv 1
+	
+	set f "$BASE_DIR/bld_$t.exp"
+	if ![valid_file $f] {
+		p_err "build type not supported: '$t', build methods\
+		implementation file not found?!"
+		return 0
+	}
+
+	if [catch {source $f} err] {
+		p_err "problems with source'ing '$f'?!"
+		puts "  $err"
+		set rv 0
+	} else {
+		p_verb "using build methods implemented in file: '$f'"
+
+		# check if the implementation file has all required methods
+		set methods {
+			bld_valid_env bld_pre bld_config bld_image bld_post
+		}
+		foreach m $methods {
+			if ![proc_exists $m] {
+				p_err "build method '$m' is not implemented\
+				in file '$f'"
+				set rv 0
+			}
+		}
+		if $rv {
+			p_verb "all build methods in place, OK"
+		}
+	}
+
+	return $rv
+}
+
 
 set argc [llength $argv]
 
@@ -756,10 +667,18 @@ opt_create_globals
 ##
 parse_params
 
+
 ##
-## run build handler
+## find get build methods implementation
 ##
-build_handler
+if ![read_build_methods $img_type] {
+	exit1
+}
+
+##
+## get started
+##
+build_main
 
 ##
 ## exit successfully if we got this far
