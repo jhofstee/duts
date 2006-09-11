@@ -1,0 +1,202 @@
+#
+# (C) Copyright 2006
+# Wolfgang Denk, DENX Software Engineering, wd@denx.de
+#
+#
+# implementation of bld_ methods for building Linux 2.4 kernel image
+#
+
+proc bld_valid_env {} {
+	
+	return [valid_linux_env 2 4]
+}
+
+proc bld_pre {} {
+	global build_sid build_prompt
+	
+	p_banner "make mrproper" #
+	return [make_mrproper $build_sid $build_prompt]
+}
+
+proc bld_config {{to 180}} {
+
+	global build_sid build_prompt img_name
+	set spawn_id $build_sid
+	set p $build_prompt
+	set timeout $to
+	set rv 1
+
+	##
+	## make <target>_config
+	##
+	set c "make $img_name"
+	append c "_config"
+	p_banner $c *
+	send -s "$c\r"
+	#
+	# error strings:
+	# make: *** No rule to make target `dfdsf'.  Stop.
+	#
+	expect {
+		timeout {
+			p_err "timed out after '$c' command"
+			set rv 0
+		}
+		-re "No\\ rule\\ to\\ make\\ target.*Stop" {
+			p_err "no target"
+			set rv 0
+		}
+		-re ".+$p$" {
+			p_verb "command '$c' OK"
+		}
+	}
+	if !$rv {
+		return $rv
+	}
+
+	##
+	## make oldconfig
+	##
+	set c "make oldconfig"
+	p_banner $c *
+	send -s "$c\r"
+	#
+	# closing strings:
+	# *** End of Linux kernel configuration.
+	# *** Check the top-level Makefile for additional configuration.
+	# *** Next, you must run 'make dep'.
+	#
+	# error strings:
+	# make: *** No rule to make target `dfdsf'.  Stop.
+	#
+	expect {
+		timeout {
+			p_err "timed out after '$c' command"
+			set rv 0
+		}
+		-re ".*\\ \\(NEW\\)\\ " {
+			send -s "\r"
+			exp_continue
+		}
+		-re "No\\ rule\\ to\\ make\\ target.*Stop" {
+			p_err "no target"
+			set rv 0
+		}
+		-re "End\\ of\\ Linux\\ kernel\\ configuration.*$p$" {
+			p_verb "command '$c' OK"
+		}
+	}
+	if !$rv {
+		return $rv
+	}
+
+	##
+	## make dep
+	##
+	set c "make dep"
+	p_banner $c *
+	send -s "$c\r"
+	#
+	# closing strings:
+	# scripts/mkdep -- init/*.c > .depend
+	#
+	expect {
+		timeout {
+			p_err "timed out after '$c' command"
+			set rv 0
+		}
+		-re "scripts/mkdep\\ --\\ init/\\*\\.c\\ >\\ \\.depend.*$p$" {
+			p_verb "command '$c' OK"
+		}
+		-re ".*:\\ error:.*" {
+			send_user -- "\n"
+			p_err "make failed for 'dep' target"
+			set rv 0
+		}
+		-re ".*make.+\\ Error\\ .*" {
+			send_user -- "\n"
+			p_err "make failed for 'dep' target"
+			set rv 0
+		}
+		-re "No\\ rule\\ to\\ make\\ target.*Stop" {
+			p_err "no target"
+			set rv 0
+		}
+	}
+
+	return $rv
+}
+
+
+proc bld_image {{to 600}} {
+
+	global build_sid build_prompt img_name
+	set spawn_id $build_sid
+	set p $build_prompt
+	set timeout $to
+	set rv 1
+	
+	set c "make uImage"
+	p_banner $c *
+	send -s "$c\r"
+	#
+	# closing strings:
+	# ln -sf vmlinux.UBoot images/uImage
+	# rm -f ./mkuboot
+	#
+	# error strings:
+	# make: *** No rule to make target `dfdsf'.  Stop.
+	# host/ehci-q.c:185: error: invalid storage class for func
+	# make[3]: *** [host/ehci-hcd.o] Error 1
+	#
+	# make[2]: *** [arch/powerpc/kernel/vdso32/gettimeofday.o] Error 1
+	# make[1]: *** [arch/powerpc/kernel/vdso32] Error 2
+	# make: *** [arch/powerpc/kernel] Error 2
+	#
+	expect {
+		timeout {
+			p_err "timed out after '$c' command"
+			set rv 0
+		}
+		-re "No\\ rule\\ to\\ make\\ target.*Stop" {
+			p_err "no target"
+			set rv 0
+		}
+		-re ".*:\\ error:.*" {
+			send_user -- "\n"
+			p_err "build failed"
+			set rv 0
+		}
+		-re ".*make.+\\ Error\\ .*" {
+			send_user -- "\n"
+			p_err "build failed"
+			set rv 0
+		}
+		-re ".*ln\\ -sf\\ vmlinux\\.UBoot\\ images/uImage.*$p$" {
+			p_verb "command '$c' OK"
+		}
+	}
+
+	return $rv
+}
+
+proc bld_post {} {
+
+	global build_arch img_dst img_src
+
+	##
+	## copy image to the desired location
+	##
+	p_banner "copy image to destination" *
+	set img_file "$img_src/arch/$build_arch/boot/images/uImage"
+	if {$img_dst == ""} {
+		p_verb "no destination location specified, nothing to do.."
+	} else {
+		send_user -- "Copying image to '$img_dst'\n"
+		if ![host_copy $img_file $img_dst] {
+			return 0
+		}
+		p_verb "copied '$img_file' to '$img_dst'"
+	}
+	return 1
+}
