@@ -37,8 +37,9 @@ source "$BASE_DIR/include/lib.tcl"
 # ./get_src [empty params] - uses default config
 #
 
-
-# default values
+##
+## default values
+##
 set verbose "no"
 set confirm "yes"
 
@@ -97,6 +98,125 @@ proc show_params {} {
 }
 
 #
+# checks if the path to repo $r is accessible and resembles GIT, returns 0/1
+#
+proc git_valid_repo {r} {
+
+	set rv 1
+
+	if ![valid_dir $r] {
+		p_verb "problems accessing source GIT repo: '$r'?!"
+		set rv 0
+	} else {
+		# check if .git present in the src dir
+		if ![file exists $r/.git] {
+			p_verb "doesn't look like GIT repo: '$r'?!"
+			set rv 0
+		}
+	}
+	
+	return $rv
+}
+
+#
+# checks the src GIT repo specified, returns 0/1.
+#
+# GIT src can be specified in the following conventions:
+# "-s /home/git/ -n u-boot"
+#
+# "-s /home/git/u-boot"
+#
+# after this f. returns successfully we have a final effective path to the GIT
+# repo directory in global $repo_src e.g. /home/git/u-boot,
+# /home/git/linux-2.6-denx etc. and a repo name alone in the $repo_name e.g. 
+# u-boot, linux-2.6-denx etc.
+#
+proc git_valid_src {} {
+
+	global repo_src repo_name
+	set rv 1
+
+	# default dir (used when specified null)
+	set repo_src_def "."
+
+	set repo_src [string trimright $repo_src "/"]
+
+	if {($repo_src == "") && ($repo_name == "")} {
+		p_err "source repo parameters null, use -s/-n options to\
+		specify GIT source location"
+		return 0
+	}
+	
+	if {$repo_src == ""} {
+		set repo_src $repo_src_def 
+	}
+
+	if [git_valid_repo $repo_src] {
+		# we have a legitimate GIT repo, use it
+		if {$repo_name != ""} {
+			p_verb "redundant GIT repo specification: repo src\
+			location is used: '$repo_src', and \[redundant\] name\
+			specification is discarded: '$repo_name'"
+		} else {
+			# everything ok, set current $repo_name for later use
+			set repo_name [file tail $repo_src]
+		}
+	} else {
+		if {$repo_name == ""} {
+			set rv 0
+		} else {
+			set repo_src "$repo_src/$repo_name"
+			if ![git_valid_repo $repo_src] {
+				set rv 0
+			}
+		}
+	}
+	if {!$rv} {
+		p_err "problems accessing GIT repo: '$repo_src'"
+	}
+
+	return $rv
+}
+
+#
+# checks GIT dest location - it can be specified in the following conventions:
+#
+# "-d <some_dir>/<name>" e.g. for U-Boot: -d ~/u-boot.mycopy
+#
+# "-d <some_dir>" e.g. -d ~
+#
+# the specification is checked against:
+#   - already exists?
+#   - parent dir writable?
+#
+# returns 0/1
+#
+proc git_valid_dst {} {
+
+	global repo_dst repo_name
+	set rv 1
+
+	if {$repo_dst == ""} {
+		# global repo_name is guranteed to have a valid non-empty value
+		# after the repo source specification is validated
+		set repo_dst "./$repo_name"
+	} else {
+		set dst_dir [file dirname $repo_dst]
+		set dst_file [file tail $repo_dst]
+		if ![valid_dir $dst_dir 1] {
+			p_err "problems accessing GIT destination directory?!"
+			set rv 0
+		}
+	}
+	if [file exists $repo_dst] {
+		p_err "destination location already exists: '$repo_dst'?!"
+		set rv 0
+	}
+
+	return $rv
+}
+
+#
 # handler function to perform GIT operations to get local repo of
 # the sources
 #
@@ -120,34 +240,18 @@ proc do_git {} {
 	##
 	## validate git source repo location
 	##
-	if ![regexp {/$} $repo_src] {
-		set repo_src "$repo_src/"
+	if ![git_valid_src] {
+		exit1
 	}
-	set src $repo_src$repo_name
-	if ![valid_dir $src] {
-		p_err "Problems accessing '$src' source GIT repo?!" 1
-	}
-	p_verb "Working with source repo: '$src'"
+	p_verb "Working with source repo: '$repo_src'"
 
 	##
 	## validate git destination location
-	## - already exists?
-	## - parent dir writable?
 	##
-	if {$repo_dst != ""} {
-		set dst_dir [file dirname $repo_dst]
-		set dst_file [file tail $repo_dst]
-		if ![valid_dir $dst_dir 1] {
-			p_err "problems accessing destination directory?!" 1
-		}
-		set tmp $repo_dst
-	} else {
-		set tmp [file tail $src]
-		set tmp "./$tmp"
+	if ![git_valid_dst] {
+		exit1
 	}
-	if [file exists $tmp] {
-		p_err "destination location '$tmp' already exists!" 1
-	}
+	p_verb "Working with destination repo: '$repo_dst'"
 
 	##
 	## ask user before proceeding
@@ -164,7 +268,7 @@ proc do_git {} {
 	## prepare cg-clone command: cg-clone <repo_src> <repo_dst>
 	##  
 	set c $cmd_co
-	set c_arg $src
+	set c_arg $repo_src
 	if {$repo_dst != ""} {
 		set c_arg "$c_arg $repo_dst"
 	}
@@ -305,8 +409,7 @@ proc scm_handler {} {
 #
 # TODO config file
 # TODO support for setting params via env vars
-# TODO built-in defaults
-
+#
 
 #
 # parses command line parameters supplied by the user
