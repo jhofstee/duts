@@ -73,9 +73,9 @@ set TIMEOUT 10
 #
 set opt_table {
 	{img_type "t" "linux-26"}
-	{img_name "n" "TQM834x_defconfig"}
-	{img_src "s" "linux-2.6-denx"}
-	{img_dst "d" "/tftpboot/tqm834x/uImage-26-raj"}
+	{img_name "n" "TQM834x"}
+	{img_src "s" ""}
+	{img_dst "d" "/tftpboot/tqm834x/"}
 
 	{build_timeout  "to" "600"}
 	{build_tools "m" "/opt/eldk-4.0/usr/bin/"}
@@ -152,11 +152,12 @@ proc check_dst {dst {ovr "0"} {dn "uImage"}} {
 				set d "$dst/$dn"
 				global overwrite
 				set o [expr {($overwrite == "yes") ? 1 : 0}]
-				set rv [check_dst $d $o]
+				set rv [check_dst $d $o $dn]
 			}
 
 		} default {
-			p_err "file type '$ft' not supported: '$dst'"
+			p_err "file type '$ft' not supported: '$dst'. Check\
+			your -d value"
 			set rv 0
 		}
 		
@@ -176,226 +177,6 @@ proc check_dst {dst {ovr "0"} {dn "uImage"}} {
 			} else {
 				p_verb "destination '$dst' OK"
 			}
-		}
-	}
-
-	return $rv
-}
-
-#
-# checks linux version tree: takes a peek in the main Makefile for version
-# strings; returns 0/1 if doesn't/match
-#
-# v: version
-# p: patchlevel
-#
-proc check_linux_ver {v p} {
-
-	global img_src
-
-	set rv 1
-	set cmd "grep"
-	set cmd_arg "-r \"VERSION = $v\" $img_src/Makefile"
-
-	if [catch {set o [eval exec $cmd $cmd_arg]}] {
-		p_verb "version does not match"
-        	set rv 0
-	}
-
-	set cmd_arg "-r \"PATCHLEVEL = $p\" $img_src/Makefile"
-	if [catch {set o [eval exec $cmd $cmd_arg]}] {
-		p_verb "patchlevel does not match"
-        	set rv 0
-	}
-
-	if {!$rv} {
-		p_verb "Linux version '$v.$p' do not match, check your sources"
-	} else {
-		p_verb "Linux tree version '$v.$p' OK"
-	}
-
-	return $rv
-}
-
-#
-# checks linux config file based on the config name core stored in $img_name,
-# returns 0/1 if not/found according file
-#
-proc check_linux_config {} {
-
-	global img_src img_name build_arch
-	set rv 1
-	
-	set c $img_name
-	append c "_defconfig"
-	set cf "$img_src/arch/$build_arch/configs/$c"
-	if {([file exists $cf]) && ([file readable $cf])} {
-		p_verb "found config file '$cf'"
-	} else {
-		p_err "no kernel config file: '$cf'"
-		set rv 0
-	}
-
-	return $rv
-}
-
-#
-# validates environment for kernel build:
-#
-# 1. check tools
-#   - path makes sense, gcc, ld etc. exist?
-#
-# 2. check src dir
-#   - exists, writable?
-#   - looks like a kernel tree?
-#
-# 3. check dst
-#   - if dir: exists, writable?
-#   - if endfile: already exists?
-#
-# 4. check kernel config file
-#   - exists _defconfig
-#
-# v: version
-# p: patchlevel
-#
-proc valid_linux_env {v p} {
-
-	global img_type img_name img_src img_dst
-	global build_tools build_arch build_cross
-	global build_timeout TIMEOUT overwrite no_clean
-	global env
-
-	## 1. check tools
-
-	##
-	## set env vars: ARCH, CROSS_COMPILE
-	##
-	set env(ARCH) $build_arch
-	set env(CROSS_COMPILE) $build_cross
-
-	##
-	## set PATH so the desired toolchain is available
-	##
-	if ![set_host_tool_path $build_tools] {
-        	p_err "path to the build tools not accessible: '$p'?!"
-		return 0
-	}
-
-	##
-	## check tools availability:
-	##  - a selected tool from cross build suite, let's have a look at 
-	##    gcc and ld
-	##
-	set cmd_gcc $build_cross
-	append cmd_gcc "gcc"
-	set cmd_ld $build_cross
-	append cmd_ld "ld"
-
-	set tools [list $cmd_gcc $cmd_ld]
-	if ![check_host_tools tools] {
-		return 0
-	}
-	p_verb "all tools in place, proceeding"
-
-
-	## 2. check src dir
-
-	##
-	## validate source dir
-	##
-	##  - exists, writable?
-	##  - looks like a kernel tree?
-	##
-
-	# strip trailing slash
-	set img_src [string trimright $img_src "/"]
-	if ![valid_dir $img_src 1] {
-		p_err "Problems accessing source dir?!"
-		return 0
-	}
-
-	if ![check_linux_ver $v $p] {
-		p_err "Doesn't look like Linux $v.$p source tree: '$img_src'?!\
-		Check your -t value."
-		return 0
-	}
-	p_verb "working with source dir: '$img_src'"
-
-	## 3. check dst
-
-	##
-	## validate  destination location
-	## - if dir: exists, writable?
-	## - if endfile: already exists?
-	##
-	set o [expr {($overwrite == "yes") ? 1 : 0}]
-	if ![check_dst $img_dst $o] {
-		return 0
-	}
-	
-	## 4. check kernel config file 
-	##
-	## - exists <name>_config, <name>_defconfig
-
-	#
-	# if user-provided kernel config name was '*.config' we only save the
-	# core of the name for further processing when it will be personalized
-	# with _config or _defconfig suffix depending on context. This is 
-	# mainly due to different handling of config name in Linux 2.4
-	# (make <name>_config) vs. 2.6 (make <name>_defconfig)
-	# e.g. for TQM834x_defconfig save only the 'TQM834x' part
-	#
-	regexp {(.+)(_.*config)} $img_name in1 in2 in3]
-	if [info exists in1] {
-		set img_name $in2
-	}
-
-	if ![check_linux_config] {
-		return 0
-	}
-	p_verb "using '$img_name' kernel config"
-	
-	##
-	## verify if we can skip configuration steps
-	##
-	if {$no_clean == "yes"} {
-		if [file exists $img_src/.config] {
-			p_verb "performing 'no-clean' build, config steps will\
-			be skipped"
-		} else {
-			p_verb "'no-clean' build specified but no .config\
-			file found so doing full build anyway..."
-			set no_clean "no"
-		}
-	}
-
-	return 1
-}
-
-proc make_mrproper {sid p {to 180}} {
-	
-	set spawn_id $sid
-	set rv 1
-
-	set timeout $to
-	set c "make mrproper"
-	send -s "$c\r"
-	#
-	# error strings:
-	# make: *** No rule to make target `dfdsf'.  Stop.
-	#
-	expect {
-		timeout {
-			p_err "timed out after '$c' command"
-			set rv 0
-		}
-		-re "No\\ rule\\ to\\ make\\ target.*Stop" {
-			p_err "no target"
-			set rv 0
-		}
-		-re ".*$p$" {
-			p_verb "command '$c' OK"
 		}
 	}
 

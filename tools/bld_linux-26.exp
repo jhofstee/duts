@@ -1,6 +1,19 @@
 #
+# (C) Copyright 2006
+# Wolfgang Denk, DENX Software Engineering, wd@denx.de
+#
+#
 # implementation of bld_ methods for building Linux 2.6 kernel image
 #
+
+#
+# source common file
+#
+set _f "$BASE_DIR/bld_linux.exp"
+if [catch {source $_f} err] {
+	p_err "problems with source'ing '$_f'?!"
+	exit 1
+}
 
 proc bld_valid_env {} {
 	

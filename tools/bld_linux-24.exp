@@ -6,6 +6,15 @@
 # implementation of bld_ methods for building Linux 2.4 kernel image
 #
 
+#
+# source common file
+#
+set _f "$BASE_DIR/bld_linux.exp"
+if [catch {source $_f} err] {
+	p_err "problems with source'ing '$_f'?!"
+	exit 1
+}
+
 proc bld_valid_env {} {
 	
 	return [valid_linux_env 2 4]
