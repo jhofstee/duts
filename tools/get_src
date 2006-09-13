@@ -13,7 +13,6 @@ set BASE_DIR "/home/raj/git/duts/"
 ##
 source "$BASE_DIR/include/lib.tcl"
 
-
 #
 # ./get_src [<config>] [-t <SCM type>] [-n <repo_name>] [-s <repo_src>] 
 #	[-d <repo_dst>] [-p <other params>] [-to <timeout>] [-nc]
@@ -23,7 +22,7 @@ source "$BASE_DIR/include/lib.tcl"
 # [-n <repo_name>] - name in the repo (u-boot, linuxppc_2_4_devel, linux-2.6-denx etc.)
 # [-s <repo_src>] - repo location (/home/git)
 # [-d <repo_dst>] - dest location (./u-boot_copy etc.)
-# [-p <other repo params>]
+# [-p <other repo params>] (private data e.g. branch ID for 'git' SCM type)
 # [-to <timeout>] - timeout in seconds for repo op to complete
 #
 # [-b]	- batch mode, no user confirmation
@@ -32,6 +31,8 @@ source "$BASE_DIR/include/lib.tcl"
 #
 #  examples:
 # ./get_src -n linuxppc_2_4_devel -t git -s /home/git/ -d linuxppc_2_4_devel_copy -p [branchID]
+#
+# ./get_src -s /git/duts/ -d old_duts -p 373d8583b609f378dd6b81d7d45aef97e6ada526
 #
 # ./get_src linux24 - uses 'linux24' predefined config
 # ./get_src [empty params] - uses default config
@@ -47,6 +48,9 @@ set scm_config ""
 set scm_handler ""
 
 set TIMEOUT 10
+
+set shell_prompt ""
+set shell_sid ""
 
 #
 # table of supported SCM schemes, each element is
@@ -157,6 +161,7 @@ proc git_valid_src {} {
 			p_verb "redundant GIT repo specification: repo src\
 			location is used: '$repo_src', and \[redundant\] name\
 			specification is discarded: '$repo_name'"
+			set repo_name ""
 		} else {
 			# everything ok, set current $repo_name for later use
 			set repo_name [file tail $repo_src]
@@ -217,21 +222,181 @@ proc git_valid_dst {} {
 }
 
 #
+# checks if supplied param valid for GIT object ID, returns 0/1
+#
+proc git_valid_params {} {
+
+	global repo_params repo_src
+
+	if {$repo_params == ""} {
+		return 1
+	}
+	
+	# git-cat-file -t 887e2ec9ecf49366a60a49b32b73825804909865
+	# commit
+	if {!(([string length $repo_params] == 40) &&\
+	      ([regexp {^[0-9a-fA-F]+$} $repo_params]))} {
+		p_err "supplied value doesn't look like a GIT object ID:\
+		'$repo_params'"
+		return 0
+	}
+
+	set rv 1
+	set cur_dir [pwd]
+        cd $repo_src
+
+	set c "git-cat-file -t $repo_params"
+	if [catch {set o [eval exec $c]}] { 
+		p_err "GIT object ID: '$repo_params' not found in repo:\
+		'$repo_src'"
+		set rv 0
+
+	} else {
+		if {$o != "commit"} {
+			p_err "supplied ID is not 'commit' type: '$o'"
+			set rv 0
+		} else {
+			p_verb "GIT ID ok: '$repo_params'"
+		}
+	}
+
+	cd $cur_dir
+	return $rv 
+}
+
+
+#
+# checks out a tree to object ID in $repo_params, creates a new branch for this
+# purpose
+#
+proc git_branch {} {
+
+	global repo_params repo_dst
+
+	if {$repo_params == ""} {
+		return 1
+	}
+
+	set rv 1
+
+	set cur_dir [pwd]
+        cd $repo_dst
+
+	##
+	## create branch and check out to it
+	##
+
+	# branch name
+	set bn "DUTS-internal"
+
+	set c "git-checkout -f -b $bn $repo_params"
+	p_banner $c *
+	if [catch {set o [eval exec $c]}] {
+		p_err "failed command: '$c'"
+		set rv 0
+	}
+
+	# TODO what to do with this created branch? issue an info warning?
+	cd $cur_dir
+	return $rv
+}
+
+#
+# performs cg-clone command, returns 0/1 upon fail/success
+#
+proc git_clone {} {
+
+	global shell_prompt shell_sid scm_timeout
+	global repo_src repo_dst
+	
+	set rv 1
+	set p $shell_prompt
+	set spawn_id $shell_sid
+
+	##
+	## prepare cg-clone command: cg-clone <repo_src> <repo_dst>
+	##  
+	set c "cg-clone"
+	set c_arg $repo_src
+	if {$repo_dst != ""} {
+		set c_arg "$c_arg $repo_dst"
+	}
+
+	##
+	## execute command
+	##  
+	set timeout $scm_timeout 
+	p_banner "$c $c_arg" *
+	send -s "$c $c_arg\r"
+	#
+	# strings:
+	# ...
+	#Fetching head...^M
+	#Fetching objects...^M
+	#Fetching tags...^M
+	#...
+	#New branch: f60ba0d35e13e9dcf839d4563f9436d07468b1ef^M
+	#Cloned to u-boot/ (origin /home/git/u-boot available as branch "origin")^M
+	#
+	#
+	#cg-clone: u-boot/ already exists
+	#
+	expect {
+		timeout {
+			p_err "timed out after cg-clone"
+			set rv 0
+		}
+		-re "already exists.*$p$" {
+			#
+			# this actually shouldn't happen as we checked earlier
+			# for such condition, but let's handle it still - we're
+			# in a multi-user environment after all and things can
+			# happen behind our back...
+			#
+			p_err "repo already cloned"
+			set rv 0
+		}
+		-re ".*Fetching\\ head\\.\\.\\." {
+			p_verb "fetching 1: heads"
+			expect {
+				timeout {
+					p_err "timed out on 'objects'"
+					set rv 0
+				}
+				-re ".*Fetching\\ objects\\.\\.\\." {
+					p_verb "fetching 2: objects"
+					expect {
+						timeout {
+							p_err "timed out on cloning"
+							set rv 0
+						}
+						-re ".*Cloned\\ to\\ .*$p$" {
+							p_verb "Cloning OK"
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return $rv
+}
+
+#
 # handler function to perform GIT operations to get local repo of
 # the sources
 #
 proc do_git {} {
 
 	global repo_type repo_name repo_src repo_dst repo_params
-	global scm_timeout confirm TIMEOUT
+	global scm_timeout confirm TIMEOUT send_slow
+	global shell_prompt shell_sid
 
 	##
 	## check tools availability:
 	##  - SCM (cogito)
 	##
-	set cmd_co "cg-clone"
-
-	set tools [list $cmd_co]
+	set tools [list "cg-clone" "git-checkout" "git-branch"]
 	if ![check_host_tools tools] {
 		exit1
 	}
@@ -254,6 +419,14 @@ proc do_git {} {
 	p_verb "Working with destination repo: '$repo_dst'"
 
 	##
+	## validate git parameters
+	##
+	if ![git_valid_params] {
+		exit1
+	}
+	p_verb "Using supplied param: '$repo_params'"
+
+	##
 	## ask user before proceeding
 	##
 	if {$confirm == "yes"} {
@@ -265,91 +438,41 @@ proc do_git {} {
 	p_banner "Starting GIT operation, please wait..." "#"
 
 	##
-	## prepare cg-clone command: cg-clone <repo_src> <repo_dst>
-	##  
-	set c $cmd_co
-	set c_arg $repo_src
-	if {$repo_dst != ""} {
-		set c_arg "$c_arg $repo_dst"
-	}
-
-	##
 	## spawn host shell
 	##
-	set p "\\$\\ "
-	set spawn_id [host_bash_shell $p]
 
-	##
-	## execute command
-	##  
-	#
-	# strings:
-	# ...
-	#Fetching head...^M
-	#Fetching objects...^M
-	#Fetching tags...^M
-	#...
-	#New branch: f60ba0d35e13e9dcf839d4563f9436d07468b1ef^M
-	#Cloned to u-boot/ (origin /home/git/u-boot available as branch "origin")^M
-	#
-	#
-	#cg-clone: u-boot/ already exists
-	#
-
+	# assign spawn_id to global var so the shell is available outside 
+        # this procedure, set other sending params
+	set shell_prompt "\\$\\ "
+	set shell_sid [host_bash_shell $shell_prompt]
 	# expect buffer size
 	match_max 16384
 	set send_slow {1 .050}
 
-	set errors 0
-	set timeout $scm_timeout 
-	send -s "$c $c_arg\r"
-	expect {
-		timeout {
-			p_err "timed out after cg-clone"
-			set errors 1
-		}
-		-re "already exists.*$p$" {
-			#
-			# this actually shouldn't happen as we checked earlier
-			# for such condition, but let's handle it still - we're
-			# in a multi-user environment after all and things can
-			# happen behind our back...
-			#
-			p_err "repo already cloned"
-			set errors 1
-		}
-		-re ".*Fetching\\ head\\.\\.\\." {
-			p_verb "fetching 1: heads"
-			expect {
-				timeout {
-					p_err "timed out on 'objects'"
-					set errors 1
-				}
-				-re ".*Fetching\\ objects\\.\\.\\." {
-					p_verb "fetching 2: objects"
-					expect {
-						timeout {
-							p_err "timed out on cloning"
-							set errors 1
-						}
-						-re ".*Cloned\\ to\\ .*$p$" {
-							p_verb "Cloning OK"
-						}
-					}
-				}
-			}
-		}
+	##
+	## checkout
+	##
+	if ![git_clone] {
+		process_close $shell_sid
+		exit1
+	}
+
+	##
+	## handle branch
+	##
+	if ![git_branch] {
+		p_warn "repo '$repo_src' cloned successfully to\
+		'$repo_dst' but subsequent GIT branch operation(s)\
+		failed. Therefore the repo may be in inconsistent\
+		state, please check and manage this manually."
+		process_close $shell_sid
+		exit1
 	}
 
 	##
 	## close spawned process
 	##
-	process_close $spawn_id
-	set spawn_id -1
-
-	if {$errors > 0} {
-		exit1
-	}
+	process_close $shell_sid
 
 	p_banner "Finished GIT operation, thanks for patience." "#"
 }
