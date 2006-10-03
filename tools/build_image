@@ -75,7 +75,7 @@ set opt_table {
 	{img_type "t" "linux-26"}
 	{img_name "n" "TQM834x"}
 	{img_src "s" ""}
-	{img_dst "d" "/tftpboot/tqm834x/"}
+	{img_dst "d" ""}
 
 	{build_timeout  "to" "600"}
 	{build_tools "m" "/opt/eldk-4.0/usr/bin/"}
@@ -280,14 +280,7 @@ proc build_main {} {
 	global build_prompt build_sid build_timeout
 
 	##
-	## validate build environment
-	##
-	if ![bld_valid_env] {
-		exit1
-	}
-	
-	##
-	## ask user before proceeding
+	## show params supplied and ask user before proceeding
 	##
 	if {$confirm == "yes"} {
 		show_params
@@ -296,6 +289,13 @@ proc build_main {} {
 		}
 	}
 
+	##
+	## validate build environment
+	##
+	if ![bld_valid_env] {
+		exit1
+	}
+	
 	p_banner "Starting image build, please wait." #
 
 	set cur_dir [pwd]

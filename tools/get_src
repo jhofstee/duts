@@ -70,7 +70,7 @@ set scm_supported {
 # {<global_var_name> "<opt_string>" "<default_value>"}
 set opt_table {
 	{repo_type "t" "git"}
-	{repo_name "n" "u-boot"}
+	{repo_name "n" ""}
 	{repo_src "s" "/home/git/"}
 	{repo_dst "d" ""}
 	{repo_params "p" ""}
@@ -161,7 +161,9 @@ proc git_valid_src {} {
 			p_verb "redundant GIT repo specification: repo src\
 			location is used: '$repo_src', and \[redundant\] name\
 			specification is discarded: '$repo_name'"
-			set repo_name ""
+
+			# reset repo name to the actually used
+			set repo_name [file tail $repo_src]
 		} else {
 			# everything ok, set current $repo_name for later use
 			set repo_name [file tail $repo_src]
@@ -202,7 +204,7 @@ proc git_valid_dst {} {
 	set rv 1
 
 	if {$repo_dst == ""} {
-		# global repo_name is guranteed to have a valid non-empty value
+		# global repo_name is guaranteed to have a valid non-empty value
 		# after the repo source specification is validated
 		set repo_dst "./$repo_name"
 	} else {
@@ -393,6 +395,16 @@ proc do_git {} {
 	global shell_prompt shell_sid
 
 	##
+	## show supplied params and ask user before proceeding
+	##
+	if {$confirm == "yes"} {
+		show_params
+		if ![ask_yesno "confirm to start execution? "] {
+			exit
+		}
+	}
+
+	##
 	## check tools availability:
 	##  - SCM (cogito)
 	##
@@ -427,14 +439,8 @@ proc do_git {} {
 	p_verb "Using supplied param: '$repo_params'"
 
 	##
-	## ask user before proceeding
+	## validations passed, let's do something real
 	##
-	if {$confirm == "yes"} {
-		show_params
-		if ![ask_yesno "confirm to start execution? "] {
-			exit
-		}
-	}
 	p_banner "Starting GIT operation, please wait..." "#"
 
 	##
