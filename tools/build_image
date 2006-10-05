@@ -3,43 +3,11 @@
 # (C) Copyright 2006
 # Wolfgang Denk, DENX Software Engineering, wd@denx.de
 #
+# This script builds image of Linux kernel or U-Boot according to user
+# supplied parameters. Please use -h for help.
+# 
 #
-
-set BASE_DIR "/home/raj/git/duts/tools"
-
-
-##
-## include helper procedures
-##
-source "$BASE_DIR/../include/lib.tcl"
-
-
-#
-# ./build_image is called with the following params:
-#
-# [<config>] - config label
-# [-t <build_type>] - id of supported build (linux-24, linux-26, uboot)
-# [-n <target_name>] - TQM834x_config, TQM834x_defconfig 
-# [-s <img_src>] - src tree location (/home/$USER/linuxppc_2_4_devel)
-# [-d <img_dst>] - dest image location: can be filename or directory (image is
-#                 copied there with default name i.e. uImage)
-#                 (/tftpboot/tqm834x/uImage-24-test, /tftpboot/tqm834x/)
-# [-to <timeout>] - timeout in seconds for build to complete
-#
-# [-m <build_tools>] - path to build tools (/opt/eldk-4.0/usr/bin/)
-# [-a <build_arch>] - build arch (ppc)
-# [-c <build_cross>] - cross build prefix (ppc_6xx-)
-#
-# [-o] - overwrite destination file, if exists
-# [-nc] - 'no clean' build - from already configured source (no mrproper, 
-#         config etc. targets, only uImage)
-#
-# [-b]	- batch mode, no user confirmation
-# [-v]	- verbose
-# [-h]  - help
-#
-#
-#  examples:
+#  usage examples:
 # ./build_image -n TQM834x_config -t linux-24 -s /home/raj/linuxppc_2_4_devel \
 #               -d /tftpboot/tqm834x -to 600
 #
@@ -47,13 +15,43 @@ source "$BASE_DIR/../include/lib.tcl"
 #               -d /tftpboot/tqm834x/uImage-26-raj -to 600
 #
 
-proc usage {} {
-	#TODO
-	p_banner "USAGE  "
-	exit
+
+##
+## locate our dependency base dir  
+##
+
+# we have to do everything by hand as we are trying to load some helper
+# routines library here, so cannot rely on it yet!
+set dep_env "DUTS_BASE_DIR"
+set dep_base_dir "."
+if {[array get env $dep_env] > 0} {
+	set dep_base_dir $env($dep_env)
+	if {$dep_base_dir == ""} {
+		set dep_base_dir "."
+	} else {
+		set dep_base_dir [string trimright $env($dep_env) "/"]
+	}
 }
 
-# default values
+##
+## include helper lib.tcl 
+##
+set lib "$dep_base_dir/include/lib.tcl"
+if [catch {source $lib} err] {
+	puts "ERROR: $err"
+	puts "$dep_env env var probably not set correctly: '$dep_base_dir'."
+	exit 1
+}
+
+##
+## discover our base dir
+##
+set base_dir [file dirname $argv0]
+
+
+##
+## default values
+##
 set verbose "no"
 set confirm "yes"
 set overwrite "no"
@@ -81,6 +79,47 @@ set opt_table {
 	{build_tools "m" "/opt/eldk-4.0/usr/bin/"}
 	{build_arch "a" "ppc"}
 	{build_cross "c" "ppc_6xx-"}
+}
+
+#
+# usage
+#
+proc usage {} {
+	global argv0 env
+
+	puts "usage: [file tail $argv0] \[parameters\]"
+	puts ""
+	puts "  The script builds -t specified image from -s specified source\
+	tree, using"
+	puts "  tools specified with -m, -a, -c, and puts the resultant\
+	image file to -d"
+	puts "  specified location."
+	puts "  " 
+	puts "  all \[parameters\] are optional and can be any combination of:"
+	puts "  " 
+#	puts "  <config>\t\tlabel of config set" 
+	puts "  -t  <build_type>\tsupported build (linux-24, linux-26 or\
+	uboot)"
+	puts "  -n  <target_name>\tbuild target label (e.g. TQM834x, yucca)"
+	puts "  -s  <img_src>\t\tsrc tree location (e.g.\
+	/home/$env(USER)/linuxppc_2_4_devel)"
+	puts "  -d  <img_dst>\t\tdst location (can be filename or\
+	directory)"
+	puts "  -to <timeout>\t\ttimeout in seconds to wait for build to\
+	complete"
+	puts "  -m  <build_tools>\tpath to build tools (e.g.\
+	/opt/eldk-4.0/usr/bin/)"
+	puts "  -a  <build_arch>\tbuild arch (e.g. ppc)"
+	puts "  -c  <build_cross>\tcross build prefix (e.g. ppc_6xx-)"
+	puts ""
+	puts "  -nc \t'no-clean' build: do not wipe out and config sources"
+	puts "  -o  \toverwrite dst file (-d), if exists (default is do not\
+	overwrite)"
+	puts "  -b  \tbatch mode, no user confirmation"
+	puts "  -v  \tverbose output"
+	puts "  -h  \tthis help"
+	puts " " 
+	exit
 }
 
 #
@@ -399,10 +438,10 @@ proc build_main {} {
 # bld_<img_type>.exp - e.g. bld_linux-26.exp, bld_linux-24.exp, bld_uboot.exp
 #
 proc read_build_methods {t} {
-	global BASE_DIR
+	global base_dir
 	set rv 1
 	
-	set f "$BASE_DIR/bld_$t.exp"
+	set f "$base_dir/bld_$t.exp"
 	if ![valid_file $f] {
 		p_err "build type not supported: '$t', build methods\
 		implementation file not found?!"

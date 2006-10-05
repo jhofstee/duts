@@ -9,9 +9,10 @@
 #
 # source common file
 #
-set _f "$BASE_DIR/bld_linux.exp"
+set _f "$base_dir/bld_linux.exp"
 if [catch {source $_f} err] {
-	p_err "problems with source'ing '$_f'?!"
+#	p_err "problems with source'ing '$_f'?!"
+	p_err $err
 	exit 1
 }
 

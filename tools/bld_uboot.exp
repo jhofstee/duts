@@ -76,7 +76,7 @@ proc make_mrproper {sid p {to 180}} {
 #
 proc bld_valid_env {} {
 	
-	global img_type img_name img_src img_dst
+	global img_name img_src img_dst
 	global build_tools build_arch build_cross
 	global overwrite no_clean
 	global env

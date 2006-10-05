@@ -85,9 +85,9 @@ proc check_linux_config {} {
 #
 proc valid_linux_env {v p} {
 
-	global img_type img_name img_src img_dst
+	global img_name img_src img_dst
 	global build_tools build_arch build_cross
-	global build_timeout TIMEOUT overwrite no_clean
+	global build_timeout overwrite no_clean
 	global env
 
 	## 1. check tools
@@ -164,7 +164,7 @@ proc valid_linux_env {v p} {
 	## - exists <name>_config, <name>_defconfig
 
 	#
-	# if user-provided kernel config name was '*.config' we only save the
+	# if user-provided kernel config name was '.+config' we only save the
 	# core of the name for further processing when it will be personalized
 	# with _config or _defconfig suffix depending on context. This is 
 	# mainly due to different handling of config name in Linux 2.4

@@ -3,40 +3,44 @@
 # (C) Copyright 2006
 # Wolfgang Denk, DENX Software Engineering, wd@denx.de
 #
+# This script fetches source tree from repository according to user
+# supplied parameters. Please use -h for help.
+# 
 #
-
-set BASE_DIR "/home/raj/git/duts/"
-
+#  usage examples:
+# ./get_src -t git -s /home/git/linuxppc_2_4_devel -d linuxppc_2_4_devel_copy -p [branchID]
+#
+# ./get_src -s /git/duts/linuxppc_2_4_devel -d old_duts -p 373d8583b609f378dd6b81d7d45aef97e6ada526
+#
+#
 
 ##
-## include helper procedures
+## locate our dependency base dir  
 ##
-source "$BASE_DIR/include/lib.tcl"
 
-#
-# ./get_src [<config>] [-t <SCM type>] [-n <repo_name>] [-s <repo_src>] 
-#	[-d <repo_dst>] [-p <other params>] [-to <timeout>] [-nc]
-#
-# [<config>] - config label
-# [-t <SCM type>] - id of supported scm (git, cvs)
-# [-n <repo_name>] - name in the repo (u-boot, linuxppc_2_4_devel, linux-2.6-denx etc.)
-# [-s <repo_src>] - repo location (/home/git)
-# [-d <repo_dst>] - dest location (./u-boot_copy etc.)
-# [-p <other repo params>] (private data e.g. branch ID for 'git' SCM type)
-# [-to <timeout>] - timeout in seconds for repo op to complete
-#
-# [-b]	- batch mode, no user confirmation
-# [-v]	- verbose
-#
-#
-#  examples:
-# ./get_src -n linuxppc_2_4_devel -t git -s /home/git/ -d linuxppc_2_4_devel_copy -p [branchID]
-#
-# ./get_src -s /git/duts/ -d old_duts -p 373d8583b609f378dd6b81d7d45aef97e6ada526
-#
-# ./get_src linux24 - uses 'linux24' predefined config
-# ./get_src [empty params] - uses default config
-#
+# we have to do everything by hand as we are trying to load some helper
+# routines library here, so cannot rely on it yet!
+set dep_env "DUTS_BASE_DIR"
+set dep_base_dir "."
+if {[array get env $dep_env] > 0} {
+	set dep_base_dir $env($dep_env)
+	if {$dep_base_dir == ""} {
+		set dep_base_dir "."
+	} else {
+		set dep_base_dir [string trimright $env($dep_env) "/"]
+	}
+}
+
+##
+## include helper lib.tcl 
+##
+set lib "$dep_base_dir/include/lib.tcl"
+if [catch {source $lib} err] {
+	puts "ERROR: $err"
+	puts "$dep_env env var probably not set correctly: '$dep_base_dir'."
+	exit 1
+}
+
 
 ##
 ## default values
@@ -70,11 +74,43 @@ set scm_supported {
 # {<global_var_name> "<opt_string>" "<default_value>"}
 set opt_table {
 	{repo_type "t" "git"}
-	{repo_name "n" ""}
 	{repo_src "s" "/home/git/"}
 	{repo_dst "d" ""}
 	{repo_params "p" ""}
 	{scm_timeout  "to" "180"}
+}
+
+#
+# usage
+#
+proc usage {} {
+	global argv0 env
+
+	puts "usage: [file tail $argv0] \[parameters\]"
+	puts ""
+	puts "  The script fetches source tree from -s specified source repo\
+	location to -d"
+	puts "  location, the type of repo is specified by -t"
+	puts "  " 
+	puts "  all \[parameters\] are optional and can be any combination of:"
+	puts "  " 
+#	puts "  <config>\t\tlabel of config set" 
+	puts "  -t  <scm_type>\tsupported SCM system (git, cvs, local)"
+	puts "  -s  <repo_src>\tsrc repo location (e.g.\
+	/home/git/u-boot)"
+	puts "  -d  <repo_dst>\tdst location: can be new or existing\
+	directory; if not"
+	puts "                \tspecified, the source repo name is used"
+	puts "  -p  <private>\t\tprivate repo params (e.g. branch ID for 'git'\
+	type)"
+	puts "  -to <timeout>\t\ttimeout in seconds for repo\
+	operation to complete"
+	puts ""
+	puts "  -b  \tbatch mode, no user confirmation"
+	puts "  -v  \tverbose output"
+	puts "  -h  \tthis help"
+	puts " " 
+	exit
 }
 
 #
@@ -109,12 +145,11 @@ proc git_valid_repo {r} {
 	set rv 1
 
 	if ![valid_dir $r] {
-		p_verb "problems accessing source GIT repo: '$r'?!"
 		set rv 0
 	} else {
 		# check if .git present in the src dir
 		if ![file exists $r/.git] {
-			p_verb "doesn't look like GIT repo: '$r'?!"
+			p_warn "doesn't look like GIT repo: '$r'?!"
 			set rv 0
 		}
 	}
@@ -125,61 +160,25 @@ proc git_valid_repo {r} {
 #
 # checks the src GIT repo specified, returns 0/1.
 #
-# GIT src can be specified in the following conventions:
-# "-s /home/git/ -n u-boot"
+# GIT src can be specified as:
 #
 # "-s /home/git/u-boot"
 #
-# after this f. returns successfully we have a final effective path to the GIT
-# repo directory in global $repo_src e.g. /home/git/u-boot,
-# /home/git/linux-2.6-denx etc. and a repo name alone in the $repo_name e.g. 
-# u-boot, linux-2.6-denx etc.
-#
 proc git_valid_src {} {
 
-	global repo_src repo_name
+	global repo_src
 	set rv 1
 
-	# default dir (used when specified null)
-	set repo_src_def "."
-
-	set repo_src [string trimright $repo_src "/"]
-
-	if {($repo_src == "") && ($repo_name == "")} {
-		p_err "source repo parameters null, use -s/-n options to\
-		specify GIT source location"
+	if {$repo_src == ""} {
+		p_err "empty source repo parameter, use -s option to\
+		specify source GIT repo location"
 		return 0
 	}
 	
-	if {$repo_src == ""} {
-		set repo_src $repo_src_def 
-	}
-
-	if [git_valid_repo $repo_src] {
-		# we have a legitimate GIT repo, use it
-		if {$repo_name != ""} {
-			p_verb "redundant GIT repo specification: repo src\
-			location is used: '$repo_src', and \[redundant\] name\
-			specification is discarded: '$repo_name'"
-
-			# reset repo name to the actually used
-			set repo_name [file tail $repo_src]
-		} else {
-			# everything ok, set current $repo_name for later use
-			set repo_name [file tail $repo_src]
-		}
-	} else {
-		if {$repo_name == ""} {
-			set rv 0
-		} else {
-			set repo_src "$repo_src/$repo_name"
-			if ![git_valid_repo $repo_src] {
-				set rv 0
-			}
-		}
-	}
-	if {!$rv} {
-		p_err "problems accessing GIT repo: '$repo_src'"
+	set repo_src [string trimright $repo_src "/"]
+	if ![git_valid_repo $repo_src] {
+		p_err "problems accessing source GIT repo: '$repo_src'"
+		set rv 0
 	}
 
 	return $rv
@@ -200,26 +199,34 @@ proc git_valid_src {} {
 #
 proc git_valid_dst {} {
 
-	global repo_dst repo_name
+	global repo_dst repo_src
 	set rv 1
 
 	if {$repo_dst == ""} {
-		# global repo_name is guaranteed to have a valid non-empty value
-		# after the repo source specification is validated
-		set repo_dst "./$repo_name"
-	} else {
-		set dst_dir [file dirname $repo_dst]
-		set dst_file [file tail $repo_dst]
-		if ![valid_dir $dst_dir 1] {
-			p_err "problems accessing GIT destination directory?!"
-			set rv 0
-		}
-	}
-	if [file exists $repo_dst] {
-		p_err "destination location already exists: '$repo_dst'?!"
-		set rv 0
+		set repo_dst [file tail $repo_src] 
 	}
 
+	set repo_dst [string trimright $repo_dst "/"]
+	if [file exists $repo_dst] {
+		if [file exists "$repo_dst/.git"] {
+			p_err "destination location already has GIT repo:\
+			'$repo_dst'?!"
+			set rv 0
+			
+		} else {
+			if ![valid_dir $repo_dst 1] {
+				p_err "access problems with destination:\
+				'$repo_dst'"
+				set rv 0
+			} else {
+				# only directory was specified as destination
+				# - append it with repo name derived from 
+				# repo_src
+				set repo_dst "$repo_dst/[file tail $repo_src]"
+			}
+		}
+	}
+	
 	return $rv
 }
 
@@ -390,7 +397,7 @@ proc git_clone {} {
 #
 proc do_git {} {
 
-	global repo_type repo_name repo_src repo_dst repo_params
+	global repo_type repo_src repo_dst repo_params
 	global scm_timeout confirm TIMEOUT send_slow
 	global shell_prompt shell_sid
 
@@ -577,7 +584,10 @@ proc parse_params {} {
 					global confirm
 					set confirm "no"
 					p_verb "no user confirmation"
+				} "h" {
+					usage
 				}
+				
 			}
 			continue
 		}
