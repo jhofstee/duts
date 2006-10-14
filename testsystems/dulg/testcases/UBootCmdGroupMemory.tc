@@ -129,21 +129,21 @@ duts_tc UBootMmHelp {
 duts_tc UBootMm {
  	Type u-boot
  	Commands {
-		"!testcases/userMm.exp"
+		"!userMm.exp"
 	}
 }
 
 duts_tc UBootMmW {
  	Type u-boot
  	Commands {
-		"!testcases/userMmW.exp"
+		"!userMmW.exp"
 	}
 }
 
 duts_tc UBootMmB {
  	Type u-boot
  	Commands {
-		"!testcases/userMmB.exp"
+		"!userMmB.exp"
 	}
 }
 
@@ -157,7 +157,7 @@ duts_tc UBootMtestHelp {
 duts_tc UBootMtest {
  	Type u-boot
  	Commands {
-		"!testcases/userMtest.exp"
+		"!userMtest.exp"
 	}
 }
 
@@ -199,7 +199,7 @@ duts_tc UBootNmHelp {
 duts_tc UBootNm {
  	Type u-boot
  	Commands {
-		"!testcases/userNm.exp"
+		"!userNm.exp"
 	}
 }
 
@@ -209,4 +209,3 @@ duts_tc UBootLoopHelp {
 		"help loop" ".*"
 	}
 }
-

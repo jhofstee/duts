@@ -57,13 +57,13 @@ proc valid_board_name {{bn ""}} {
 #
 # runs external [expect] script
 #
-# fn: filename with respect to the DUTS working dir
+# fn: filename with respect to the DUTS working/testcases dir
 #
 proc run_external_script {fn} {
-	global working_dir dry_run
+	global working_dir dry_run TC_DESCR_DIR
 
 	set f [string trimleft $fn "!"]
-	set f "$working_dir/$f"
+	set f "$working_dir/$TC_DESCR_DIR/$f"
 
 	if ![valid_file $f] {
 		p_err "problems with accessing file: $f" 1

@@ -5,10 +5,10 @@
 
 duts_tc Kernel24Build {
 	Type host
-	Commands "!testcases/userBuildKernel24.exp"
+	Commands "!userBuildKernel24.exp"
 }
 
 duts_tc Kernel26Build {
 	Type host
-	Commands "!testcases/userBuildKernel26.exp"
+	Commands "!userBuildKernel26.exp"
 }

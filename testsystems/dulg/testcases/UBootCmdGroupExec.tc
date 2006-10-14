@@ -14,13 +14,13 @@ duts_tc UBootAutoscrHelp {
 duts_tc UBootAutoscrScript {
  	Type u-boot
  	Commands {
-		"!testcases/userScr.exp"
+		"!userScr.exp"
 	}
 }
 
 duts_tc UBootAutoscrMkimage {
 	Type host
-	Commands "!testcases/userAutoscrMkimage.exp"
+	Commands "!userAutoscrMkimage.exp"
 }
 
 duts_tc UBootAutoscr {
