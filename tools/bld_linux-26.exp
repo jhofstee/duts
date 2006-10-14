@@ -121,13 +121,13 @@ proc bld_image {{to 600}} {
 
 proc bld_post {} {
 
-	global build_arch img_dst build_sid
+	global build_arch img_dst img_src
 
 	##
 	## copy image to the desired location
 	##
 	p_banner "copy image to destination" *
-	set img_file "arch/$build_arch/boot/images/uImage"
+	set img_file "$img_src/arch/$build_arch/boot/images/uImage"
 	if {$img_dst == ""} {
 		p_verb "no destination location specified, nothing to do.."
 	} else {

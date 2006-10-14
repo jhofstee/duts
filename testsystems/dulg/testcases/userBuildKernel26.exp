@@ -2,216 +2,33 @@
 # Build 2.6 kernel 
 #
 
-global _context_host_prompt _context_host_shell TIMEOUT
-global board_name a_devices timeout env
-global _context_kernel_image
-
-set prompt $_context_host_prompt
-set p [string map {"]" "\\]" "$" "\\$" " " "\\ "} $prompt]
-set shell $_context_host_shell
-
-set eldk_path "/opt/eldk-4.0/usr/bin/"
-
-set kernel_dir "linux-2.6-denx"
-set kernel_repo "/home/git/$kernel_dir"
-set kernel_src "~/git/$kernel_dir-duts"
-
 ##
-## spawn shell
+## set parameters for 2.6 build
 ##
-expect "*"
-if [catch {spawn $shell}] {
-	p_err "couldn't spawn '$shell' command" 1
-}
-expect {
-	$prompt { p_verb "shell prompt OK" }
-	timeout {
-		p_err "couldn't get '$prompt' shell prompt"
-		set timeout $TIMEOUT
-		return
-	}
-}
+global BASE_DIR
+
+set duts_ext "_DUTS"
+set linux "linux-2.6-denx"
+set repo_src "/home/git/$linux"
+set repo_dst "./${linux}${duts_ext}"
+
+set build_type "linux-26"
+
+set toolchain "/opt/eldk-4.0/usr/bin/"
+
+set timeout_co 1600 
+set timeout_build 600
 
 ##
-## clone kernel tree repo
+## include generic kernel build script
 ##
+global working_dir TC_DESCR_DIR
+set generic_build_kernel "$working_dir/$TC_DESCR_DIR/userBuildKernel.exp"
 
-# closing strings:
-# Cloned to linuxppc_2_4_devel/ (origin /home/git/linuxppc_2_4_devel available as branch "origin")
-set cmd "cg-clone $kernel_repo $kernel_src"
-# note cloning 2.6 tree can be veeeeery time consuming...
-set timeout 2000
-send -s "$cmd\r"
-expect {
-	-re ".*Cloned\\ to\\ .*$p" {
-		p_verb "'$cmd' OK"
-	}
-	-re ".*already\\ exists.*$p" {
-		p_warn "Repo '$kernel_src' exists!"
-	}
-	timeout {
-		p_err "Timed out after '$cmd'"
-		set timeout $TIMEOUT
-		return
-	}
-}
-
-##
-## get make target name for our board
-##
-set target $a_devices($board_name,maketarget) 
-
-##
-## set env vars for the build: ARCH, CROSS_COMPILE
-##
-set env(ARCH) $a_devices($board_name,makearch)
-set env(CROSS_COMPILE) $a_devices($board_name,makecompile)
-
-##
-## set PATH so the desired ELDK toolchain is selected
-##
-if ![valid_dir $eldk_path] {
-	p_err "Problems accessing '$eldk_path' dir..?!"
+if ![valid_file $generic_build_kernel] {
+	p_err "dependecy not found: 'generic_build_kernel'"
 	return
 }
-set path $env(PATH)
+source $generic_build_kernel
 
-set pl [split $path ":"]
-set pl_new {}
-
-set len [llength $pl]
-for {set i 0} {$i < $len} {incr i} {
-	set el [lindex $pl $i]
-	if [string match *eldk* $el] {
-		# there's already a path to ELDK - change it to the desired
-		set pl_new [lreplace $pl $i $i $eldk_path]
-	}
-}
-if [llength $pl_new] {
-	set path_new [join $pl_new ":"]
-} else {
-	# if there is no updated path list it means there was no eldk found in
-	# the current PATH so we need to add it
-	lappend pl $eldk_path
-	set path_new [join $pl ":"]
-}
-# now we can set the [new] PATH
-set env(PATH) $path_new
-
-##
-## change dir to kernel src tree
-##
-set cur_dir [pwd]
-if ![valid_dir $kernel_src] {
-	p_err "Problems accessing '$kernel_src' dir..?!"
-	return
-}
-cd $kernel_src
-
-
-##
-## mrproper
-##
-set timeout 180
-_context_host_command "make mrproper" ".*"
-
-
-##
-## spawn shell - this is a second shell as we changed dir to the newly cloned 
-## dir and the previously spawned shell wouldn't know about it
-##
-set timeout 120
-expect "*"
-if [catch {spawn $shell}] {
-	p_err "couldn't spawn '$shell' command" 1
-}
-expect {
-	$prompt { p_verb "shell prompt OK" }
-	timeout {
-		p_err "couldn't get '$prompt' shell prompt"
-		set timeout $TIMEOUT
-		return
-	}
-}
-
-##
-## make ..._defconfig
-##
-#_context_host_command "make ${target}_defconfig" ".*"
-set cmd "make ${target}_defconfig"
-send -s "$cmd\r"
-#exp_internal 1
-expect {
-	-re ".*$p" {
-		p_verb "'$cmd' OK"
-	}
-	-re ".*\\ \\(NEW\\)\\ " {
-		send -s "\r"
-		exp_continue	
-	}
-	timeout {
-		p_err "Timed out after '$cmd'"
-		set timeout $TIMEOUT
-		return
-	}
-}
-set timeout $TIMEOUT 
-
-
-##
-## make uImage
-##
-set timeout 600
-set cmd "make uImage"
-send -s "$cmd\r"
-
-# closing strings are: 
-#
-#  Image: arch/ppc/boot/images/uImage is ready
-#
-# error strings:
-#
-# host/ehci-q.c:185: error: invalid storage class for func
-# make[3]: *** [host/ehci-hcd.o] Error 1
-expect {
-	-re ".*boot/images/uImage\\ is\\ ready.*$p" {
-		p_verb "'$cmd' OK"
-	}
-	-re ".*:\\ error:.*" {
-		p_err "failed in '$cmd'"
-		set timeout $TIMEOUT
-		return
-	}
-	-re ".*make.*\\ Error\\ .*" {
-		p_err "failed in '$cmd'"
-		set timeout $TIMEOUT
-		return
-	}
-	timeout {
-		p_err "Timed out after '$cmd'"
-		set timeout $TIMEOUT
-		return
-	}
-}
-
-##
-## copy image to /tftpboot location
-##
-set dest_dir [file dirname $_context_kernel_image]
-if ![valid_dir $dest_dir] {
-	p_err "Problems with '$dest_dir' image directory?!"
-	return
-}
-set cmd "cp arch/$a_devices($board_name,makearch)/boot/images/uImage $_context_kernel_image"
-if [catch {set o [eval exec $cmd]}] {
-        p_err "couldn't execute '$cmd'" 1
-}
-send_user $o
-
-cd $cur_dir
-unset cur_dir
-unset prompt
-
-# reset default timeout
-set timeout $TIMEOUT
 return
