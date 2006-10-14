@@ -37,7 +37,7 @@ duts_device bamboo {
 	}
 	MakeTarget "bamboo"
 	MakeArch "ppc"
-	MakeCompile "ppc_4xx-"
+	MakeCompile "ppc_4xxFP-"
 }
 
 duts_device bubinga {
@@ -211,5 +211,5 @@ duts_device yosemite {
 	}
 	MakeTarget "yosemite"
 	MakeArch "ppc"
-	MakeCompile "ppc_4xx-"
+	MakeCompile "ppc_4xxFP-"
 }
