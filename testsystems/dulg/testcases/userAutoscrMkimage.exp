@@ -2,17 +2,45 @@
 # create example Autoscr image (and put it in /tftpboot dir)
 #
 
-global working_dir BASE_DIR board_name
+global working_dir board_name TC_DESCR_DIR BASE_DIR
 
-set cur_dir [pwd]
-set cmd "./UBootAutoscrMkimage.sh"
+set cmd "$BASE_DIR/tools/UBootAutoscrMkimage.sh"
+set arg1 "$working_dir/$TC_DESCR_DIR/example.script"
+set arg2 "/tftpboot/$board_name/example.img"
 
-cd $BASE_DIR/$working_dir/testcases
+##
+## validate
+##
+if ![valid_file $cmd] {
+	p_err "helper script not accessible: '$cmd'"
+	return
+}
+if ![valid_file $arg1] {
+	p_err "source script not accessible: '$arg1'"
+	return
+}
 
-if [catch {set o [exec $cmd $board_name]}] {
-	p_err "couldn't execute '$cmd'" 1
+if [valid_file $arg2] {
+	p_warn "image file exists and will be overwritten: '$arg2'"
+	if ![file writable $arg2] {
+		p_err "file not writable: '$arg2'"
+		return
+	}
+} else {
+	set d [file dirname $arg2]
+	if ![valid_dir $d 1] {
+		p_err "image dir location not accessible: '$d'"
+		return
+	}
+}
+
+p_verb "executing: '$cmd $arg1 $arg2"
+if [catch {set o [eval exec $cmd $arg1 $arg2]} err] {
+	p_err "couldn't execute '$cmd'"
+	puts $err
+	return
 }
 send_user $o
 
-cd $cur_dir
-unset cur_dir
+unset cmd arg1 arg2
+unset o
