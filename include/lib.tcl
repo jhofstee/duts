@@ -233,7 +233,7 @@ proc valid_dir {dir {check_write "0"}} {
 			if [file readable $dir] {
 				if {$check_write} {
 					if ![file writable $dir] {
-						p_err "'$dir' not writable?!"
+						p_verb "'$dir' not writable?!"
 						set rv 0
 					} else {
 						p_verb "'$dir' exists and writable, OK"
@@ -242,16 +242,16 @@ proc valid_dir {dir {check_write "0"}} {
 					p_verb "'$dir' exists and accessible, OK"
 				}
 			} else {
-				p_err "'$dir' not accessible..!?"
+				p_verb "'$dir' not accessible..!?"
 				set rv 0
 			}
 		} else {
-			p_err "$dir is not a directory..?!"
+			p_verb "$dir is not a directory..?!"
 			set rv 0
 		}
 		
 	} else {
-		p_err "no such directory: '$dir'"
+		p_verb "no such directory: '$dir'"
 		set rv 0
 	}
 	return $rv
@@ -262,7 +262,7 @@ proc valid_dir {dir {check_write "0"}} {
 #
 # f: filename
 #
-proc valid_file {f} {
+proc valid_file {f {check_write "0"}} {
 
 	set rv 1
 
@@ -270,17 +270,26 @@ proc valid_file {f} {
 	if [file exists $f] {
 		if [file isfile $f] {
 			if [file readable $f] {
-				p_verb "file exists and accessible, OK"
+				if {$check_write} {
+					if ![file writable $f] {
+						p_verb "'$f' not writable?!"
+						set rv 0
+					} else {
+						p_verb "'$f' exists and writable, OK"
+					}
+				} else {
+					p_verb "file exists and accessible, OK"
+				}
 			} else {
-				p_err "file '$f' not readable..!?"
+				p_verb "file '$f' not readable..!?"
 				set rv 0
 			}
 		} else {
-			p_err "file '$f' is not a plain file..?!"
+			p_verb "file '$f' is not a plain file..?!"
 			set rv 0
 		}
 	} else {
-		p_err "no such file: '$f'?!"
+		p_verb "no such file: '$f'?!"
 		set rv 0
 	}
 	

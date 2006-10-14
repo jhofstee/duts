@@ -1,14 +1,12 @@
 #!/bin/env expect
 #
+# (C) Copyright 2006
+# Wolfgang Denk, DENX Software Engineering, wd@denx.de
 #
-# this is the main script for the DENX Universal Test System (DUTS)
-#
-# TODO add (c) etc.
-#
-#
+# This is the main script for the DENX Universal Test System (DUTS)
 #
 
-set BASE_DIR "./"
+set BASE_DIR "."
 set verbose "no"
 set debugging "yes"
 
