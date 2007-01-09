@@ -6,7 +6,7 @@
 proc valid_kernel_file {f} {
 	global control_con remote
 	
-	set rv 1
+	set rv 0
 	set cmd "file"
 
 #p_verb "VALID $cmd"
@@ -27,10 +27,10 @@ proc valid_kernel_file {f} {
 	expect {
 		timeout {
 			 p_err "timed out while validating kernel file"
-			 set rv 0
 		}
 		"PPCBoot image" {
 #			p_verb "file OK"
+			set rv 1
 		}
 	}
 

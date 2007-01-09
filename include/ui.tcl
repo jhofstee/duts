@@ -296,6 +296,7 @@ proc cmd_t_parse_params {a} {
 				continue
 			}
 			p_verb "loading TG file $arg"
+			# TODO catch the sourcing for errors
 			source $arg
 			set l_runlist [tg_list]
 		}
