@@ -18,6 +18,7 @@ if ![valid_file "/tftpboot/$board_name/uRamdisk"] {
 set user_commands {
 	"setenv ramdisk_addr $CFG_RAMDISK_START" ".*"
 	"setenv ram_ws $CFG_RAM_WS_BASE" ".*"
+	"prot off $CFG_RAMDISK_START $CFG_RAMDISK_END" ".*"
 	"era $CFG_RAMDISK_START $CFG_RAMDISK_END" ".*"
 	"tftp $CFG_RAM_WS_BASE /tftpboot/$BOARD/uRamdisk" ".*"
 	"imi $CFG_RAM_WS_BASE" ".*"
