@@ -130,7 +130,13 @@ proc show_tc_details {tc} {
 	##
 	puts "Testcase '$tc' details:"
 	puts "  Type:\t\t$a_testcases($tc,type)"
+	if {[in_array a_testcases "$tc,pre"]} {
+		puts "  Pre:\t\t$a_testcases($tc,pre)"
+	}
 	puts "  Commands:\t$a_testcases($tc,commands)"
+	if {[in_array a_testcases "$tc,post"]} {
+		puts "  Post:\t\t$a_testcases($tc,post)"
+	}
 	puts "  Filename:\t$a_testcases($tc,filename)"
 }
 
