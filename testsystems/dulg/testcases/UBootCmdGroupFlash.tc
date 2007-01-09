@@ -106,4 +106,7 @@ duts_tc UBootProtect {
 		"fli" ".*"
 		"era $CFG_FLASH_TST_SECT" ".*"
 	}
+	Post {
+		"prot off $CFG_FLASH_TST_START $CFG_FLASH_TST_END" ".*"
+	}
 }
