@@ -1,0 +1,53 @@
+#
+# Definitions for Marel boards 
+#
+
+duts_device _common {
+
+	Internals "devices/VL_devices.tcl"
+
+	Vars {
+		CFG_RAM_WS_BASE 	200000
+	}
+}
+
+#
+# V38B flash layout:
+#
+# 16MB in 256 sectors, 1 bank
+#
+# 0xFF000000 - 0xFF03FFFF U-boot (4 sectors)
+# 0xFF040000 - 0xFF04FFFF environment (1 sector)
+#
+# 0xFF100000 - 0xFF1FFFFF kernel (1MB)
+# 0xFF200000 - 0xFF4FFFFF ramdisk (3MB)
+# 0xFF500000 - 0xFFAFFFFF JFFS2 (6MB)
+# 0xFFB00000 - 0xFFFFFFFF Spare (5MB)
+#
+duts_device v38b {
+	MakeTarget "v38b"
+	MakeArch "ppc"
+	MakeCompile "ppc_6xx-"
+
+	Vars {
+		CFG_KERNEL_START	FF100000
+		CFG_KERNEL_END		FF1FFFFF
+		CFG_RAMDISK_START	FF200000
+		CFG_RAMDISK_END		FF4FFFFF 
+
+		CFG_MTD_ERASE_DEVICE	"mtd4"
+
+		CFG_FLASH_PROT1_START	FF000000
+		CFG_FLASH_PROT1_END	FF04FFFF
+
+		CFG_FLASH_TST_START	FFB00000
+		CFG_FLASH_TST_END	FFFFFFFF
+		CFG_FLASH_ERASE_START	FFB00000
+		CFG_FLASH_ERASE_END	FFB3FFFF
+		CFG_FLASH_TST_SIZE 	10000
+
+		CFG_FLASH_ERASE_SECT	"1:176-177"
+		CFG_FLASH_ERASE_BANK	"1"
+		CFG_FLASH_TST_SECT	"1:176"
+	}
+}
