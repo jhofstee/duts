@@ -15,6 +15,7 @@ set DEVICE_DESCR_EXT "tgt"
 
 # name of the common (shared) device definition
 set DEVICE_COMMON_NAME "_common"
+set DEVICE_COMMON_FILE "$DEVICE_COMMON_NAME.$DEVICE_DESCR_EXT"
 
 # location of files with config descriptions
 set CONFIG_DESCR_DIR "config"

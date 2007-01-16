@@ -226,7 +226,7 @@ proc valid_devices {} {
 proc load_all_devices {{e ""}} {
 
 	global working_dir board_name l_boards
-	global DEVICE_DESCR_DIR DEVICE_DESCR_EXT
+	global DEVICE_DESCR_DIR DEVICE_DESCR_EXT DEVICE_COMMON_FILE
 	
 	set d "$working_dir/$DEVICE_DESCR_DIR"
 	if ![valid_dir $d] {
@@ -234,8 +234,26 @@ proc load_all_devices {{e ""}} {
 	}
 
 	set e [expr {($e == "") ? $DEVICE_DESCR_EXT : $e}]
-	
+
+	#
+	# try load a _common device description before any others
+	#
+	set f "$d/$DEVICE_COMMON_FILE"
+	if [valid_file $f] {
+		p_verb "loading common devices description '$f'"
+		if [catch {source $f} err] {
+			p_err "could not parse common device file: '$f'"
+			puts "  $err"
+			exit1
+		}
+	}
+
 	foreach f [find_files $d $e] {
+		# skip common device file
+		if {[file tail $f] == $DEVICE_COMMON_FILE} {
+			continue
+		}
+
 		p_verb "loading devices from $f"
 
 		# just sourcing the file does the trick - a_devices hash
