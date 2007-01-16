@@ -1,0 +1,22 @@
+#
+# 1. Protected range(s), NOT to be altered during TC steps (usually containing
+#    U-Boot and env):
+# 
+#    CFG_FLASH_PROT1_START - CFG_FLASH_PROT1_END
+#    CFG_FLASH_PROT2_START - CFG_FLASH_PROT2_END (optional)
+#
+# 2. Testing area params, will be altered (unprotected, erased, written to
+#    etc.):
+#
+#    CFG_FLASH_TST_START - CFG_FLASH_TST_END
+#    CFG_FLASH_ERASE_START - CFG_FLASH_ERASE_END
+#    CFG_FLASH_ERASE_SECT
+#    CFG_FLASH_ERASE_BANK
+#    CFG_FLASH_TST_SIZE - must be <= (CFG_FLASH_TST_END - CFG_FLASH_TST_START)
+#
+# 3. Areas to be filled out with kernel and ramdisk images:
+#
+#    CFG_KERNEL_START - CFG_KERNEL_END
+#    CFG_RAMDISK_START - CFG_RAMDISK_END
+#
+

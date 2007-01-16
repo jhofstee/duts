@@ -37,7 +37,7 @@ proc duts_device {name args} {
 
 
 #
-# processes Internals section in duts_device decription
+# processes Internals section in duts_device description
 #
 # p: path to the tcl script with implementation of required methods, note the
 # path is relative to $working_dir
@@ -234,9 +234,9 @@ proc load_all_devices {{e ""}} {
 		p_err "Invalid device dir: $d" 1
 	}
 
-	set e [ expr {($e == "") ? $DEVICE_DESCR_EXT : $e}]
+	set e [expr {($e == "") ? $DEVICE_DESCR_EXT : $e}]
 	
-	foreach f [ find_files $d $e ] {
+	foreach f [find_files $d $e] {
 		p_verb "loading devices from $f"
 
 		# just sourcing the file does the trick - a_devices hash

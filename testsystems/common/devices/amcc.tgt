@@ -1,16 +1,6 @@
 #
-# 
+# Definitions for AMCC boards
 #
-
-duts_device _common {
-
-	Internals "devices/VL_devices.tcl"
-
-	Vars {
-		CFG_RAM_WS_BASE 100000
-		CFG_MTD_ERASE_DEVICE "mtd6"
-	}
-}
 
 duts_device bamboo {
 	Vars {
@@ -18,6 +8,8 @@ duts_device bamboo {
 		CFG_KERNEL_END	 ffd7ffff
 		CFG_RAMDISK_START ffd80000
 		CFG_RAMDISK_END	  fff4ffff
+
+		CFG_MTD_ERASE_DEVICE "mtd6"
 
 		CFG_FLASH_TST_START 87f00000
 		CFG_FLASH_TST_END 87f7ffff
@@ -48,6 +40,7 @@ duts_device bubinga {
 		CFG_FLASH_ERASE_END fff8ffff
 		CFG_FLASH_TST_SIZE 10000
 
+		CFG_MTD_ERASE_DEVICE "mtd6"
 		CFG_FLASH_PROT1_START fffc0000
 		CFG_FLASH_PROT1_END ffffffff 
 		CFG_FLASH_ERASE_SECT "1:0-1"
@@ -59,8 +52,72 @@ duts_device bubinga {
 	MakeCompile "ppc_4xx-"
 }
 
+#
+# luan flash layout:
+#
+# Bank #1 - 512 KB in 8 Sectors
+#
+#   FF900000 - FF97FFFF
+#
+#
+# Bank #2 - 512 KB in 8 Sectors
+#
+#   FF980000 - FF9FFFFF
+#
+#
+# Bank #3 - 4096 KB in 64 Sectors
+#
+#   FFC00000 - FFFF0000
+#
+#   layout:
+#
+#   FFFA0000 - FFFAFFFF environment
+#   FFFB0000 - FFFBFFFF environment
+#   FFFC0000 - FFFFFFFF U-Boot
+#
+#
+#
+
+#
+# 0xFF000000 - 0xFF03FFFF U-boot (4 sectors)
+# 0xFF040000 - 0xFF04FFFF environment (1 sector)
+#
+# 0xFF100000 - 0xFF1FFFFF kernel (1MB)
+# 0xFF200000 - 0xFF4FFFFF ramdisk (3MB)
+# 0xFF500000 - 0xFFAFFFFF JFFS2 (6MB)
+# 0xFFB00000 - 0xFFFFFFFF Spare (5MB)
+#
+duts_device luan {
+	Vars {
+		CFG_MTD_ERASE_DEVICE "mtd6"
+
+		CFG_FLASH_TST_START 	ff900000
+		CFG_FLASH_TST_END	ff97ffff
+		CFG_FLASH_ERASE_START	ff900000 
+		CFG_FLASH_ERASE_END	ff95ffff
+
+		CFG_FLASH_TST_SIZE	40000
+
+		CFG_FLASH_PROT1_START	fffa0000
+		CFG_FLASH_PROT1_END	ffffffff
+
+		CFG_FLASH_ERASE_SECT	"1:0-1"
+		CFG_FLASH_ERASE_BANK	"1"
+		CFG_FLASH_TST_SECT	"1:0"
+
+		CFG_KERNEL_START	ffc00000  
+		CFG_KERNEL_END 		ffd4ffff 
+		CFG_RAMDISK_START	ffd50000
+		CFG_RAMDISK_END		ffebffff
+	}
+	MakeTarget "luan"
+	MakeArch "ppc"
+	MakeCompile "ppc_4xx-"
+}
+
 duts_device ebony {
 	Vars {
+		CFG_MTD_ERASE_DEVICE "mtd6"
 		CFG_FLASH_TST_START ff800000 
 		CFG_FLASH_TST_END ff9fffff
 		CFG_FLASH_ERASE_START ff800000 
@@ -88,6 +145,7 @@ duts_device ebony {
 
 duts_device ocotea {
 	Vars {
+		CFG_MTD_ERASE_DEVICE "mtd6"
 		CFG_FLASH_TST_START ff800000
 		CFG_FLASH_TST_END ff9fffff
 		CFG_FLASH_ERASE_START ff800000
@@ -115,6 +173,7 @@ duts_device ocotea {
 
 duts_device sycamore {
 	Vars {
+		CFG_MTD_ERASE_DEVICE "mtd6"
 		CFG_FLASH_TST_START fff80000
 		CFG_FLASH_TST_END fff8ffff
 		CFG_FLASH_ERASE_START fff80000
@@ -140,6 +199,7 @@ duts_device sycamore {
 
 duts_device walnut {
 	Vars {
+		CFG_MTD_ERASE_DEVICE "mtd6"
 		CFG_FLASH_TST_START fff80000
 		CFG_FLASH_TST_END fff8ffff
 		CFG_FLASH_ERASE_START fff80000
@@ -160,6 +220,7 @@ duts_device walnut {
 
 duts_device yellowstone {
 	Vars {
+		CFG_MTD_ERASE_DEVICE "mtd6"
 		CFG_FLASH_TST_START fd000000
 		CFG_FLASH_TST_END fd03ffff
 		CFG_FLASH_ERASE_START fc000000
@@ -188,6 +249,7 @@ duts_device yellowstone {
 
 duts_device yosemite {
 	Vars {
+		CFG_MTD_ERASE_DEVICE "mtd6"
 		CFG_FLASH_TST_START fd000000
 		CFG_FLASH_TST_END fd03ffff
 		CFG_FLASH_ERASE_START fc000000

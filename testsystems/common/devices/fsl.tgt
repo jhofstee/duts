@@ -1,15 +1,6 @@
 #
-# Definitions for MPC boards 
+# Definitions for Freescale boards 
 #
-
-duts_device _common {
-
-	Internals "devices/VL_devices.tcl"
-
-	Vars {
-		CFG_RAM_WS_BASE 100000
-	}
-}
 
 duts_device mpc8349emds {
 	Vars {

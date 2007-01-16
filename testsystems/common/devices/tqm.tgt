@@ -2,15 +2,6 @@
 # Definitions for TQ Component boards
 #
 
-duts_device _common {
-
-	Internals "devices/VL_devices.tcl"
-
-	Vars {
-		CFG_RAM_WS_BASE 100000
-	}
-}
-
 duts_device tqm834x {
 	Vars {
 		CFG_KERNEL_START	80060000

@@ -200,14 +200,14 @@ proc on_list {l e} {
 #
 proc find_files {dir ext {recursive "no"}} {
 
-	if { $recursive == "yes" } {
+	if {$recursive == "yes"} {
 		# unix 'find' needs to be used here, glob is to weak...
 		niy "recursive find"	
 	}
 	
 	set l_files [lsort [glob -nocomplain -dir $dir *.$ext]]
 	
-	if {![ llength $l_files ] > 0} {
+	if {![llength $l_files]  > 0} {
 		p_verb "No files with extension $ext in dir $dir?!"
 	}
 	return $l_files

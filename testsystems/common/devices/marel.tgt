@@ -1,15 +1,6 @@
 #
-# Definitions for Marel boards 
+# Definitions for Marel board(s) 
 #
-
-duts_device _common {
-
-	Internals "devices/VL_devices.tcl"
-
-	Vars {
-		CFG_RAM_WS_BASE 	200000
-	}
-}
 
 #
 # V38B flash layout:
@@ -30,6 +21,8 @@ duts_device v38b {
 	MakeCompile "ppc_6xx-"
 
 	Vars {
+		CFG_RAM_WS_BASE 	200000
+
 		CFG_KERNEL_START	FF100000
 		CFG_KERNEL_END		FF1FFFFF
 		CFG_RAMDISK_START	FF200000
