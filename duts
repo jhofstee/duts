@@ -92,9 +92,6 @@ set logs_location $LOG_DIR
 
 set dry_run "no"
 
-# assume we're local to the VL by default
-set remote "no"
-
 # spawn id identifiers for console and control connections
 set console_con ""
 set control_con ""

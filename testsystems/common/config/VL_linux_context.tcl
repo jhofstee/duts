@@ -4,25 +4,16 @@
 #
 
 proc valid_kernel_file {f} {
-	global control_con remote
+	global control_con
 	
 	set rv 0
 	set cmd "file"
 
 #p_verb "VALID $cmd"
 
-	if {$remote == "yes"} {
-		if {$control_con == ""} {
-			p_err "no spawn_id of the control connection" 1
-		}
-		set spawn_id $control_con
-		send -s "$cmd $f\r"
-	} else {
-		# we're local on VL host so need to spawn the power_on process
-		if [catch {spawn -noecho $cmd $f}] {
-			p_err "couldn't spawn '$cmd' command" 1
-		}	
-	}
+	if [catch {spawn -noecho $cmd $f}] {
+		p_err "couldn't spawn '$cmd' command" 1
+	}	
 
 	expect {
 		timeout {

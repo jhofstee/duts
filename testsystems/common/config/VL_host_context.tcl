@@ -7,7 +7,7 @@ proc _context_host_command {cmd rsp {slp 0.25}} {
 
 #exp_internal 1
 
-	global _context_host_prompt remote
+	global _context_host_prompt
 	global _context_host_shell
 	set shell $_context_host_shell
 	set prompt $_context_host_prompt
@@ -18,13 +18,8 @@ proc _context_host_command {cmd rsp {slp 0.25}} {
 	}
 
 	expect "*"
-	if {$remote == "yes"} {
-		#TODO
-	} else {
-		# we're local on VL host so need to spawn the bash process
-		if [catch {spawn $shell}] {
-			p_err "couldn't spawn '$shell' command" 1
-		}
+	if [catch {spawn $shell}] {
+		p_err "couldn't spawn '$shell' command" 1
 	}
 
 	expect {

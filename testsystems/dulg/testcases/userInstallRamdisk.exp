@@ -9,7 +9,6 @@ expect "*"
 ##
 ## check if we have the file to install
 ##
-# TODO this will only work locally in VL, add support for remote access
 if ![valid_file "/tftpboot/$board_name/uRamdisk"] {
 	p_err "problems with Ramdisk file?!"
 	return

@@ -22,7 +22,6 @@ proc usage {} {
 	puts "   " 
 	puts "    -d <dir>  (alternative dir)"
 	puts "    -n        (do NOT execute real actions)"
-	puts "    -r        (remote VL operation)"
 	puts "    -v        (verbose)"
 	puts " " 
 	exit 1
@@ -490,12 +489,6 @@ proc parse_params {} {
 
 			continue
 
-		} "-r" {
-			global remote
-			set remote "yes"
-			p_verb "remote VL mode ON"
-			continue
-		
 		} "-v" {
 			global verbose
 			set verbose "yes"

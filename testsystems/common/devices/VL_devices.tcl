@@ -13,27 +13,16 @@
 #
 # method implementing powering on the $board_name device
 #
-# if remote, assume connection to the host is established
-#
 proc _device_power_on {} {
 
-	global board_name remote send_slow control_con
+	global board_name send_slow control_con
 
 	set cmd "/usr/local/bin/remote_power"
 
 #p_banner "powering ON"
 
-	if {$remote == "yes"} {
-		if {$control_con == ""} {
-			p_err "no spawn_id of the control connection" 1
-		}
-		set spawn_id $control_con
-		send -s "$cmd $board_name on\r"
-	} else {
-		# we're local on VL host so need to spawn the power_on process
-		if [catch {spawn -noecho $cmd $board_name "on"}] {
-			p_err "couldn't spawn '$cmd'" 1
-		}
+	if [catch {spawn -noecho $cmd $board_name "on"}] {
+		p_err "couldn't spawn '$cmd'" 1
 	}
 	expect {
 		timeout {
@@ -62,30 +51,17 @@ proc _device_power_off {} {
 #
 # method implementing connection to the target in $board_name global
 #
-# for remote operation (via host - VL) we first connect to the host and then
-# to the target. returns spawn_id of the process connected to the target
-#
 proc _device_connect_target {} {
-	global remote board_name
+	global board_name
 
 	set con_cmd "connect"
 	
 	expect "*"
-	if {$remote == "yes"} {
-
-		# we're remote so a connection to the host must be established
-		set spawn_id [_device_connect_host] 
-		send -s "$con_cmd $board_name\r"
-
-	} else {
 #TODO check if not already connected (connected global)	
-		# we're locally in the VL so need to spawn "connect" command
-		if [catch {spawn -noecho $con_cmd $board_name}] {
-			p_err "couldn't spawn 'connect'?! Maybe -r option\
-			(remote VL) needed..?" 1
-		}
-		
+	if [catch {spawn -noecho $con_cmd $board_name}] {
+		p_err "couldn't spawn 'connect'?!" 1
 	}
+		
 	# TODO when the port is occupied by another connection it is not
 	# reliably detected and handled
 
@@ -121,28 +97,7 @@ proc _device_connect_target {} {
 # spawn_id of the created process
 # 
 proc _device_connect_host {} {
-
-#TODO redesign so username/prompt are not hard-coded...
-	set ssh_cmd "/usr/bin/ssh"
-	set ssh_exp "raj]"
-	set host "pollux"
-
-	if [catch {spawn $ssh_cmd $host}] {
-		p_err "couldn't spawn SSH?!" 1
-	}
-
-#TODO is current timeout period ok?
-	expect {
-		timeout {
-			p_err "timed out while connecting to host '$host'" 1
-		}
-		$ssh_exp {
-			p_verb "connection to host established"
-		}
-	}
-	return $spawn_id
 }
-
 
 proc _device_disconnect_target {} {
 }
@@ -157,18 +112,13 @@ proc _device_disconnect_host {} {
 #
 proc is_powered_on {} {
 
-	global remote control_con board_name
+	global control_con board_name
 	
 	set cmd "/usr/local/bin/remote_power"
 	set rv 0
 
-	if {$remote == "yes"} {
-		set spawn_id $control_con
-		send -s "$cmd $board_name -l\r"
-	} else {
-		if [catch {spawn $cmd $board_name "-l"}] {
-			p_err "couldn't spawn '$cmd'" 1
-		}
+	if [catch {spawn $cmd $board_name "-l"}] {
+		p_err "couldn't spawn '$cmd'" 1
 	}
 
 	expect {
@@ -191,7 +141,7 @@ proc is_powered_on {} {
 # connection(s) established
 #
 proc _device_current_context {} {
-	global remote console_con _context_firmware_prompt
+	global console_con _context_firmware_prompt
 	global _context_kernel_prompt connected
 
 	set ctx "off"

@@ -176,7 +176,6 @@ proc is_device_board_defined {b ent} {
 proc valid_devices {} {
 
 	global a_devices l_boards DEVICE_COMMON_NAME board_name
-	global remote
 
 	set rv 1
 

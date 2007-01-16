@@ -273,7 +273,7 @@ proc tc_prologue {tc ctx} {
 #	}
 
 	global cur_context send_slow spawn_id
-	global remote connected console_con control_con
+	global connected console_con control_con
 
 	set send_slow {1 .050}
 
@@ -290,15 +290,6 @@ proc tc_prologue {tc ctx} {
 	## establish console/control connection(s)
 	##
 	if {$connected != "yes"} {
-
-		if {$remote == "yes"} {
-			# in a remote VL setup we need a 'control' connection
-			# i.e. a connection to host machine for powering on/off
-			# and other operations on device
-#p_banner "CTRL connection"	
-			set control_con [_device_connect_host]
-#			p_verb "CTRL connection set, OK"
-		}
 
 #p_banner "CONS connection"
 
