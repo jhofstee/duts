@@ -77,16 +77,6 @@ duts_device bubinga {
 #
 #
 #
-
-#
-# 0xFF000000 - 0xFF03FFFF U-boot (4 sectors)
-# 0xFF040000 - 0xFF04FFFF environment (1 sector)
-#
-# 0xFF100000 - 0xFF1FFFFF kernel (1MB)
-# 0xFF200000 - 0xFF4FFFFF ramdisk (3MB)
-# 0xFF500000 - 0xFFAFFFFF JFFS2 (6MB)
-# 0xFFB00000 - 0xFFFFFFFF Spare (5MB)
-#
 duts_device luan {
 	Vars {
 		CFG_MTD_ERASE_DEVICE "mtd6"
