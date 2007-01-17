@@ -207,7 +207,7 @@ proc find_files {dir ext {recursive "no"}} {
 	
 	set l_files [lsort [glob -nocomplain -dir $dir *.$ext]]
 	
-	if {![llength $l_files]  > 0} {
+	if {!([llength $l_files]  > 0)} {
 		p_verb "No files with extension $ext in dir $dir?!"
 	}
 	return $l_files

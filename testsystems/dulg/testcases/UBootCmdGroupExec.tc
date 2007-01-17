@@ -26,9 +26,9 @@ duts_tc UBootAutoscrMkimage {
 duts_tc UBootAutoscr {
  	Type u-boot
  	Commands {
-		"tftp 100000 /tftpboot/$BOARD/example.img" ".*"
+		"tftp $CFG_RAM_WS_BASE /tftpboot/$BOARD/example.img" ".*"
 		"imi" ".*"
-		"autoscr 100000" ".*"
+		"autoscr $CFG_RAM_WS_BASE" ".*"
 	}
 }
 
