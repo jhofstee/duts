@@ -428,65 +428,6 @@ proc run_tc_list {ln} {
 }
 
 
-
-
-###############################################################################
-#
-# test groups processing
-#
-###############################################################################
-
-proc duts_tg {name tcs} {
-
-	global l_testgroups
-	lappend l_testgroups $name
-
-	global a_testgroups
-	set a_testgroups($name) $tcs
-}
-
-
-proc show_tg_list {} {
-
-	global a_testgroups
-
-	foreach tg [array names a_testgroups] {
-		puts "Test group: $tg"
-	
-		set tc_list $a_testgroups($tg)
-		foreach tc $tc_list {
-			puts "  $tc"
-		}
-		puts "\n"
-	}
-}
-
-#
-# returns a complete list of test cases from all test groups
-#
-proc tg_list {} {
-
-	global a_testgroups
-
-	set l_tcs [list]
-
-	foreach tg [array names a_testgroups] {
-
-		# list of TCs in this group
-		set tc_list $a_testgroups($tg)
-		foreach tc $tc_list {
-			if [ regexp {^#.*} $tc] {
-				# commented line starts with a hash
-				continue
-			}
-			p_verb "  adding $tc to the list"
-			lappend l_tcs $tc
-		}
-	}
-	return $l_tcs
-}
-
-
 #
 # check if testcases on the list are defined in the global TCs structures; if
 # one or more TCs are not defined, interrupt DUTS
@@ -518,17 +459,32 @@ proc check_tc_list {list} {
 	}		
 }
 
+proc load_tc_file {f} {
 
-proc load_tc_files {d {e ""}} {
+	global tc_filename
+
+	if ![valid_file $f] {
+		p_err "could not access TC file '$f'" 1
+	}
+
+	set tc_filename $f
+	if [catch {source $f} err] {
+		p_err "problems with parsing '$f'?!"
+		puts "  $err"
+		exit1
+	}
+}
+
+proc load_all_tc_files {d {e ""}} {
 	
 	global tc_filename
 	global TC_DESCR_EXT
 	set e [ expr {($e == "") ? $TC_DESCR_EXT : $e}]
 	
-	foreach f [ find_files $d $e ] {
+	foreach f [find_files $d $e] {
 		p_verb "loading TCs from $f"
 
-		# some areas make use of current TC name
+		# some other modules make use of current TC name
 		set tc_filename $f
 
 		# just sourcing the file does the trick - a_testcases hash
@@ -545,7 +501,7 @@ proc load_tc_files {d {e ""}} {
 }
 
 #
-# load common TC files
+# load test cases from files
 #
 proc load_tcs {} {
 
@@ -558,10 +514,10 @@ proc load_tcs {} {
 	}
 
 	##
-	## load common TCs
+	## load common TCs from all files with TC descriptions
 	##
 	puts "Testcases directory: $working_dir"
-	load_tc_files $d
+	load_all_tc_files $d
 
 	set n [llength $l_testcases]
 	if {$n > 0 } {
@@ -587,7 +543,7 @@ proc load_custom_tcs {{b ""}} {
 	if ![valid_dir $d] {
 		p_verb "no target specific TCs for $b"	
 	} else {
-		load_tc_files $d
+		load_all_tc_files $d
 
 		set n [llength $l_testcases]
 		if {$n > 0 } {

@@ -157,8 +157,8 @@ proc cmd_t_usage {} {
 	puts " "
 	puts "  \[-c config\]"
 	puts ""
-	puts "  <TGfile1> <TGfile2> ... <TGfileX>"
-	puts "      runs test cases listed in <TGfile1..X> files"
+	puts "  <TCfile1> <TCfile2> ... <TCfileX>"
+	puts "      runs test cases from <TCfile1..X> files"
 	puts " "
 	puts "  -t <TC1> <TC2> ... <TCx>"
 	puts "      runs test cases <TC1..X> selected by their names"
@@ -203,12 +203,6 @@ proc cmd_t {a} {
 	puts "Board name: $bn"
 
 	##
-	## load TC descriptions
-	##
-	load_tcs
-	load_custom_tcs
-
-	##
 	## parse remaining params
 	##
 	set max [llength $a]
@@ -223,6 +217,11 @@ proc cmd_t {a} {
 	} else {
 		# no params after 'board_name' so let's run all defined test
 		# cases using default config
+
+		# load TC descriptions
+		load_tcs
+		load_custom_tcs
+
 		set l_runlist $l_testcases
 		p_verb "ALL defined test cases selected to run"
 	}
@@ -277,28 +276,38 @@ proc cmd_t_parse_params {a} {
 			
 			p_verb "selected configuration: $selected_config"
 			continue
-		}	
+		}
 
+		#
 		# remaining parameters are the list of files/test cases
-		
+		#
 		if {$list_type == "tcs"} {
 			# add element (TC name to a run list)
 			p_verb "adding $arg to runlist"
 			lappend l_runlist $arg
-			
+
 		} else {
-			# element is a TG file name
+			# element is a TC file name
 
 			if ![valid_file $arg] {
-#				p_err "problems with accessing file: $arg"
+				p_err "problems with accessing file: $arg"
 				set files_ok "no"
 				continue
 			}
-			p_verb "loading TG file $arg"
-			# TODO catch the sourcing for errors
-			source $arg
-			set l_runlist [tg_list]
+			p_verb "loading TC file $arg"
+
+			# load the file with TC description(s)
+			load_tc_file $arg
+
+			# schedule all TCs loaded from file(s) tu run
+			set l_runlist $l_testcases
 		}
+	}
+
+	# if we didn't load a specific TC file, lets load all definitions
+	if {$list_type == "tcs"} {
+		load_tcs
+		load_custom_tcs
 	}
 
 	if {[llength $l_runlist] == 0} {
@@ -315,7 +324,7 @@ proc cmd_t_parse_params {a} {
 	}
 
 	if {$files_ok != "yes"} {
-		p_err "Invalid test group file(s)...?!" 1
+		p_err "Invalid test case file(s)...?!" 1
 	}
 }
 
