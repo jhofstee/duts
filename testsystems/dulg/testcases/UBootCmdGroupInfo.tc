@@ -57,10 +57,11 @@ duts_tc UBootIminfoHelp {
 duts_tc UBootIminfo {
  	Type u-boot
 	Pre {
-		{tftp 200000 ${bootfile}} ".*"
+		"setenv ram_ws $CFG_RAM_WS_BASE" ".*"
+		{tftp ${ram_ws} ${bootfile}} ".*"
 	}
  	Commands {
-		"imi 200000" ".*"
+		"imi ${ram_ws}" ".*"
 	}
 }
 

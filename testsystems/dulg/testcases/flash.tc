@@ -1,10 +1,10 @@
 #
 # WARNING! Testcases contained herein attempt to manipulate board flash
-# contents. They assume the parameters like CFG_MTD_ERASE_DEVICE, addresses
-# range etc. are propely set for the given board, so beware and triple check
+# contents. They assume the parameters in board config file
+# (testsystems/common/devices/*.tgt) like CFG_MTD_ERASE_DEVICE, addresses
+# range etc. are properly set for the given board, so beware and triple check
 # everything makes sense before running these.
 #
-
 
 duts_tc InstallUBootUsingLinux {
  	Type u-boot
@@ -12,6 +12,7 @@ duts_tc InstallUBootUsingLinux {
 		"" ".*"
 	}
 	Info {
+	RUN MANUALLY:
 	bash-2.05b# cat /proc/mtd
 	dev:     size   erasesize  name
 	mtd0: 00100000 00010000 "user"
@@ -31,6 +32,7 @@ duts_tc InstallUBootUsingUBoot {
 		"" ".*"
 	}
 	Info {
+	RUN MANUALLY:
 	5.4.3. Installation using U-Boot
 	tftp 100000 /tftpboot/uboot.bin
 	protect off 40000000 4003FFFF
@@ -46,7 +48,7 @@ duts_tc InstallUBootUsingUBoot {
 duts_tc LinuxMtdDump {
  	Type linux 
  	Commands {
-		"xxd /dev/mtd0 | head -4" ".*"
+		"xxd /dev/$CFG_MTD_ERASE_DEVICE | head -4" ".*"
 	}
 }
 
