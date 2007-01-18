@@ -6,6 +6,25 @@
 # everything makes sense before running these.
 #
 
+
+duts_tc InstallUBootUsingUBoot {
+ 	Type u-boot
+ 	Commands {
+		"" ".*"
+	}
+	Info {
+	RUN MANUALLY:
+	5.4.3. Installation using U-Boot
+	tftp 100000 /tftpboot/uboot.bin
+	protect off 40000000 4003FFFF
+	era 40000000 4003FFFF
+	cp.b 100000 40000000 ${filesize}
+	setenv filesize
+	saveenv
+	reset
+	}
+}
+
 duts_tc InstallUBootUsingLinux {
  	Type u-boot
  	Commands {
@@ -26,24 +45,17 @@ duts_tc InstallUBootUsingLinux {
 	}
 }
 
-duts_tc InstallUBootUsingUBoot {
+duts_tc InstallKernelTftp {
  	Type u-boot
- 	Commands {
-		"" ".*"
-	}
-	Info {
-	RUN MANUALLY:
-	5.4.3. Installation using U-Boot
-	tftp 100000 /tftpboot/uboot.bin
-	protect off 40000000 4003FFFF
-	era 40000000 4003FFFF
-	cp.b 100000 40000000 ${filesize}
-	setenv filesize
-	saveenv
-	reset
-	}
+	Timeout 600
+	Commands "!userInstallKernelTftp.exp"
 }
 
+duts_tc UBootInstallRamdisk {
+ 	Type u-boot
+	Timeout 600
+	Commands "!userInstallRamdisk.exp"
+}
 
 duts_tc LinuxMtdDump {
  	Type linux 
@@ -80,16 +92,4 @@ duts_tc LinuxProcMtd {
  	Commands {
 		"cat /proc/mtd" ".*"
 	}
-}
-
-duts_tc InstallKernelTftp {
- 	Type u-boot
-	Timeout 600
-	Commands "!userInstallKernelTftp.exp"
-}
-
-duts_tc UBootInstallRamdisk {
- 	Type u-boot
-	Timeout 600
-	Commands "!userInstallRamdisk.exp"
 }

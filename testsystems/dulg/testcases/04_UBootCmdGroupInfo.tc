@@ -61,7 +61,7 @@ duts_tc UBootIminfo {
 		{tftp ${ram_ws} ${bootfile}} ".*"
 	}
  	Commands {
-		"imi ${ram_ws}" ".*"
+		"imi $CFG_RAM_WS_BASE" ".*"
 	}
 }
 
