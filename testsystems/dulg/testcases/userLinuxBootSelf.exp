@@ -6,14 +6,20 @@ global _context_kernel_prompt cur_context TIMEOUT
 
 expect "*"
 
+if ![_context_firmware_get_prompt] {
+	p_err "could not get firmware prompt"
+	return 0
+}
+
 send -s "run flash_self\r"
 expect {
 	timeout {
-		p_err "timed out after 'flash_self'" 1
+		p_err "timed out after 'flash_self'"
+		return 0
 	}
 	"Bad Magic Number" {
 		p_err "problems finding image?!"
-		return
+		return 0
 	}
 	"Linux version" {
 		set cur_context "kernel"
@@ -21,12 +27,12 @@ expect {
 
 		expect {
 			timeout {
-				p_err "timed out whiel waiting for BusyBox"
-				return
+				p_err "timed out while waiting for BusyBox"
+				return 0
 			}
 			-re ".*Kernel\\ panic" {
 				p_err "PANIC"
-				return
+				return 0
 			}
 			"BusyBox" {
 				p_verb "BB OK"
@@ -38,9 +44,10 @@ expect {
 		expect {
 			timeout {
 				p_err "timed out while waiting for kernel prompt"
-				return
+				return 0
 			}
 			-re ".*$_context_kernel_prompt" {
+				return 1
 			}
 		}
 	}

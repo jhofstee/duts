@@ -11,7 +11,7 @@ expect "*"
 ##
 if ![valid_file "/tftpboot/$board_name/uRamdisk"] {
 	p_err "problems with Ramdisk file?!"
-	return
+	return 0
 }
 
 set user_commands {
@@ -26,6 +26,7 @@ set user_commands {
 	"saveenv" ".*"
 }
 
-run_cmds user_commands "firmware"
+set rv [run_cmds user_commands "firmware"]
 
 unset user_commands
+return $rv

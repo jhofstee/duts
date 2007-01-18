@@ -64,9 +64,11 @@ proc run_external_script {fn} {
 
 	set f [string trimleft $fn "!"]
 	set f "$working_dir/$TC_DESCR_DIR/$f"
+	set rv 1
 
 	if ![valid_file $f] {
-		p_err "problems with accessing file: $f" 1
+		p_err "problems with accessing file: $f"
+		return 0
 	}
 
 	p_verb "running external script $f"
@@ -74,10 +76,14 @@ proc run_external_script {fn} {
 		p_warn "dry run activated, skipping execution of '$f'"
 	} else {
 		set err ""
-		if [catch {source $f} err] {
+		set ret 0
+		if [catch {set ret [source $f]} err] {
 			p_err "problems with source'ing '$f'?!"
 			puts "  $err"
-			exit1
+			set rv 0
 		}
+		set rv $ret
 	}
+
+	return $rv
 }

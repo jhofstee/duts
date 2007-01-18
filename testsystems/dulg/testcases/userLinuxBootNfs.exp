@@ -6,14 +6,20 @@ global _context_kernel_prompt cur_context TIMEOUT
 
 expect "*"
 
+if ![_context_firmware_get_prompt] {
+	p_err "could not get firmware prompt"
+	return 0
+}
+
 send -s "run flash_nfs\r"
 expect {
 	timeout {
-		p_err "timed out after 'flash_nfs'" 1
+		p_err "timed out after 'flash_nfs'"
+		return 0
 	}
 	"Bad Magic Number" {
 		p_err "problems finding image?!"
-		return
+		return 0
 	}
 	"Linux version" {
 		set cur_context "kernel"
@@ -22,11 +28,11 @@ expect {
 		expect {
 			timeout {
 				p_err "timed out while waiting for login prompt"
-				return
+				return 0
 			}
 			-re ".*Kernel\\ panic" {
 				p_err "PANIC"
-				return
+				return 0
 			}
 			"login: " {
 				p_verb "login prompt OK"
@@ -38,9 +44,10 @@ expect {
 		expect {
 			timeout {
 				p_err "timed out while waiting for kernel prompt"
-				return
+				return 0
 			}
 			"$_context_kernel_prompt" {
+				return 1
 			}
 		}
 	}

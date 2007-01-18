@@ -2,9 +2,12 @@
 # 
 #
 
-global _context_firmware_prompt
-
 expect "*"
+
+if ![_context_firmware_get_prompt] {
+	p_err "could not get firmware prompt"
+	return 0
+}
 
 send -s "reset\r"
 
@@ -15,17 +18,17 @@ send -s "reset\r"
 #
 expect {
 	timeout {
-		p_err "timed out while waiting for autoboot prompt" 1
+		p_err "timed out while waiting for autoboot prompt"
+		return 0
 	}
 	"Hit any key to stop" {
 		send -s "\r"
 	}
 }
 
-send -s " \r"
-expect {
-	timeout {
-		p_err "timed out while waiting for U-Boot prompt" 1
-	}
-	$_context_firmware_prompt { }
+if ![_context_firmware_get_prompt] {
+	p_err "could not get firmware prompt after reset"
+	return 0
 }
+
+return 1

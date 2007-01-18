@@ -1,10 +1,20 @@
 #
-#
+# All we do here is pushing the contents of the example.script to DUTS output
+# i.e.  the [logged to file] screen
 #
 
 set scrfn "testsystems/dulg/testcases/example.script"
 
-set scrf [open $scrfn r]
+if ![valid_file $scrfn] {
+	p_err "problems with script file '$scrfn'"
+	return 0
+}
+
+if [catch {set scrf [open $scrfn r]} err] {
+	p_err "problems open'ing '$scrfn'"
+	puts "  $err"
+	return 0
+}
 
 while {[gets $scrf line] >= 0} {
 	send_user -- "$line\n"
@@ -13,3 +23,5 @@ while {[gets $scrf line] >= 0} {
 close $scrf
 unset scrfn
 unset scrf
+
+return 1

@@ -9,8 +9,6 @@ proc valid_kernel_file {f} {
 	set rv 0
 	set cmd "file"
 
-#p_verb "VALID $cmd"
-
 	if [catch {spawn -noecho $cmd $f}] {
 		p_err "couldn't spawn '$cmd' command" 1
 	}	
@@ -81,6 +79,28 @@ proc _context_kernel_handler {} {
 	}
 }
 
+proc _context_kernel_get_prompt {} {
+
+	global _context_kernel_prompt
+
+	set p $_context_kernel_prompt
+	set timeout 3
+	set rv 1
+
+	send -s " \r"
+	expect {
+		timeout {
+			set rv 0
+			p_verb "timed out while waiting on kernel prompt: \
+			'$p'"
+		}
+		-r ".*$p" {
+			p_verb "kernel prompt OK"
+		}
+	}
+
+	return $rv
+}
 #
 # this method implements sending command and receiving response
 #
@@ -88,18 +108,32 @@ proc _context_kernel_command {cmd rsp {slp 0.25}} {
 	global _context_kernel_prompt
 
 	set p $_context_kernel_prompt
+	set rv 1
 
-#p_verb "CMD $cmd, RSP '$rsp', prompt $p"
+	p_verb "CMD $cmd, RSP '$rsp', prompt $p"
 
-	expect "*"
+	#expect "*"
+	if ![_context_kernel_get_prompt] {
+		p_err "could not get kernel prompt"
+		return 0
+	}
+
 	send -s "$cmd\r"
 
 	sleep $slp
 	expect {
 		-re "($rsp)(.*)$p" {
+			p_verb "kernel command executed OK"
 		}
 		timeout {
-			p_err "timed out after Linux command '$cmd'" 1
+			set rv 0
+
+			p_err "timed out while waiting on cmd '$cmd'"
+			if ![ask_yesno "do you want to continue? "] {
+				exit1
+			}
 		}
 	}
+
+	return $rv
 }

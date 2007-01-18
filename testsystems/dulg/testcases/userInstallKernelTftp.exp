@@ -29,7 +29,7 @@ lappend a_devices($board_name,varlist) "CFG_KERNEL_IMAGE"
 ##
 if ![valid_file $_context_kernel_image] {
 	p_err "problems with kernel file?!"
-	return
+	return 0
 }
 
 
@@ -45,6 +45,7 @@ set user_commands {
 	"saveenv" ".*"
 }
 
-run_cmds user_commands "firmware"
+set rv [run_cmds user_commands "firmware"]
 
 unset user_commands
+return $rv

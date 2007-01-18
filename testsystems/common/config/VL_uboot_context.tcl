@@ -71,6 +71,29 @@ proc _context_firmware_handler {} {
 	}
 }
 
+proc _context_firmware_get_prompt {} {
+
+	global _context_firmware_prompt
+
+	set p $_context_firmware_prompt
+	set timeout 3
+	set rv 1
+
+	send -s " \r"
+	expect {
+		timeout {
+			set rv 0
+			p_verb "timed out while waiting on firmware prompt: \
+			'$p'"
+		}
+		-r ".*$p" {
+			p_verb "firmware prompt OK"
+		}
+	}
+
+	return $rv
+}
+
 #
 # this method implements sending command and receiving response
 #
@@ -78,10 +101,15 @@ proc _context_firmware_command {cmd rsp {slp 0.35}} {
 
 	global _context_firmware_prompt dry_run
 
+	set rv 1
 	set p $_context_firmware_prompt
-	set ok 1
 
 	p_verb "CMD '$cmd', RSP '$rsp'"
+
+	if ![_context_firmware_get_prompt] {
+		p_err "could not get firmware prompt"
+		return 0
+	}
 
 	send -s "$cmd\r"
 
@@ -89,10 +117,14 @@ proc _context_firmware_command {cmd rsp {slp 0.35}} {
 	expect {
 		-re "Unknown\\ command.*$p" {
 			p_verb "Hmm, no command compiled in.."
-			return
+			set rv 0
 		}
-		-re "($rsp)(.*)$p" { p_verb "firmware prompt OK" }
+		-re "($rsp)(.*)$p" {
+			p_verb "firmware command executed OK"
+		}
 		timeout {
+			set rv 0
+
 			p_err "timed out while waiting on cmd '$cmd'... Sure\
 			the board is alive?"
 
@@ -103,4 +135,6 @@ proc _context_firmware_command {cmd rsp {slp 0.35}} {
 			}
 		}
 	}
-}	
+
+	return $rv
+}

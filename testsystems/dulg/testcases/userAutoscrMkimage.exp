@@ -13,24 +13,24 @@ set arg2 "/tftpboot/$board_name/example.img"
 ##
 if ![valid_file $cmd] {
 	p_err "helper script not accessible: '$cmd'"
-	return
+	return 0
 }
 if ![valid_file $arg1] {
 	p_err "source script not accessible: '$arg1'"
-	return
+	return 0
 }
 
 if [valid_file $arg2] {
 	p_warn "image file exists and will be overwritten: '$arg2'"
 	if ![file writable $arg2] {
 		p_err "file not writable: '$arg2'"
-		return
+		return 0
 	}
 } else {
 	set d [file dirname $arg2]
 	if ![valid_dir $d 1] {
 		p_err "image dir location not accessible: '$d'"
-		return
+		return 0
 	}
 }
 
@@ -38,9 +38,10 @@ p_verb "executing: '$cmd $arg1 $arg2"
 if [catch {set o [eval exec $cmd $arg1 $arg2]} err] {
 	p_err "couldn't execute '$cmd'"
 	puts $err
-	return
+	return 0
 }
 send_user $o
 
 unset cmd arg1 arg2
 unset o
+return 1

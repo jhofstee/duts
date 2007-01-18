@@ -5,8 +5,6 @@
 #
 # turns on/off logging
 #
-# p: prompt (only needed when turning ON)
-#
 proc logging {onoff {lf ""}} {
 	
 	if {$onoff == "on"} {

@@ -6,13 +6,16 @@ global _context_kernel_prompt _context_kernel_image cur_context TIMEOUT
 ##
 if ![valid_file $_context_kernel_image] {
 	p_err "problems with kernel file?!"
-	return
+	return 0
 }
 
 ##
 ## Set kernel file name to boot
 ##
-_context_firmware_command "setenv bootfile $_context_kernel_image" ".*"
+set rv [_context_firmware_command "setenv bootfile $_context_kernel_image" ".*"]
+if {!$rv} {
+	return 0
+}
 
 ##
 ## net_nfs
@@ -22,11 +25,11 @@ send -s "run net_nfs\r"
 expect {
 	timeout {
 		p_err "timed out after 'bootcmd'"
-		return
+		return 0
 	}
 	"Bad Magic Number" {
 		p_err "problems finding image?!"
-		return
+		return 0
 	}
 	"Linux version" {
 		set cur_context "kernel"
@@ -35,11 +38,11 @@ expect {
 		expect {
 			timeout {
 				p_err "timed out while waiting for login prompt"
-				return
+				return 0
 			}
 			-re ".*Kernel\\ panic" {
 				p_err "PANIC"
-				return
+				return 0
 			}
 			"login: " {
 				p_verb "login prompt OK"
@@ -51,9 +54,10 @@ expect {
 		expect {
 			timeout {
 				p_err "timed out while waiting for kernel prompt"
-				return
+				return 0
 			}
 			-re ".*$_context_kernel_prompt" {
+				return 1
 			}
 		}	
 	}

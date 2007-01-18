@@ -149,6 +149,7 @@ proc show_tc_details {tc} {
 proc run_cmds {cmds ctx} {
 
 	global dry_run board_name a_devices DEVICE_COMMON_NAME
+	set result 1
 	upvar $cmds c
 	
 	#
@@ -184,15 +185,19 @@ proc run_cmds {cmds ctx} {
 		set c [lindex $c 0]
 		# there's only one argument - check if we have an external
 		# script to execute
+		set res 1
 		if [regexp {^\!.*} $c] {
-			run_external_script $c
+			set res [run_external_script $c]
 			# we allow only one special (external) TC
-			return
+		#	return
 
 		} else {
+			set res 0
 			p_warn "command '$c' seems broken, skipping..."
-			return
+		#	return 0
 		}
+		p_verb "external script result: $res"
+		return $res
 	}
 	
 	for {set i 0} {$i < $max} {incr i 2} {
@@ -240,25 +245,30 @@ proc run_cmds {cmds ctx} {
 		}
 
 		##
-		## Time to execute command. Make sure we always get a prompt
-		## put in the log by issuing a space before the actual command.
+		## Time to execute command.
 		##
+		set res 0
 		if {$ctx == "firmware"} {
-			_context_firmware_command " \r" ".*"
-			_context_firmware_command $cmd $rsp
+			set res [_context_firmware_command $cmd $rsp]
 			
 		} elseif {$ctx == "kernel"} {
-			_context_kernel_command " \r" ".*"
-			_context_kernel_command $cmd $rsp
+			set res [_context_kernel_command $cmd $rsp]
 
 		} elseif {$ctx == "host"} {
-			_context_host_command " \r" ".*"
-			_context_host_command $cmd $rsp
+			set res [_context_host_command $cmd $rsp]
 
 		} else {
 			p_err "unknown context '$ctx' required?!" 1
 		}
+
+		p_verb "Command result: $res"
+		# a single command failure means failure of the whole sequence
+		if {$res == 0} {
+			set result 0
+		}
 	}
+
+	return $result
 }
 
 
@@ -337,9 +347,7 @@ proc tc_prologue {tc ctx} {
 proc run_tc {tc} {
 
 	global l_testcases a_testcases TIMEOUT
-
-	global timeout cur_context _context_firmware_prompt
-	global _context_kernel_prompt
+	global timeout cur_context
 
 	##
 	## header

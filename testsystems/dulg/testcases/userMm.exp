@@ -5,6 +5,11 @@
 global _context_firmware_prompt
 
 expect "*"
+if ![_context_firmware_get_prompt] {
+	p_err "could not get firmware prompt"
+	return 0
+}
+
 send -s "mm 100000\r"
 expect "?"
 
@@ -15,8 +20,15 @@ foreach v {0 aabbccdd 01234567} {
 }
 
 send -s ".\r"
-expect $_context_firmware_prompt
+expect {
+	timeout {
+		p_err "timed out while waiting for firmware prompt"
+		return 0
+	}
+	$_context_firmware_prompt
+}
 unset v
 
-_context_firmware_command "md 100000 10" ".*"
+set rv [_context_firmware_command "md 100000 10" ".*"]
 
+return $rv
