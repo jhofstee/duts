@@ -74,8 +74,8 @@ duts_device bubinga {
 #   FFFA0000 - FFFAFFFF environment
 #   FFFB0000 - FFFBFFFF environment
 #   FFFC0000 - FFFFFFFF U-Boot
-#
-#
+#   FFC00000 - FFD4FFFF kernel
+#   FFD50000 - FFEBFFFF ramdisk
 #
 duts_device luan {
 	Vars {
@@ -264,4 +264,58 @@ duts_device yosemite {
 	MakeTarget "yosemite"
 	MakeArch "ppc"
 	MakeCompile "ppc_4xxFP-"
+}
+
+#
+# yucca flash layout:
+#
+# Bank #1 - 512 KB in 8 Sectors
+#
+#   FFF00000 - FFF7FFFF
+#
+#
+# Bank #2 - 512 KB in 8 Sectors
+#
+#   FFF80000 - FFFF0000
+#
+#   layout:
+#   FFFA0000 - FFFAFFFF environment
+#   FFFB0000 - FFFFFFFF U-Boot
+#
+#
+# Bank #3 - 4096 KB in 71 Sectors
+# 
+#   E7C00000 - E7FFEFFF
+#
+#   layout:
+#   E7C00000 - E7D3FFFF kernel (20 sectors)
+#   E7D40000 - E7E9FFFF ramdisk (22 sectors)
+#
+#
+duts_device yucca {
+	Vars {
+		CFG_MTD_ERASE_DEVICE "mtd6"
+
+		CFG_FLASH_TST_START 	FFF00000
+		CFG_FLASH_TST_END	FFF7FFFF
+		CFG_FLASH_ERASE_START	FFF00000
+		CFG_FLASH_ERASE_END	FFF5FFFF
+
+		CFG_FLASH_TST_SIZE	40000
+
+		CFG_FLASH_PROT1_START	fffa0000
+		CFG_FLASH_PROT1_END	ffffffff
+
+		CFG_FLASH_ERASE_SECT	"1:0-1"
+		CFG_FLASH_ERASE_BANK	"1"
+		CFG_FLASH_TST_SECT	"1:0"
+
+		CFG_KERNEL_START	E7C00000
+		CFG_KERNEL_END 	 	E7D3FFFF
+		CFG_RAMDISK_START	E7D40000
+		CFG_RAMDISK_END		E7E9FFFF
+	}
+	MakeTarget "yucca"
+	MakeArch "ppc"
+	MakeCompile "ppc_4xx-"
 }
