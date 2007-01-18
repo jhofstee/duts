@@ -349,6 +349,8 @@ proc run_tc {tc} {
 	global l_testcases a_testcases TIMEOUT
 	global timeout cur_context
 
+	set rv 1
+
 	##
 	## header
 	##
@@ -384,7 +386,10 @@ proc run_tc {tc} {
 	##
 	if {[in_array a_testcases "$tc,pre"]} {
 		p_verb "running commands from Pre section"
-		run_cmds a_testcases($tc,pre) $context
+		if ![run_cmds a_testcases($tc,pre) $context] {
+			p_err "problems while executing Pre section"
+			set rv 0
+		}
 	} else {
 		p_verb "no Pre section for test case '$tc'"
 	}
@@ -399,7 +404,10 @@ proc run_tc {tc} {
 	##
 	## proper TC commands
 	##
-	run_cmds a_testcases($tc,commands) $context
+	if ![run_cmds a_testcases($tc,commands) $context] {
+		p_err "problems while while executing test cases"
+		set rv 0
+	}
 	
 	##
 	## logging off
@@ -410,13 +418,18 @@ proc run_tc {tc} {
 	## post-commands
 	##
 	if {[in_array a_testcases "$tc,post"]} {
-		run_cmds a_testcases($tc,post) $context
+		if ![run_cmds a_testcases($tc,post) $context] {
+			p_err "problems while while executing Post section"
+			set rv 0
+		}
 	} else {
 		p_verb "no Post section for test case '$tc'"
 	}
 
 	# reset default timeout
-	set timeout $TIMEOUT 
+	set timeout $TIMEOUT
+
+	return $rv
 }
 
 
@@ -426,15 +439,32 @@ proc run_tc {tc} {
 # ln: name of a list
 #
 proc run_tc_list {ln} {
+	
+	global board_name
 
 	upvar $ln l
 
 	##
-	## run TCs from the list
+	## Open a summary logfile.
+	##
+	set rfn "${board_name}_results.log"
+	if [catch {set rf [open $rfn w+]} err] {
+		p_err "problems open'ing '$rfn'"
+		puts "  $err"
+		exit1
+	}
+
+	##
+	## Run TCs from the list, for each put an entry to a result log
+	## indicating whether we passed or failed.
 	##
 	foreach tc $l {
-		run_tc $tc
+		set res [run_tc $tc]
+		set result [expr {($res == 0) ? "FAIL" : "PASS"}]
+		puts $rf "$tc:\t\t\t $result"
 	}
+	
+	close $rf
 
 	p_banner "finished processing test cases" "#"
 }
