@@ -18,7 +18,20 @@ expect {
 	"Linux version" {
 		set cur_context "kernel"
 		set timeout 300
-		expect "BusyBox"
+
+		expect {
+			timeout {
+				p_err "timed out whiel waiting for BusyBox"
+				return
+			}
+			-re ".*Kernel\\ panic" {
+				p_err "PANIC"
+				return
+			}
+			"BusyBox" {
+				p_verb "BB OK"
+			}
+		}
 
 		set timeout $TIMEOUT
 		send -s "\r"
@@ -27,7 +40,7 @@ expect {
 				p_err "timed out while waiting for kernel prompt"
 				return
 			}
-			"$_context_kernel_prompt" {
+			-re ".*$_context_kernel_prompt" {
 			}
 		}
 	}

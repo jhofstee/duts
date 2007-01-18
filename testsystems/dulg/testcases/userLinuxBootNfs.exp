@@ -18,7 +18,20 @@ expect {
 	"Linux version" {
 		set cur_context "kernel"
 		set timeout 300
-		expect "login: "
+
+		expect {
+			timeout {
+				p_err "timed out while waiting for login prompt"
+				return
+			}
+			-re ".*Kernel\\ panic" {
+				p_err "PANIC"
+				return
+			}
+			"login: " {
+				p_verb "login prompt OK"
+			}
+		}
 
 		set timeout $TIMEOUT 
 		send -s "root\r"
