@@ -170,7 +170,7 @@ proc run_cmds {cmds ctx} {
 #		p_verb "global'ling $v"
 		global $v
 	}
-	# this is a built-in keyword often used
+	# this is a built-in keyword often used - add it to the var list
 	set BOARD $board_name
 	lappend l_vars "BOARD"
 

@@ -180,7 +180,7 @@ proc valid_devices {} {
 	set rv 1
 
 	set mandatory_methods {_device_power_on _device_power_off\
-	_device_connect_target _device_connect_host}
+				_device_connect_target _device_connect_host}
 
 	foreach mm $mandatory_methods {
 		if ![proc_exists $mm] {

@@ -61,7 +61,7 @@ proc _device_connect_target {} {
 	if [catch {spawn -noecho $con_cmd $board_name}] {
 		p_err "couldn't spawn 'connect'?!" 1
 	}
-		
+
 	# TODO when the port is occupied by another connection it is not
 	# reliably detected and handled
 
@@ -147,7 +147,7 @@ proc _device_current_context {} {
 	set ctx "off"
 	set spawn_id $console_con
 
-#TODO recover from Linux login should really be elsewhere as is context-specific
+#TODO recovery from Linux login should really be elsewhere as is context-specific
 
 	if [is_powered_on] {
 		send -s " \r" 
