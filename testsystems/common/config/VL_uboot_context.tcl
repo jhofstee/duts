@@ -81,15 +81,16 @@ proc _context_firmware_command {cmd rsp {slp 0.35}} {
 	set p $_context_firmware_prompt
 	set ok 1
 
-p_verb "CMD '$cmd', RSP '$rsp'"
-
-	# put the prompt string in log
-	send_user $p
+	p_verb "CMD '$cmd', RSP '$rsp'"
 
 	send -s "$cmd\r"
 
 	sleep $slp
 	expect {
+		-re "Unknown\\ command.*$p" {
+			p_verb "Hmm, no command compiled in.."
+			return
+		}
 		-re "($rsp)(.*)$p" { p_verb "firmware prompt OK" }
 		timeout {
 			p_err "timed out while waiting on cmd '$cmd'... Sure\

@@ -240,15 +240,19 @@ proc run_cmds {cmds ctx} {
 		}
 
 		##
-		## time to execute command
+		## Time to execute command. Make sure we always get a prompt
+		## put in the log by issuing a space before the actual command.
 		##
 		if {$ctx == "firmware"} {
+			_context_firmware_command " \r" ".*"
 			_context_firmware_command $cmd $rsp
 			
 		} elseif {$ctx == "kernel"} {
+			_context_kernel_command " \r" ".*"
 			_context_kernel_command $cmd $rsp
 
 		} elseif {$ctx == "host"} {
+			_context_host_command " \r" ".*"
 			_context_host_command $cmd $rsp
 
 		} else {
@@ -459,12 +463,38 @@ proc check_tc_list {list} {
 	}		
 }
 
+#
+# loads TCs from an individual .tc file
+#
+# f - can be a full path to the file or just a TC file name within current
+# testsystem's 'testcases' subdir i.e. specified by one of the following
+# convetions:
+#
+#   - ./duts -v t luan testsystems/dulg/testcases/01_flash.tc
+#   - ./duts -v t luan 01_flash.tc
+#
 proc load_tc_file {f} {
 
-	global tc_filename
+	global tc_filename working_dir TC_DESCR_DIR
 
 	if ![valid_file $f] {
-		p_err "could not access TC file '$f'" 1
+		#
+		# Problem with the file - give it a 2nd chance and search for
+		# it in the 'testcases' subdir, in case it was not the full
+		# path.
+		#
+		set d "$working_dir/$TC_DESCR_DIR"
+		if ![valid_dir $d] {
+			p_err "Invalid testcases dir: $d" 1
+		}
+		set f2 "$d/$f"
+		
+		if ![valid_file $f2] {
+			# All failed, give up.
+			p_err "could not access TC file '$f'" 1
+		} else {
+			set f $f2
+		}
 	}
 
 	set tc_filename $f

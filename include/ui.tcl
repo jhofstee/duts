@@ -255,7 +255,6 @@ proc cmd_t_parse_params {a} {
 
 	# by default the params list gives file names with test groups
 	set list_type "files"
-	set files_ok "yes"
 
 	set selected_config ""
 
@@ -288,18 +287,12 @@ proc cmd_t_parse_params {a} {
 
 		} else {
 			# element is a TC file name
-
-			if ![valid_file $arg] {
-				p_err "problems with accessing file: $arg"
-				set files_ok "no"
-				continue
-			}
 			p_verb "loading TC file $arg"
 
 			# load the file with TC description(s)
 			load_tc_file $arg
 
-			# schedule all TCs loaded from file(s) tu run
+			# schedule all TCs loaded from file(s) to run
 			set l_runlist $l_testcases
 		}
 	}
@@ -323,9 +316,9 @@ proc cmd_t_parse_params {a} {
 		}
 	}
 
-	if {$files_ok != "yes"} {
-		p_err "Invalid test case file(s)...?!" 1
-	}
+#	if {$files_ok != "yes"} {
+#		p_err "Invalid test case file(s)...?!" 1
+#	}
 }
 
 
