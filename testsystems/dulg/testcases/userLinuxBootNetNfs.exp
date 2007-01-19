@@ -41,8 +41,17 @@ expect {
 				return 0
 			}
 			-re ".*Kernel\\ panic" {
-				p_err "PANIC"
-				return 0
+				##
+				## This is really bad - we cannot be sure if
+				## the crash does not confuse test cases that
+				## were scheduled for execution after this one.
+				##
+				p_err "PANIC!"
+				if [ask_yesno "continue execution? "] {
+					return 0
+				} else {
+					exit1
+				}
 			}
 			"login: " {
 				p_verb "login prompt OK"
