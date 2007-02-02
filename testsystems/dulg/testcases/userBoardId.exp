@@ -1,0 +1,14 @@
+#
+# 
+#
+
+set body "All %BOARDNAME% boards use a serial number for identification
+purposes. Also, all boards have at least one ethernet (MAC) address
+assigned. You may lose your warranty on the board if this data gets
+lost. Before installing U-Boot or otherwise changing the software
+configuration of a board (like erasing some flash memory) you should
+make sure that you have all necessary information about such data."
+
+send_user -- "$body"
+
+return 1

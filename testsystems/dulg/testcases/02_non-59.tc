@@ -45,9 +45,19 @@ duts_tc UBootHelpLong {
 	}
 }
 
+duts_tc UBootSetSerial {
+ 	Type host
+ 	Commands "!userSetSerial.exp"
+}
+
 duts_tc UBootPrintenvBoardID {
  	Type u-boot
  	Commands {
 		"printenv serial# ethaddr" ".*"
 	}
+}
+
+duts_tc BoardId {
+ 	Type host
+ 	Commands "!userBoardId.exp"
 }
