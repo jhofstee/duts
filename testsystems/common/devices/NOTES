@@ -1,4 +1,7 @@
 #
+# Be VERY careful when defining these!
+#
+#
 # 1. Protected range(s), NOT to be altered during TC steps (usually containing
 #    U-Boot and env):
 # 
@@ -10,7 +13,7 @@
 #
 #    CFG_FLASH_TST_START - CFG_FLASH_TST_END
 #    CFG_FLASH_ERASE_START - CFG_FLASH_ERASE_END
-#    CFG_FLASH_ERASE_SECT
+#    CFG_FLASH_ERASE_SECT (sector numbers are 0-based!)
 #    CFG_FLASH_ERASE_BANK
 #    CFG_FLASH_TST_SIZE - must be <= (CFG_FLASH_TST_END - CFG_FLASH_TST_START)
 #
