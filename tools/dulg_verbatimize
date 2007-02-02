@@ -1,0 +1,16 @@
+#!/bin/bash
+#
+# prepares .log files for use with DULG wiki (adds tags, renames, makes
+# tarball) $1: board name 
+#
+
+if test -z "$1"; then
+	echo "Missing board name"
+	exit 1
+fi
+
+for f in `ls`; do n=`echo $f | sed 's/\.log$/\.txt/'`;
+	echo "<verbatim>" > $n; cat $f >> $n; echo "</verbatim>" >> $n;
+done
+
+tar -cvzf $1_logs.tgz *.txt
