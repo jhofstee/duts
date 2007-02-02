@@ -1,0 +1,32 @@
+#
+# All we do here is pushing the contents of the BDI config file to DUTS output
+# i.e.  the [logged to file] screen
+#
+
+global board_name
+
+##
+## try to find a BDI config file
+##
+set fn "/tftpboot/$board_name/$board_name.cfg"
+
+if ![valid_file $fn] {
+	p_err "problems accessing BDI config file: '$fn'"
+	return 0
+}
+
+if [catch {set f [open $fn r]} err] {
+	p_err "problems open'ing '$fn'"
+	puts "  $err"
+	return 0
+}
+
+while {[gets $f line] >= 0} {
+	send_user -- "$line\n"
+}
+
+close $f
+unset scrfn
+unset scrf
+
+return 1
