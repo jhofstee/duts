@@ -26,7 +26,7 @@ while {[gets $f line] >= 0} {
 }
 
 close $f
-unset scrfn
-unset scrf
+unset fn
+unset f
 
 return 1

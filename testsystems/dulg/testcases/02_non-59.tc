@@ -66,3 +66,15 @@ duts_tc BDI2000Config {
  	Type host
  	Commands "!userBDI2000Config.exp"
 }
+
+# this will create an empty file and this is what is needed in most cases
+duts_tc LinuxConfig {
+ 	Type host
+ 	Commands { "" ".*" }
+}
+
+# this will create an empty file and this is what is needed in most cases
+duts_tc UBootConfig {
+ 	Type host
+ 	Commands { "" ".*" }
+}
