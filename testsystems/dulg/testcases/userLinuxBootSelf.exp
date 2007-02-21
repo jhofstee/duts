@@ -46,6 +46,9 @@ expect {
 			"BusyBox" {
 				p_verb "BB OK"
 			}
+			-re ".*Application\\ running" {
+				return 1
+			}
 		}
 
 		set timeout $TIMEOUT
