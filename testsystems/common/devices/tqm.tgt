@@ -2,6 +2,48 @@
 # Definitions for TQ Component boards
 #
 
+#
+# TQM8272 flash layout:
+#
+# Bank #1 - 8 MB in 64 Sectors (1 sector = 128KB)
+#
+#   40000000 - 407FFFFF
+#
+#   layout:
+#
+#   40000000 - 4003FFFF U-Boot
+#   40040000 - 4005FFFF environment
+#   40060000 - 4007FFFF environment
+#   40080000 - 401FFFFF kernel (12 sectors)
+#   40200000 - 4039FFFF ramdisk (13 sectors)
+#
+duts_device tqm8272 {
+	Vars {
+		CFG_KERNEL_START	40080000
+		CFG_KERNEL_END		401FFFFF
+		CFG_RAMDISK_START	40200000
+		CFG_RAMDISK_END		4039FFFF
+		CFG_MTD_ERASE_DEVICE	"mtd5"
+
+		CFG_FLASH_TST_START	403A0000
+		CFG_FLASH_TST_END	407FFFFF
+
+		CFG_FLASH_ERASE_START	403A0000
+		CFG_FLASH_ERASE_END	403BFFFF
+		CFG_FLASH_TST_SIZE	10000
+
+		CFG_FLASH_PROT1_START	40000000
+		CFG_FLASH_PROT1_END	4007FFFF
+
+		CFG_FLASH_ERASE_SECT	"1:29"
+		CFG_FLASH_ERASE_BANK	"1"
+		CFG_FLASH_TST_SECT	"1:29"
+	}
+	MakeTarget	"TQM8272"
+	MakeArch	"ppc"
+	MakeCompile	"ppc_82xx-"
+}
+
 duts_device tqm834x {
 	Vars {
 		CFG_KERNEL_START	80060000
