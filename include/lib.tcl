@@ -47,7 +47,7 @@ proc p_warn {msg} {
 # exit: if "1" causes to stop execution
 #
 proc p_err {msg {exit "0"}} {
-	puts "ERROR: $msg"
+	puts "\nERROR: $msg"
 	if {$exit == "1"} {
 		exit1
 	}

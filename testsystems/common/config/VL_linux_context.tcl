@@ -46,6 +46,10 @@ proc _context_kernel_handler {} {
 		p_err "problems validating kernel file" 1
 	}
 
+	if ![_context_firmware_get_prompt] {
+		p_err "could not get firmware prompt" 1
+	}
+
 	##
 	## set bootfile
 	##
@@ -58,23 +62,54 @@ proc _context_kernel_handler {} {
 
 	set timeout 120
 	send -s "run net_nfs\r"
+
 	expect {
 		timeout {
-			p_err "timed out after 'run net_nfs'" 1
+			p_err "timed out after 'bootcmd'"
+			return 0
 		}
-		"Uncompressing Kernel Image" {
+		"Bad Magic Number" {
+			p_err "problems finding image?!"
+			return 0
 		}
-	}
+		"Linux version" {
+			set cur_context "kernel"
+			set timeout 300
 
-	set timeout 300
-	expect "login: "
+			expect {
+				timeout {
+					p_err "timed out while waiting for\
+					       login prompt" 1
+				}
+				-re ".*Kernel\\ panic" {
+					##
+					## This is really bad - we cannot be
+					## sure if the crash does not confuse
+					## test cases that were scheduled for
+					## execution after this one.
+					##
+					p_err "PANIC!"
+					if [ask_yesno "continue execution? "] {
+						return 
+					} else {
+						exit1
+					}
+				}
+				"login: " {
+					p_verb "login prompt OK"
+				}
+			}
 
-	set timeout $TIMEOUT 
-	send -s "root\r"
-	expect {
-		$p { }
-		timeout {
-			p_err "timed out while logging on root" 1
+			set timeout $TIMEOUT 
+			send -s "root\r"
+			expect {
+				timeout {
+					p_err "timed out while waiting for\
+					       kernel prompt" 1
+			}
+				-re ".*$_context_kernel_prompt" {
+				}
+			}
 		}
 	}
 }
