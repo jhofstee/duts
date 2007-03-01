@@ -1,0 +1,107 @@
+#
+# Run the basic LTP suite
+#
+# - check environment: LTP present
+# - run LTP
+#
+# TODO add comment about LTP assumptions, version, already installed etc.
+#
+
+global _context_kernel_prompt board_name
+set p $_context_kernel_prompt
+set ltp_dir "/tmp/ltp-full-20061222"
+
+expect "*"
+
+##
+## Get a new bash shell on the target, ignore rc, profile so we have a clean
+## output without color formatting and such
+##
+set cmd "bash --norc --noprofile"
+set res [_context_kernel_command $cmd ".*"]
+if !{$res} {
+	p_err "could not execute a new shell"
+	return 0
+}
+
+##
+## Check if the LTP is installed
+##
+set c "ls -d $ltp_dir"
+send -s "$c\r"
+expect {
+	-re ".*$ltp_dir:\\ No\\ such\\ file\\ or\\ directory.*$p" {
+		p_err "no LTP directory. Please install the LTP into '$ltp_dir'"
+		return 0
+	}
+	-re ".*$ltp_dir.*$p" { p_verb "LTP dir exists" }
+	timeout {
+		p_err "timed out waiting for shell prompt"
+		return 0
+	}
+}
+
+##
+## cd to the LTP dir
+##
+set cmd "cd $ltp_dir"
+set res [_context_kernel_command $cmd ".*"]
+if !{$res} {
+	p_err "could not 'cd' to the LTP dir"
+	return 0
+}
+
+
+##
+## run basic LTP suite
+##
+
+# ./runltp -p -l <board_name>.log
+# ...
+# <<<test_start>>>
+# ...
+# ...
+# <<<test_end>>>
+#INFO: pan reported some tests FAIL
+#LTP Version: LTP-20061222
+#        
+#       ###############################################################"
+#        
+#            Done executing testcases."
+#            result log is in the /tmp/ltp-full-20061222/results directory"
+#            LTP Version:  LTP-20061222
+#       ###############################################################"
+#
+
+# number of LTP execution rounds
+set rounds 3
+
+for {set i 1} {$i <= $rounds} {incr i 1} {
+	send_user -- "\n>>> LTP round '$i' <<<\n"
+
+	set results_log [format "%s_%02d.log" $board_name $i]
+
+	set c "./runltp -p -l $results_log"
+	send -s "$c\r"
+	set timeout 20
+	expect {
+		timeout {
+			p_err "timed out while starting up LTP test suite"
+			return 0
+		}
+		"<<<test_start>>>" {
+			p_verb "LTP started OK"
+			set timeout 8100 
+			expect {
+				timeout {
+					p_err "timed out while waiting for LTP finish"
+					return 0
+				}
+				-re ".*Done\\ executing\\ testcases.*$p" {
+					p_verb "LTP round finished"
+				}
+			}
+		}
+	}
+}
+return 1;

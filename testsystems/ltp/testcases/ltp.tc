@@ -1,0 +1,10 @@
+
+duts_tc RunAllTests {
+	Type linux 
+	Commands "!userRunAllTests.exp"
+}
+
+#duts_tc NetworkTests {
+#	Type linux
+#	Commands "!userNetworkTests.exp"
+#}
