@@ -15,7 +15,7 @@ set repo_dst "./${linux}${duts_ext}"
 set build_type "linux-26"
 
 #set toolchain "/opt/eldk-4.0-2006-02-19/usr/bin/"
-set toolchain "/opt/eldk-4.1/usr/bin/"
+#set toolchain "/opt/eldk-4.1/usr/bin/"
 
 set timeout_co 1600 
 set timeout_build 1000

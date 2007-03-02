@@ -16,13 +16,14 @@
 # 0xFFB00000 - 0xFFFFFFFF Spare (5MB)
 #
 duts_device v38b {
-	MakeTarget "v38b"
-	MakeArch "ppc"
-	MakeCompile "ppc_6xx-"
+	MakeTarget	"v38b"
+	MakeArch	"ppc"
+	MakeCompile	"ppc_6xx-"
+	MakeToolPath	"/opt/eldk-4.1-2007-01-19/usr/bin/"
 
 	Vars {
 		CFG_RAM_WS_BASE 	200000
-
+		CFG_ROOTPATH		"/opt/eldk-4.1-2007-01-19/ppc_6xx/"
 		CFG_KERNEL_START	FF100000
 		CFG_KERNEL_END		FF1FFFFF
 		CFG_RAMDISK_START	FF200000

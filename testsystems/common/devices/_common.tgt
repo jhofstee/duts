@@ -6,7 +6,9 @@ duts_device _common {
 
 	Internals "devices/VL_devices.tcl"
 
+	MakeToolPath "/opt/eldk-4.1/usr/bin/"
+
 	Vars {
-		CFG_RAM_WS_BASE 100000
+		CFG_RAM_WS_BASE	100000
 	}
 }

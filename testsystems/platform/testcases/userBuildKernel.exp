@@ -82,6 +82,7 @@ proc checkout {{to 1600}} {
 	return 1
 }
 
+
 #
 # -t linux-26
 # -n <board_name>
@@ -100,7 +101,6 @@ proc build {{to 600}} {
 	global a_devices board_name _context_kernel_image
 	upvar tools_dir tools_dir
 	upvar tool_build tool_build
-	upvar toolchain toolchain
 	upvar build_type build_type
 
 	# note the repo location we checked out to in a previous (checkout)
@@ -117,20 +117,25 @@ proc build {{to 600}} {
 	##
 	## get make target name for our board
 	##
-	set target $a_devices($board_name,maketarget) 
+	set target [get_device_attr "maketarget"]
 
 	##
 	## get ARCH, CROSS_COMPILE values
 	##
-	set arch $a_devices($board_name,makearch)
-	set cross $a_devices($board_name,makecompile)
+	set arch [get_device_attr "makearch"]
+	set cross [get_device_attr "makecompile"]
+
+	##
+	## get toolchain path 
+	##
+	set toolchain [get_device_attr "maketoolpath"]
 
 	##
 	## run build_image to build the image 
 	##
 	set tool_cmd "$tools_dir/$tool_build"
 	set tool_arg "-t $build_type -s $src -d $dst -n $target -m $toolchain\
-	-a $arch -c $cross -b -to $to -nc"
+	-a $arch -c $cross -b -to $to"
 
 	if [file exists $dst] {
 		p_warn "destination kernel image already exists and will be\

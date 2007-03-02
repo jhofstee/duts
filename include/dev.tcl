@@ -13,7 +13,7 @@ set device_errors 0
 proc duts_device {name args} {
 
 	global cur_device was_common_device DEVICE_COMMON_NAME
-	global l_boards a_devices device_errors
+	global l_boards device_errors
 
 	set cur_device $name
 	
@@ -86,6 +86,9 @@ proc MakeCompile {p} {
 	make "compile" $p
 }
 
+proc MakeToolPath {p} {
+	make "toolpath" $p
+}
 
 #
 # processes Vars section in duts_device description
@@ -137,6 +140,30 @@ proc Vars {vars} {
 }
 
 #
+# Retrieves attribute for the current board, or the _common device.
+#
+proc get_device_attr {a} {
+	global a_devices board_name DEVICE_COMMON_NAME
+	set rv ""
+	
+	if ![in_array a_devices "$board_name,$a" ] {
+		if ![is_device_common_defined $a ] {
+			p_err "attribute '$a' not found for device\
+			      '$board_name'" 1
+
+		} else {
+			p_verb "attribute '$a' found for common device, OK"
+			set rv $a_devices($DEVICE_COMMON_NAME,$a)
+		}
+	} else {
+		p_verb "attribute '$a' defined for device '$board_name', OK"
+		set rv  $a_devices($board_name,$a)
+	}
+
+	return $rv
+}
+
+#
 # checks if entry $ent for _common section is defined in a_devices array,
 # returns 1 if found, 0 otherwise
 #
@@ -175,7 +202,7 @@ proc is_device_board_defined {b ent} {
 #
 proc valid_devices {} {
 
-	global a_devices l_boards DEVICE_COMMON_NAME board_name
+	global a_devices l_boards board_name
 
 	set rv 1
 
@@ -205,13 +232,15 @@ proc valid_devices {} {
 	##
 	## verify make params are present
 	##
-	set makeparams {MakeTarget MakeArch MakeCompile}
+	set makeparams {MakeTarget MakeArch MakeCompile MakeToolPath}
 	foreach mp $makeparams {
 		set mpp [string tolower $mp]
-		if [in_array a_devices "$board_name,$mpp" ] {
-			p_verb "make param '$mp' found, OK"
-		} else {
-			p_verb "make param '$mp' not found?!"
+		if ![in_array a_devices "$board_name,$mpp" ] {
+			if ![is_device_common_defined $mpp ] {
+				p_warn "make param '$mp' not found?!"
+			} else {
+				p_verb "common make param '$mp'"
+			}
 		}
 	}
 
@@ -316,6 +345,9 @@ proc show_device {} {
 		set a ""
 	}
 	if [catch {set c $a_devices($board_name,makecompile)}] {
+		set c ""
+	}
+	if [catch {set c $a_devices($board_name,maketoolpath)}] {
 		set c ""
 	}
 	puts "  vars set: $vl"
