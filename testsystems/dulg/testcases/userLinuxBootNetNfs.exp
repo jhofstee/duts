@@ -1,11 +1,27 @@
 
 global _context_kernel_prompt _context_kernel_image cur_context TIMEOUT
+global CFG_ROOTPATH
+
+##
+## Check rootpath 
+##
+if ![info exists CFG_ROOTPATH] {
+	p_err "variable CFG_ROOTPATH is not set, please update the\
+	       .tgt definition file for your board"
+	       return 0
+} else {
+	p_verb "CFG_ROOTPATH '$CFG_ROOTPATH'"
+	if ![valid_dir $CFG_ROOTPATH] {
+		p_err "problem validating rootpath: '$CFG_ROOTPATH'"
+		return 0
+	}
+}
 
 ##
 ## Check if we have kernel file to load
 ##
 if ![valid_file $_context_kernel_image] {
-	p_err "problems with kernel file?!"
+	p_err "problems with kernel file '$_context_kernel_image'?!"
 	return 0
 }
 
@@ -13,6 +29,14 @@ if ![valid_file $_context_kernel_image] {
 ## Set kernel file name to boot
 ##
 set rv [_context_firmware_command "setenv bootfile $_context_kernel_image" ".*"]
+if {!$rv} {
+	return 0
+}
+
+##
+## Set rootpath 
+##
+set rv [_context_firmware_command "setenv rootpath $CFG_ROOTPATH" ".*"]
 if {!$rv} {
 	return 0
 }

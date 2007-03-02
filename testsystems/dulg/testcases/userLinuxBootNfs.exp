@@ -3,11 +3,35 @@
 #
 
 global _context_kernel_prompt cur_context TIMEOUT
+global CFG_ROOTPATH
+
+##
+## Check rootpath 
+##
+if ![info exists CFG_ROOTPATH] {
+	p_err "variable CFG_ROOTPATH is not set, please update the\
+	       .tgt definition file for your board"
+	       return 0
+} else {
+	p_verb "CFG_ROOTPATH '$CFG_ROOTPATH'"
+	if ![valid_dir $CFG_ROOTPATH] {
+		p_err "problem validating rootpath: '$CFG_ROOTPATH'"
+		return 0
+	}
+}
 
 expect "*"
 
 if ![_context_firmware_get_prompt] {
 	p_err "could not get firmware prompt"
+	return 0
+}
+
+##
+## Set rootpath 
+##
+set rv [_context_firmware_command "setenv rootpath $CFG_ROOTPATH" ".*"]
+if {!$rv} {
 	return 0
 }
 

@@ -40,6 +40,20 @@ proc _context_kernel_handler {} {
 	expect "*"
 
 	##
+	## check rootpath 
+	##
+	global CFG_ROOTPATH
+	if ![info exists CFG_ROOTPATH] {
+		p_err "variable CFG_ROOTPATH is not set, please update the\
+		       .tgt definition file for your board" 1
+	} else {
+		p_verb "CFG_ROOTPATH '$CFG_ROOTPATH'"
+		if ![valid_dir $CFG_ROOTPATH] {
+			p_err "problem validating rootpath: '$CFG_ROOTPATH'" 1
+		}
+	}
+
+	##
 	## check if the kernel file is ok
 	##
 	if ![valid_kernel_file $_context_kernel_image] {
@@ -54,6 +68,11 @@ proc _context_kernel_handler {} {
 	## set bootfile
 	##
 	_context_firmware_command "setenv bootfile $_context_kernel_image" ".*"
+
+	##
+	## set rootpath
+	##
+	_context_firmware_command "setenv rootpath $CFG_ROOTPATH" ".*"
 
 	##
 	## run net_nfs
