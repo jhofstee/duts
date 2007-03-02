@@ -11,7 +11,11 @@ duts_device mpc8349emds {
 }
 
 duts_device lite5200b {
-	MakeTarget "lite5200b"
-	MakeArch "ppc"
-	MakeCompile "ppc_6xx-"
+	MakeTarget	"lite5200b"
+	MakeArch	"ppc"
+	MakeCompile	"ppc_6xx-"
+
+	Vars {
+		CFG_ROOTPATH		"/opt/eldk-4.1-2007-01-19/ppc_6xx/"
+	}
 }
