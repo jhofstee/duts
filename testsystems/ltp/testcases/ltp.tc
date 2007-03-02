@@ -1,10 +1,10 @@
 
-duts_tc RunAllTests {
+duts_tc LTPRunAllTests {
 	Type linux 
 	Commands "!userRunAllTests.exp"
 }
 
-#duts_tc NetworkTests {
+#duts_tc LTPNetworkTests {
 #	Type linux
 #	Commands "!userNetworkTests.exp"
 #}
