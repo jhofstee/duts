@@ -217,6 +217,7 @@ proc run_cmds {cmds ctx} {
 			if [catch {set cmd [subst $cmd]}] {
 				p_err "substitution failed on the following:"
 				puts "  $cmd"
+				set result 0
 				continue
 			}
 		}
