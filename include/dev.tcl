@@ -43,12 +43,13 @@ proc duts_device {name args} {
 # path is relative to $working_dir
 #
 proc Internals {p} {
-	global cur_device a_devices device_errors working_dir
+#	global cur_device a_devices device_errors working_dir
+	global cur_device a_devices device_errors BASE_DIR
 	
 	##
 	## validate file
 	##
-	set f "$working_dir/$p"
+	set f "$BASE_DIR/$p"
 	if ![valid_file $f] {
 		p_err "problems validating file: $f"
 		set device_errors 1
@@ -237,7 +238,7 @@ proc valid_devices {} {
 		set mpp [string tolower $mp]
 		if ![in_array a_devices "$board_name,$mpp" ] {
 			if ![is_device_common_defined $mpp ] {
-				p_warn "make param '$mp' not found?!"
+				p_verb "make param '$mp' not found?!"
 			} else {
 				p_verb "common make param '$mp'"
 			}
@@ -256,8 +257,10 @@ proc load_all_devices {{e ""}} {
 
 	global working_dir board_name l_boards
 	global DEVICE_DESCR_DIR DEVICE_DESCR_EXT DEVICE_COMMON_FILE
+	global BASE_DIR
 	
-	set d "$working_dir/$DEVICE_DESCR_DIR"
+#	set d "$working_dir/$DEVICE_DESCR_DIR"
+	set d "$BASE_DIR/$DEVICE_DESCR_DIR"
 	if ![valid_dir $d] {
 		p_err "Invalid device dir: $d" 1
 	}

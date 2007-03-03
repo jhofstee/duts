@@ -68,7 +68,7 @@ set _context_firmware_image ""
 #
 #
 proc context {type name c} {
-	global cur_config config_errors working_dir
+	global cur_config config_errors BASE_DIR
 	global _context_kernel _context_firmware _context_host
 	global _context_kernel_prompt _context_kernel_image
 	global _context_firmware_prompt _context_firmware_image
@@ -104,9 +104,8 @@ proc context {type name c} {
 			}
 			"descr" {
 				# this is a file with internal context
-				# descripton - validate and source it; note
-				# this is relative to current working dir
-				set p "$working_dir/$val"
+				# descripton - validate and source it
+				set p "$BASE_DIR/$val"
 				if ![valid_file $p] {
 					set config_errors 1
 					continue
@@ -186,16 +185,17 @@ proc valid_configs {} {
 #
 proc load_configs {{e ""}} {
 
-	global working_dir CONFIG_DESCR_DIR CONFIG_DESCR_EXT configs_no 
+#	global working_dir CONFIG_DESCR_DIR CONFIG_DESCR_EXT configs_no 
+	global BASE_DIR CONFIG_DESCR_DIR CONFIG_DESCR_EXT configs_no 
 	
-	set d "$working_dir/$CONFIG_DESCR_DIR"
+	set d "$BASE_DIR/$CONFIG_DESCR_DIR"
 	if ![valid_dir $d] {
 		p_err "Invalid device dir: $d" 1
 	}
 
-	set e [ expr {($e == "") ? $CONFIG_DESCR_EXT : $e}]
+	set e [expr {($e == "") ? $CONFIG_DESCR_EXT : $e}]
 	
-	foreach f [ find_files $d $e ] {
+	foreach f [find_files $d $e] {
 		p_verb "loading configs from $f"
 
 		# just sourcing the file does the trick - a_configs hash
