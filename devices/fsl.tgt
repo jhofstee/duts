@@ -1,0 +1,25 @@
+#
+# Definitions for Freescale boards 
+#
+
+duts_device mpc8349emds {
+	MakeTarget	"mpc834x_sys"
+	MakeArch	"ppc"
+	MakeCompile	"ppc_6xx-"
+
+	Vars {
+		CFG_KERNEL_START	80060000
+		CFG_KERNEL_END		8015ffff
+		CFG_RAMDISK_START	80160000
+	}
+}
+
+duts_device lite5200b {
+	MakeTarget	"lite5200b"
+	MakeArch	"ppc"
+	MakeCompile	"ppc_6xx-"
+
+	Vars {
+		CFG_ROOTPATH		"/opt/eldk-4.1-2007-01-19/ppc_6xx/"
+	}
+}
