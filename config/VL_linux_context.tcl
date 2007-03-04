@@ -77,8 +77,6 @@ proc _context_kernel_handler {} {
 	##
 	## run net_nfs
 	##
-#	_context_firmware_command "run net_nfs" "ENET"
-
 	set timeout 120
 	send -s "run net_nfs\r"
 

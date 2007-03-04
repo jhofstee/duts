@@ -70,35 +70,35 @@ duts_device _common {
 	# commands - we want these to be NOT substituted (by using {} brackets
 	# instead of "" as delimiters), so it's not allowed to use both DUTS
 	# and U-Boot vars in the same command line - please visit TC
-	# UBootInstallRamdisk for example (testsystems/dulg/testcases/non-59.tc)
+	# UBootInstallRamdisk for example (testsystems/dulg/testcases/02_non-59.tc)
 	######################################################################
 	Vars {
-		CFG_RAM_WS_BASE 100000
-		CFG_MTD_ERASE_DEVICE "mtd6"
+		CFG_RAM_WS_BASE		100000
+		CFG_MTD_ERASE_DEVICE	"mtd6"
 	}
 }
 
 duts_device bamboo {
 	Vars {
-		CFG_KERNEL_START ffc00000
-		CFG_KERNEL_END	 ffd7ffff
-		CFG_RAMDISK_START ffd80000
-		CFG_RAMDISK_END	  fff4ffff
+		CFG_KERNEL_START	ffc00000
+		CFG_KERNEL_END		ffd7ffff
+		CFG_RAMDISK_START	ffd80000
+		CFG_RAMDISK_END		fff4ffff
 
-		CFG_FLASH_TST_START 87f00000
-		CFG_FLASH_TST_END 87f7ffff
-		CFG_FLASH_ERASE_START 87f00000
-		CFG_FLASH_ERASE_END 87f2ffff
-		CFG_FLASH_TST_SIZE 10000
+		CFG_FLASH_TST_START	87f00000
+		CFG_FLASH_TST_END	87f7ffff
+		CFG_FLASH_ERASE_START	87f00000
+		CFG_FLASH_ERASE_END	87f2ffff
+		CFG_FLASH_TST_SIZE	10000
 
-		CFG_FLASH_PROT1_START 87f60000
-		CFG_FLASH_PROT1_END 87f7ffff
+		CFG_FLASH_PROT1_START	87f60000
+		CFG_FLASH_PROT1_END	87f7ffff
 
-		CFG_FLASH_PROT2_START fff80000
-		CFG_FLASH_PROT2_END ffffffff
+		CFG_FLASH_PROT2_START	fff80000
+		CFG_FLASH_PROT2_END	ffffffff
 
-		CFG_FLASH_ERASE_SECT "1:0-1"
-		CFG_FLASH_ERASE_BANK "1"
-		CFG_FLASH_TST_SECT "1:0"
+		CFG_FLASH_ERASE_SECT	"1:0-1"
+		CFG_FLASH_ERASE_BANK	"1"
+		CFG_FLASH_TST_SECT	"1:0"
 	}
 }

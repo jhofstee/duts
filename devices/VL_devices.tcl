@@ -131,7 +131,6 @@ proc is_powered_on {} {
 		"off" {
 		}
 	}
-#	p_verb "power status: $rv"
 	return $rv
 }
 

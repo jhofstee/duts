@@ -1,6 +1,5 @@
 #
-# Be VERY careful when defining these!
-#
+# [DULG] Be VERY careful when defining these!
 #
 # 1. Protected range(s), i.e. NOT to be altered during TC steps (usually
 #    containing U-Boot and env):
