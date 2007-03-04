@@ -43,7 +43,6 @@ proc duts_device {name args} {
 # path is relative to $working_dir
 #
 proc Internals {p} {
-#	global cur_device a_devices device_errors working_dir
 	global cur_device a_devices device_errors BASE_DIR
 	
 	##
@@ -259,7 +258,6 @@ proc load_all_devices {{e ""}} {
 	global DEVICE_DESCR_DIR DEVICE_DESCR_EXT DEVICE_COMMON_FILE
 	global BASE_DIR
 	
-#	set d "$working_dir/$DEVICE_DESCR_DIR"
 	set d "$BASE_DIR/$DEVICE_DESCR_DIR"
 	if ![valid_dir $d] {
 		p_err "Invalid device dir: $d" 1

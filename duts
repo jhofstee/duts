@@ -1,14 +1,47 @@
 #!/bin/env expect
 #
-# (C) Copyright 2006
+# (C) Copyright 2006, 2007
 # Wolfgang Denk, DENX Software Engineering, wd@denx.de
 #
 # This is the main script for the DENX Universal Test System (DUTS)
 #
 
-set BASE_DIR "."
 set verbose "no"
 set debugging "yes"
+
+##
+## Discover base dir
+## 
+set BASE_DIR [file dirname $argv0]
+
+##
+## Verify it's a sane DUTS installation
+##
+set duts_dirs {config devices include testsystems}
+set errors 0
+foreach dd $duts_dirs {
+	set dpath "$BASE_DIR/$dd"
+	if [file exists $dpath] {
+		if [file isdirectory $dpath] {
+			if ![file readable $dpath] {
+				puts "ERROR: directory not accessible: '$dpath'"
+				set errors 1
+			}
+		} else {
+			puts "ERROR: file exists but is not a directory: '$dpath'"
+			set errors 1
+		}
+	} else {
+		puts "ERROR: DUTS directory not found: '$dpath'"
+		set errors 1
+	}
+}
+if {$errors} {
+	puts "Doesn't look like a valid DUTS installation..."
+	exit 1
+}
+unset errors
+unset duts_dirs
 
 ##
 ## include global defines
@@ -26,12 +59,12 @@ source "$BASE_DIR/include/tc.tcl"
 source "$BASE_DIR/include/config.tcl"
 
 ##
-## initialise vars to default values
+## initialise global defaults
 ##
 set argc [llength $argv]
 
 # working directory, may be overwritten with user-supplied -d option
-set DEFAULT_DIR "testsystems/dulg"
+set DEFAULT_DIR "$BASE_DIR/testsystems/dulg"
 if {[in_array env DUTS_DIR]} {
 	if { $env(DUTS_DIR) != "" } {
 		set working_dir $env(DUTS_DIR)
