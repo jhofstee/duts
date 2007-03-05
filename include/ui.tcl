@@ -20,7 +20,7 @@ proc usage {} {
 	puts "   " 
 	puts "  \[options\] are:"
 	puts "   " 
-	puts "    -d <dir>  (alternative dir)"
+	puts "    -d <dir>  (alternative working directory)"
 	puts "    -n        (do NOT execute real actions)"
 	puts "    -v        (verbose)"
 	puts " " 
