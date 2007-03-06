@@ -1,0 +1,91 @@
+
+This how-to describes steps required to build and install the LTP, and finally
+transfer the prepared installation to the target accessible location.
+
+0. Get the LTP package
+
+  http://ltp.sourceforge.net/
+
+
+1. Become superuser
+  
+  su -
+
+
+2. Unpack the LTP package
+
+  # tar -xzf ltp-full-20061222.tgz 
+  # cd ltp-full-20061222
+
+
+3. Cross-build the LTP
+
+  Make sure the following vars are set accordingly:
+
+  ARCH=ppc
+  CROSS_COMPILE=ppc_6xx-
+
+  # make
+  make[1]: Entering directory `/tmp/ltp-full-20061222/lib'
+  ppc_6xx-gcc -Wall  -I../include  -Wall    -c -o dataascii.o dataascii.c
+  ppc_6xx-gcc -Wall  -I../include  -Wall    -c -o databin.o databin.c
+  ppc_6xx-gcc -Wall  -I../include  -Wall    -c -o datapid.o datapid.c
+  ppc_6xx-gcc -Wall  -I../include  -Wall    -c -o file_lock.o file_lock.c
+  ppc_6xx-gcc -Wall  -I../include  -Wall    -c -o forker.o forker.c
+  ...
+  ...
+  ...
+  make[2]: Leaving directory `/tmp/ltp-full-20061222/tools/netpipe-2.4-ipv6'
+  make[1]: Leaving directory `/tmp/ltp-full-20061222/tools'
+
+  ***********************************************
+  ** You now need to do a make install as root **
+  ***********************************************
+
+
+4. 'Install' the LTP
+
+  Note the term 'installation' may seem confusing, as it does not affect any
+  typical UNIX directories like /bin/, /usr/bin etc. but only the current LTP
+  directory we're in. Nevertheless this step is required for the LTP to work
+  correctly.
+
+  # make install
+
+  make[1]: Entering directory `/tmp/ltp-full-20061222/lib'
+  make[1]: `libltp.a' is up to date.
+  make[1]: Leaving directory `/tmp/ltp-full-20061222/lib'
+  make[1]: Entering directory `/tmp/ltp-full-20061222/pan'
+  make[1]: Nothing to be done for `all'.
+  ...
+  ...
+  ...
+
+  Checking for required user/group ids
+
+  Nobody user id and group exist.
+  Bin user id and group exist.
+  Daemon user id and group exist.
+  Users group exists.
+  Sys group exists.
+  Required users/groups exist.
+
+
+5. Put the prepared LTP installation to the target accessible location.
+
+  For a net-mounted setup:
+
+  # cp -R ltp-full-20061222 /opt/eldk-4.1/ppc_6xx/tmp/
+
+  For other configurations: copy the whole LTP directory to the desired
+  location like HDD, USB etc. that would later be accessible from the target.
+
+
+6. Build and install on the target.
+
+  Alternatively, one can prepare LTP directly on the target. In this case the
+  prerequisite is to transfer the LTP tarball to target's file system and
+  perform steps 3-4 from there. Note step 3. then becomes a native, not cross,
+  build (do not set the CROSS_COMPILE env). Also, the self-hosted environment
+  takes usually longer to build due to typical lower bandwidth of the embedded
+  targets.
