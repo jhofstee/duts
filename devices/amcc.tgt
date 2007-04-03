@@ -161,6 +161,98 @@ duts_device ocotea {
 	MakeCompile	"ppc_4xx-"
 }
 
+#
+# rainier flash layout:
+#
+# Bank #1 - 64 MB in 512 Sectors (1 sector = 128 KB)
+#
+#   FC000000 - FFFFFFFF
+#
+#   layout:
+#
+#   FC000000 - FC17FFFF Kernel
+#   FC180000 - FC37FFFF Ramdisk
+#
+#   FFF60000 - FFF7FFFF environment
+#   FFF80000 - FFF9FFFF	environment
+#   FFFA0000 - FFFFFFFF U-Boot
+#
+duts_device rainier {
+	Vars {
+		CFG_ROOTPATH		"/opt/eldk-4.1-2007-01-19/ppc_4xx/"
+
+		CFG_FLASH_TST_START 	FF900000
+		CFG_FLASH_TST_END	FF97FFFF
+		CFG_FLASH_ERASE_START	FF900000 
+		CFG_FLASH_ERASE_END	FF95FFFF
+
+		CFG_FLASH_TST_SIZE	40000
+
+		CFG_FLASH_PROT1_START	FFF60000
+		CFG_FLASH_PROT1_END	FFFFFFFF
+
+		CFG_MTD_ERASE_DEVICE	"mtd2"
+
+		CFG_FLASH_ERASE_SECT	"1:455-456"
+		CFG_FLASH_ERASE_BANK	"1"
+		CFG_FLASH_TST_SECT	"1:455"
+
+		CFG_KERNEL_START	FC000000
+		CFG_KERNEL_END 		FC17FFFF
+		CFG_RAMDISK_START	FC180000
+		CFG_RAMDISK_END		FC37FFFF
+	}
+	MakeTarget	"rainier"
+	MakeArch	"ppc"
+	MakeCompile	"ppc_4xx-"
+}
+
+#
+# sequoia flash layout:
+#
+# Bank #1 - 64 MB in 512 Sectors (1 sector = 128 KB)
+#
+#   FC000000 - FFFFFFFF
+#
+#   layout:
+#
+#   FC000000 - FC17FFFF Kernel
+#   FC180000 - FC37FFFF Ramdisk
+#   FFE20000 - FFF5FFFF kDiagnostics
+#
+#   FFF60000 - FFF7FFFF environment
+#   FFF80000 - FFF9FFFF	environment?
+#   FFFA0000 - FFFFFFFF U-Boot
+#
+duts_device sequoia {
+	Vars {
+		CFG_ROOTPATH		"/opt/eldk-4.1-2007-01-19/ppc_4xxFP/"
+		CFG_MTD_ERASE_DEVICE	"mtd6"
+
+		CFG_FLASH_TST_START 	FF900000
+		CFG_FLASH_TST_END	FF97FFFF
+		CFG_FLASH_ERASE_START	FF900000 
+		CFG_FLASH_ERASE_END	FF95FFFF
+
+		CFG_FLASH_TST_SIZE	40000
+
+		CFG_FLASH_PROT1_START	FFF60000
+		CFG_FLASH_PROT1_END	FFFFFFFF
+
+		CFG_FLASH_ERASE_SECT	"1:455-456"
+		CFG_FLASH_ERASE_BANK	"1"
+		CFG_FLASH_TST_SECT	"1:455"
+
+		CFG_KERNEL_START	FC000000
+		CFG_KERNEL_END 		FC17FFFF
+		CFG_RAMDISK_START	FC180000
+		CFG_RAMDISK_END		FC37FFFF
+	}
+	MakeTarget	"sequoia"
+	MakeArch	"ppc"
+	MakeCompile	"ppc_4xxFP-"
+}
+
 duts_device sycamore {
 	Vars {
 		CFG_MTD_ERASE_DEVICE "mtd6"
@@ -183,6 +275,55 @@ duts_device sycamore {
 		CFG_RAMDISK_END ffbfffff
 	}
 	MakeTarget	"sycamore"
+	MakeArch	"ppc"
+	MakeCompile	"ppc_4xx-"
+}
+
+#
+# taishan flash layout:
+#
+# Bank #1 - 64 MB in 256 Sectors (1 sector = 256 KB)
+#
+#   FC000000 - FFFFFFFF
+#
+#   layout:
+#
+#   FC000000 - FC17FFFF Kernel
+#   FC180000 - FC37FFFF Ramdisk
+#
+#   FFF40000 - FFF7FFFF environment
+#   FFF80000 - FFFBFFFF	environment
+#   FFFC0000 - FFFFFFFF U-Boot
+#
+duts_device taishan {
+	Vars {
+		CFG_ROOTPATH		"/opt/eldk-4.1-2007-01-19/ppc_4xx/"
+
+		CFG_FLASH_TST_START 	FF900000
+		CFG_FLASH_TST_END	FF97FFFF
+		CFG_FLASH_ERASE_START	FF900000 
+		CFG_FLASH_ERASE_END	FF97FFFF
+
+		CFG_FLASH_TST_SIZE	40000
+
+		CFG_FLASH_PROT1_START	FFF40000
+		CFG_FLASH_PROT1_END	FFFFFFFF
+
+		CFG_FLASH_PROT2_START	FC000000
+		CFG_FLASH_PROT2_END	FC37FFFF
+
+		CFG_MTD_ERASE_DEVICE	"mtd2"
+
+		CFG_FLASH_ERASE_SECT	"1:228-229"
+		CFG_FLASH_ERASE_BANK	"1"
+		CFG_FLASH_TST_SECT	"1:228"
+
+		CFG_KERNEL_START	FC000000
+		CFG_KERNEL_END 		FC17FFFF
+		CFG_RAMDISK_START	FC180000
+		CFG_RAMDISK_END		FC37FFFF
+	}
+	MakeTarget	"taishan"
 	MakeArch	"ppc"
 	MakeCompile	"ppc_4xx-"
 }

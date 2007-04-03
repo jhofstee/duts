@@ -1,0 +1,16 @@
+#
+#
+#
+#
+
+duts_tc UBootEraseAll {
+	Type u-boot
+	Timeout 300
+	Pre {
+		"prot on $CFG_FLASH_PROT1_START $CFG_FLASH_PROT1_END" ".*"
+		"prot on $CFG_FLASH_PROT2_START $CFG_FLASH_PROT2_END" ".*"
+	}
+	Commands {
+		"era all" ".*"
+	}
+}

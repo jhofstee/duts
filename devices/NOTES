@@ -5,15 +5,17 @@
 #    containing U-Boot and env):
 # 
 #    CFG_FLASH_PROT1_START - CFG_FLASH_PROT1_END
-#    CFG_FLASH_PROT2_START - CFG_FLASH_PROT2_END (optional)
+#    CFG_FLASH_PROT2_START - CFG_FLASH_PROT2_END (optional, used for
+#                                                 protecting not-contiguous
+#                                                 ranges)
 #
 # 2. Testing area params, will be altered (unprotected, erased, written to
 #    etc.):
 #
 #    CFG_FLASH_TST_START - CFG_FLASH_TST_END
 #    CFG_FLASH_ERASE_START - CFG_FLASH_ERASE_END
-#    CFG_FLASH_ERASE_SECT (sector numbers are 0-based!)
-#    CFG_FLASH_ERASE_BANK
+#    CFG_FLASH_ERASE_SECT (sector numbers are 0-based)
+#    CFG_FLASH_ERASE_BANK (bank nubmers are 1-based)
 #    CFG_FLASH_TST_SIZE - must be <= (CFG_FLASH_TST_END - CFG_FLASH_TST_START)
 #
 # 3. Areas to be filled out with kernel and ramdisk images:
