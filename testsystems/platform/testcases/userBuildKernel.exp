@@ -152,6 +152,7 @@ proc build {{to 600}} {
 		puts "$err"
 		return 0
 	}
+
 	p_banner "Finished building kernel image" *
 }
 
@@ -161,7 +162,7 @@ proc build {{to 600}} {
 set tools [list $tool_co $tool_build]
 if ![check_tools tools] {
 	p_err "build tools not accessible"
-	return 1
+	return 0
 }
 p_verb "build tools in place, proceeding"
 

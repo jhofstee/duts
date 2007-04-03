@@ -398,6 +398,8 @@ proc build_main {} {
 	process_close $build_sid
 
 	p_banner "Finished image build, thanks for patience." #
+
+	return 1
 }
 
 #

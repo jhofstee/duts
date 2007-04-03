@@ -27,6 +27,5 @@ if ![valid_file $generic_build_kernel] {
 	p_err "dependecy not found: 'generic_build_kernel'"
 	return 0
 }
-source $generic_build_kernel
-
-return 1
+set rv [source $generic_build_kernel]
+return $rv

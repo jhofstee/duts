@@ -14,9 +14,6 @@ set repo_dst "./${linux}${duts_ext}"
 
 set build_type "linux-26"
 
-#set toolchain "/opt/eldk-4.0-2006-02-19/usr/bin/"
-#set toolchain "/opt/eldk-4.1/usr/bin/"
-
 set timeout_co 1600 
 set timeout_build 1000
 
@@ -30,6 +27,5 @@ if ![valid_file $generic_build_kernel] {
 	p_err "dependecy not found: 'generic_build_kernel'"
 	return 0
 }
-source $generic_build_kernel
-
-return 1
+set rv [source $generic_build_kernel]
+return $rv 
