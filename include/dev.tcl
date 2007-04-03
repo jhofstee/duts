@@ -335,24 +335,16 @@ proc list_all_devices {} {
 proc show_device {} {
 	global board_name a_devices
 
+	set vl [get_device_attr "varlist"]
+	set t [get_device_attr "maketarget"]
+	set a [get_device_attr "makearch"]
+	set c [get_device_attr "makecompile"]
+	set p [get_device_attr "maketoolpath"]
+
 	puts "Configuration for board: $board_name"
-	if [catch {set vl $a_devices($board_name,varlist)}] {
-		set vl ""
-	}
-	if [catch {set t $a_devices($board_name,maketarget)}] {
-		set t ""
-	}
-	if [catch {set a $a_devices($board_name,makearch)}] {
-		set a ""
-	}
-	if [catch {set c $a_devices($board_name,makecompile)}] {
-		set c ""
-	}
-	if [catch {set c $a_devices($board_name,maketoolpath)}] {
-		set c ""
-	}
 	puts "  vars set: $vl"
 	puts ""
-	puts "  make params: target '$t' arch '$a' ccompile '$c'"
+	puts "  make params:\n    target\t'$t'\n    arch\t'$a'"
+	puts "    ccompile\t'$c'\n    toolpath\t'$p'"
 	puts ""
 }

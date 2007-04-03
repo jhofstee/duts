@@ -441,14 +441,15 @@ proc run_tc {tc} {
 #
 proc run_tc_list {ln} {
 	
-	global board_name
+	global board_name working_dir
 
 	upvar $ln l
+	set testsystem_name [file tail $working_dir]
 
 	##
 	## Open a summary logfile.
 	##
-	set rfn "${board_name}_results.log"
+	set rfn "${board_name}_${testsystem_name}_results.log"
 	if [catch {set rf [open $rfn w+]} err] {
 		p_err "problems open'ing '$rfn'"
 		puts "  $err"
