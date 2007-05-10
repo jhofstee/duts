@@ -3,7 +3,6 @@
 #
 #
 
-
 duts_tc UBootI2cHelp {
  	Type u-boot
  	Commands {
@@ -30,18 +29,3 @@ duts_tc UBootDiskbootHelp {
 		"help disk" ".*"
 	}
 }
-
-duts_tc UBootDocHelp {
- 	Type u-boot
- 	Commands {
-		"help doc" ".*"
-	}
-}
-
-duts_tc UBootDocbootHelp {
- 	Type u-boot
- 	Commands {
-		"help docboot" ".*"
-	}
-}
-
