@@ -154,6 +154,8 @@ proc build {{to 600}} {
 	}
 
 	p_banner "Finished building kernel image" *
+
+	return 1
 }
 
 ##
@@ -177,4 +179,3 @@ if ![checkout $timeout_co] {
 ## build kernel
 ##
 build $timeout_build
-
