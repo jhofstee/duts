@@ -1,7 +1,8 @@
 #!/bin/bash
 #
-# (C) Copyright 2006, 2007
-# Wolfgang Denk, DENX Software Engineering, wd@denx.de
+# (C) Copyright 2006, 2007 DENX Software Engineering
+#
+# Author: Rafal Jaworowski <raj@semihalf.com>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as

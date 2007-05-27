@@ -1,6 +1,7 @@
 #
-# (C) Copyright 2006, 2007
-# Wolfgang Denk, DENX Software Engineering, wd@denx.de
+# (C) Copyright 2006, 2007 DENX Software Engineering
+#
+# Author: Rafal Jaworowski <raj@semihalf.com>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -17,7 +18,6 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston,
 # MA 02111-1307 USA
 #
-
 
 proc valid_kernel_file {f} {
 	global control_con
