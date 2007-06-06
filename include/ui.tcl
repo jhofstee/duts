@@ -240,8 +240,7 @@ proc cmd_t {a} {
 		# cases using default config
 
 		# load TC descriptions
-		load_tcs
-		load_custom_tcs
+		load_all_test_cases
 
 		set l_runlist $l_testcases
 		p_verb "ALL defined test cases selected to run"
@@ -274,9 +273,8 @@ proc cmd_t_parse_params {a} {
 
 	global l_runlist l_testcases selected_config CONFIG_DEFAULT_NAME
 
-	# by default the params list gives file names with test groups
+	# by default the params list gives TC file names
 	set list_type "files"
-
 	set selected_config ""
 
 	set max [llength $a]
@@ -285,7 +283,7 @@ proc cmd_t_parse_params {a} {
 
 		switch -- $arg "-t" {
 			# we have the list of individual TCs rather than 
-			# file names of test groups...
+			# TC file names
 			set list_type "tcs"
 			p_verb "individual TCs being selected"
 			continue
@@ -320,14 +318,15 @@ proc cmd_t_parse_params {a} {
 
 	# if we didn't load a specific TC file, lets load all definitions
 	if {$list_type == "tcs"} {
-		load_tcs
-		load_custom_tcs
+		load_all_test_cases
 	}
 
 	if {[llength $l_runlist] == 0} {
 		if {$selected_config != ""} {
 			# seems no TC's specified after -c config - let's take
 			# all we have
+			load_all_test_cases
+
 			set l_runlist $l_testcases
 			p_verb "ALL defined test cases selected to run"
 
@@ -336,10 +335,6 @@ proc cmd_t_parse_params {a} {
 			cmd_t_usage
 		}
 	}
-
-#	if {$files_ok != "yes"} {
-#		p_err "Invalid test case file(s)...?!" 1
-#	}
 }
 
 

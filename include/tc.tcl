@@ -524,6 +524,7 @@ proc check_tc_list {list} {
 	}		
 }
 
+
 #
 # loads TCs from an individual .tc file
 #
@@ -641,4 +642,9 @@ proc load_custom_tcs {{b ""}} {
 			p_verb "loaded $n test cases decriptions"
 		} 
 	}
+}
+
+proc load_all_test_cases {} {
+	load_tcs
+	load_custom_tcs
 }
