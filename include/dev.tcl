@@ -56,36 +56,6 @@ proc duts_device {name args} {
 	}
 }
 
-
-#
-# processes Internals section in duts_device description
-#
-# p: path to the tcl script with implementation of required methods, note the
-# path is relative to $working_dir
-#
-proc Internals {p} {
-	global cur_device a_devices device_errors BASE_DIR
-	
-	##
-	## validate file
-	##
-	set f "$BASE_DIR/$p"
-	if ![valid_file $f] {
-		p_err "problems validating file: $f"
-		set device_errors 1
-	} else {
-		# is this used anywhere later?
-		set a_devices($cur_device,internals) $p
-		
-		set err ""
-		if [catch {source $f} err] {
-			p_err "problems with source'ing '$f'?!"
-			puts "  $err"
-			set device_errors 1
-		}
-	}
-}
-
 #
 # processes MakeTarget/Arch/Compile section in duts_device description
 #
@@ -218,26 +188,12 @@ proc is_device_board_defined {b ent} {
 #
 # validates devices are consistent:
 #
-# - if mandatory device methods are implemented
 # - if all boards have Vars sections - warn, this may turn to problems later
 #
 proc valid_devices {} {
 
 	global a_devices l_boards board_name
-
 	set rv 1
-
-	set mandatory_methods {_device_power_on _device_power_off\
-				_device_connect_target _device_connect_host}
-
-	foreach mm $mandatory_methods {
-		if ![proc_exists $mm] {
-			p_err "method '$mm' not found?!"
-			set rv 0
-		} else {
-			p_verb "method '$mm' found, OK"
-		}
-	}
 
 	foreach b $l_boards {
 		##

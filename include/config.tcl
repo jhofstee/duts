@@ -161,11 +161,11 @@ proc context {type name c} {
 #
 # these context types (classes) are currently implemented
 #
-proc context_firmware {name c} {
+proc cfg_context_firmware {name c} {
 	context "firmware" $name $c
 }
 
-proc context_kernel {name c} {
+proc cfg_context_kernel {name c} {
 	context "kernel" $name $c
 }
 
@@ -175,10 +175,35 @@ proc context_kernel {name c} {
 # the host like code building, creating image, copying into /tftpboot location
 # etc.
 #
-proc context_host {name c} {
+proc cfg_context_host {name c} {
 	context "host" $name $c
 }
 
+#
+# low-level devices handling operations
+#
+# p: path to the tcl script with implementation of required methods, note the
+# path is relative to $working_dir
+#
+proc cfg_device_ops {p} {
+	global cur_device a_devices device_errors BASE_DIR
+	
+	##
+	## validate file
+	##
+	set f "$BASE_DIR/$p"
+	if ![valid_file $f] {
+		p_err "problems validating file: $f"
+		set device_errors 1
+	} else {
+		set err ""
+		if [catch {source $f} err] {
+			p_err "problems with source'ing '$f'?!"
+			puts "  $err"
+			set device_errors 1
+		}
+	}
+}
 
 #
 # validates loaded config data
@@ -194,6 +219,21 @@ proc valid_configs {} {
 		p_err "selected config '$selected_config' was not found?!"
 		set rv 0
 	}
+
+	##
+	## check methods operating on devices
+	##
+	set mandatory_methods {_device_power_on _device_power_off\
+				_device_connect_target _device_connect_host}
+	foreach mm $mandatory_methods {
+		if ![proc_exists $mm] {
+			p_err "method '$mm' not found?!"
+			set rv 0
+		} else {
+			p_verb "method '$mm' found, OK"
+		}
+	}
+
 	#TODO add other checks - if we have handler method defined etc.
 	#-if _context_firmware/kernel are set and nonempty
 	return $rv
@@ -206,7 +246,6 @@ proc valid_configs {} {
 #
 proc load_configs {{e ""}} {
 
-#	global working_dir CONFIG_DESCR_DIR CONFIG_DESCR_EXT configs_no 
 	global BASE_DIR CONFIG_DESCR_DIR CONFIG_DESCR_EXT configs_no 
 	
 	set d "$BASE_DIR/$CONFIG_DESCR_DIR"
