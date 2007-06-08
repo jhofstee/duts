@@ -108,3 +108,43 @@ proc run_external_script {fn} {
 
 	return $rv
 }
+
+
+#
+# Performs a UNIX login with user/pass pair. It is assumed the caller has already
+# detected the "login: " prompt
+#
+# returns 0/1
+#
+proc login_kernel {user {pass ""}} {
+	global _context_kernel_prompt TIMEOUT console_con
+
+	set spawn_id $console_con
+	set timeout $TIMEOUT
+	send -s "$user\r"
+	expect {
+		"assword: " {
+			send -s "$pass\r"
+			expect {
+				-re ".*$_context_kernel_prompt" {
+					return 1
+				}
+				"incorrect" {
+					p_err "wrong login or password"
+					return 0
+				}
+				timeout {
+					p_err "timed out while waiting for kernel prompt"
+					return 0
+				}
+			}
+		}
+		-re ".*$_context_kernel_prompt" {
+			return 1
+		}
+		timeout {
+			p_err "timed out while waiting for kernel prompt"
+			return 0
+		}
+	}
+}
