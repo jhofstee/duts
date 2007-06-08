@@ -346,7 +346,7 @@ proc tc_prologue {tc ctx} {
 	##
 	set real_context [_device_current_context]
 	if {$real_context != $cur_context} {
-		p_verb "adjusting current context to: '$real_context'"
+		p_verb "adjusting current context '$cur_context' to: '$real_context'"
 		set cur_context $real_context
 	}
 

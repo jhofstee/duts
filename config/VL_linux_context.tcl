@@ -128,19 +128,10 @@ proc _context_kernel_handler {} {
 						exit1
 					}
 				}
-				"login: " {
-					p_verb "login prompt OK"
-				}
-			}
-
-			set timeout $TIMEOUT 
-			send -s "root\r"
-			expect {
-				timeout {
-					p_err "timed out while waiting for\
-					       kernel prompt" 1
-			}
-				-re ".*$_context_kernel_prompt" {
+				"login:" {
+					if ![login_kernel "root" "root"] {
+						p_err "could not login" 1
+					}
 				}
 			}
 		}

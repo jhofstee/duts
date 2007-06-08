@@ -51,6 +51,16 @@ expect {
 		p_err "timed out after 'bootcmd'"
 		return 0
 	}
+	"TFTP error" {
+		p_err "TFTP problems"
+		# send CTRL-C
+		send -s "\003"
+		if ![_context_firmware_get_prompt] {
+			p_err "could not recover after CTRL-C, aborting..." 1
+		}
+
+		return 0
+	}
 	"Bad Magic Number" {
 		p_err "problems finding image?!"
 		return 0
@@ -79,19 +89,8 @@ expect {
 			}
 			"login: " {
 				p_verb "login prompt OK"
+				return [login_kernel "root" "root"]
 			}
 		}
-
-		set timeout $TIMEOUT 
-		send -s "root\r"
-		expect {
-			timeout {
-				p_err "timed out while waiting for kernel prompt"
-				return 0
-			}
-			-re ".*$_context_kernel_prompt" {
-				return 1
-			}
-		}	
 	}
 }

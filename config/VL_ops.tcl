@@ -167,7 +167,7 @@ proc _device_current_context {} {
 	set ctx "off"
 	set spawn_id $console_con
 
-#TODO recovery from Linux login should really be elsewhere as is context-specific
+	# FIXME recovery from Linux login should really be elsewhere as is context-specific
 
 	if [is_powered_on] {
 		send -s " \r" 
@@ -182,16 +182,11 @@ proc _device_current_context {} {
 				set ctx "kernel"
 			}
 			"login:" {
-				send -s "root\r"
-				expect {
-					$_context_kernel_prompt {
-						set ctx "kernel"
-					}
-					timeout {
-						p_err "timed out - context\
-						unknown..?!" 1"
-					}	
+				if ![login_kernel "root" "root"] {
+					p_err "context unknown..?!" 1
 				}
+
+				set ctx "kernel"
 			}
 		}
 	}
