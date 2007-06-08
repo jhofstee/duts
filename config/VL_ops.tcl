@@ -162,7 +162,14 @@ proc is_powered_on {} {
 #
 proc _device_current_context {} {
 	global console_con _context_firmware_prompt
-	global _context_kernel_prompt connected
+	global _context_kernel_prompt _context_kernel_alt_prompt
+
+	set kp1 $_context_kernel_prompt
+	if [var_exists _context_kernel_alt_prompt] {
+		set kp2 $_context_kernel_alt_prompt
+	} else {
+		set kp2 $kp1
+	}
 
 	set ctx "off"
 	set spawn_id $console_con
@@ -178,7 +185,10 @@ proc _device_current_context {} {
 			$_context_firmware_prompt {
 				set ctx "firmware"
 			}
-			$_context_kernel_prompt {
+			$kp1 {
+				set ctx "kernel"
+			}
+			$kp2 {
 				set ctx "kernel"
 			}
 			"login:" {

@@ -140,9 +140,16 @@ proc _context_kernel_handler {} {
 
 proc _context_kernel_get_prompt {} {
 
-	global _context_kernel_prompt
+	global _context_kernel_prompt _context_kernel_alt_prompt
 
+	# if there's an alt prompt set p2 with it
 	set p $_context_kernel_prompt
+	if [var_exists _context_kernel_alt_prompt] {
+		set p2 $_context_kernel_alt_prompt
+	} else {
+		set p2 $p
+	}
+
 	set timeout 3
 	set rv 1
 
@@ -156,6 +163,9 @@ proc _context_kernel_get_prompt {} {
 		-r ".*$p" {
 			p_verb "kernel prompt OK"
 		}
+		-r ".*$p2" {
+			p_verb "kernel prompt2 OK"
+		}
 	}
 
 	return $rv
@@ -164,12 +174,18 @@ proc _context_kernel_get_prompt {} {
 # this method implements sending command and receiving response
 #
 proc _context_kernel_command {cmd rsp {slp 0.25}} {
-	global _context_kernel_prompt
+	global _context_kernel_prompt _context_kernel_alt_prompt
 
 	set p $_context_kernel_prompt
+	if [var_exists _context_kernel_alt_prompt] {
+		set p2 $_context_kernel_alt_prompt
+	} else {
+		set p2 $p
+	}
+
 	set rv 1
 
-	p_verb "CMD $cmd, RSP '$rsp', prompt $p"
+	p_verb "CMD $cmd, RSP '$rsp', prompt $p/$p2"
 
 	#expect "*"
 	if ![_context_kernel_get_prompt] {
@@ -182,6 +198,9 @@ proc _context_kernel_command {cmd rsp {slp 0.25}} {
 	sleep $slp
 	expect {
 		-re "($rsp)(.*)$p" {
+			p_verb "kernel command executed OK"
+		}
+		-re "($rsp)(.*)$p2" {
 			p_verb "kernel command executed OK"
 		}
 		timeout {

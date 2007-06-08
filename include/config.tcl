@@ -91,7 +91,7 @@ set _context_firmware_image ""
 proc context {type name c} {
 	global cur_config config_errors BASE_DIR
 	global _context_kernel _context_firmware _context_host
-	global _context_kernel_prompt _context_kernel_image
+	global _context_kernel_prompt _context_kernel_image _context_kernel_alt_prompt
 	global _context_firmware_prompt _context_firmware_image
 	global _context_host_prompt _context_host_shell
 	global board_name a_configs
@@ -116,6 +116,9 @@ proc context {type name c} {
 		switch $f {
 			"prompt" {
 				set _context_${type}_prompt $val
+			}
+			"alt_prompt" {
+				set _context_${type}_alt_prompt $val
 			}
 			"image" {
 				# possible variable here, so need to make an

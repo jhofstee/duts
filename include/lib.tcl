@@ -172,6 +172,21 @@ proc proc_exists {p} {
 }
 
 #
+# checks if variable exists, returns 0 if not
+#
+# v: var name
+#
+proc var_exists {v} {
+	set rv 1
+	upvar $v var
+
+	if ![info exists var] {
+		set rv 0
+	}
+	return $rv
+}
+
+#
 # checks if element $k is found in array $a, returns 0 if not
 #
 # a: name of array (NOT the array itself!)
