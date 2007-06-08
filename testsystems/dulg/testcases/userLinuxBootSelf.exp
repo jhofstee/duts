@@ -43,22 +43,15 @@ expect {
 					exit1
 				}
 			}
-			"BusyBox" {
-				p_verb "BB OK"
+			"login: " {
+				return [login_kernel "root" "root"]
 			}
-			-re ".*Application\\ running" {
-				return 1
-			}
-		}
 
-		set timeout $TIMEOUT
-		send -s "\r"
-		expect {
-			timeout {
-				p_err "timed out while waiting for kernel prompt"
-				return 0
-			}
-			-re ".*$_context_kernel_prompt" {
+			-re ".*Application\\ running.*" {
+				if ![_context_kernel_get_prompt] {
+					p_err "could not get kernel prompt"
+					return 0
+				}
 				return 1
 			}
 		}
