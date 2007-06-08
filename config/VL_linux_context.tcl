@@ -47,96 +47,12 @@ proc valid_kernel_file {f} {
 # this context. assume we start from 'firmware' context
 #
 proc _context_kernel_handler {} {
-	global _context_kernel_prompt _context_kernel_image TIMEOUT
-
-	set p $_context_kernel_prompt
 
 #p_banner "Linux context handler"
 
-	expect "*"
-
-	##
-	## check rootpath 
-	##
-	global CFG_ROOTPATH
-	if ![info exists CFG_ROOTPATH] {
-		p_err "variable CFG_ROOTPATH is not set, please update the\
-		       .tgt definition file for your board" 1
-	} else {
-		p_verb "CFG_ROOTPATH '$CFG_ROOTPATH'"
-		if ![valid_dir $CFG_ROOTPATH] {
-			p_err "problem validating rootpath: '$CFG_ROOTPATH'" 1
-		}
-	}
-
-	##
-	## check if the kernel file is ok
-	##
-	if ![valid_kernel_file $_context_kernel_image] {
-		p_err "problems validating kernel file" 1
-	}
-
-	if ![_context_firmware_get_prompt] {
-		p_err "could not get firmware prompt" 1
-	}
-
-	##
-	## set bootfile
-	##
-	_context_firmware_command "setenv bootfile $_context_kernel_image" ".*"
-
-	##
-	## set rootpath
-	##
-	_context_firmware_command "setenv rootpath $CFG_ROOTPATH" ".*"
-
-	##
-	## run net_nfs
-	##
-	set timeout 120
-	send -s "run net_nfs\r"
-
-	expect {
-		timeout {
-			p_err "timed out after 'bootcmd'"
-			return 0
-		}
-		"Bad Magic Number" {
-			p_err "problems finding image?!"
-			return 0
-		}
-		"Linux version" {
-			set cur_context "kernel"
-			set timeout 300
-
-			expect {
-				timeout {
-					p_err "timed out while waiting for\
-					       login prompt" 1
-				}
-				-re ".*Kernel\\ panic" {
-					##
-					## This is really bad - we cannot be
-					## sure if the crash does not confuse
-					## test cases that were scheduled for
-					## execution after this one.
-					##
-					p_err "PANIC!"
-					if [ask_yesno "continue execution? "] {
-						return 
-					} else {
-						exit1
-					}
-				}
-				"login:" {
-					if ![login_kernel "root" "root"] {
-						p_err "could not login" 1
-					}
-				}
-			}
-		}
-	}
+	return [boot_kernel_net_nfs]
 }
+
 
 proc _context_kernel_get_prompt {} {
 

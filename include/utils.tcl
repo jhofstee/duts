@@ -148,3 +148,106 @@ proc login_kernel {user {pass ""}} {
 		}
 	}
 }
+
+
+proc boot_kernel_net_nfs {} {
+
+	global _context_kernel_image TIMEOUT CFG_ROOTPATH console_con
+
+	set spawn_id $console_con
+	expect "*"
+
+	##
+	## check rootpath 
+	##
+	if ![var_exists CFG_ROOTPATH] {
+		p_err "variable CFG_ROOTPATH is not set, please update the\
+		       .tgt definition file for your board" 1
+	} else {
+		p_verb "CFG_ROOTPATH '$CFG_ROOTPATH'"
+		if ![valid_dir $CFG_ROOTPATH] {
+			p_err "problem validating rootpath: '$CFG_ROOTPATH'" 1
+		}
+	}
+
+	##
+	## check if the kernel file is ok
+	##
+	if ![valid_kernel_file $_context_kernel_image] {
+		p_err "problems validating kernel file" 1
+	}
+
+	if ![_context_firmware_get_prompt] {
+		p_err "could not get firmware prompt" 1
+	}
+
+	##
+	## set bootfile
+	##
+	_context_firmware_command "setenv bootfile $_context_kernel_image" ".*"
+
+	##
+	## set rootpath
+	##
+	_context_firmware_command "setenv rootpath $CFG_ROOTPATH" ".*"
+
+	##
+	## run net_nfs
+	##
+	set timeout 120
+	send -s "run net_nfs\r"
+
+	expect {
+		timeout {
+			p_err "timed out after 'bootcmd'"
+			return 0
+		}
+		"TFTP error" {
+			p_err "TFTP problems"
+			# send CTRL-C
+			send -s "\003"
+			if ![_context_firmware_get_prompt] {
+				p_err "could not recover after CTRL-C, aborting..." 1
+			}
+
+			return 0
+		}
+		"Bad Magic Number" {
+			p_err "problems finding image?!"
+			return 0
+		}
+		"Linux version" {
+			set cur_context "kernel"
+			set timeout 300
+
+			expect {
+				timeout {
+					p_err "timed out while waiting for\
+					       login prompt" 1
+				}
+				-re ".*Kernel\\ panic" {
+					##
+					## This is really bad - we cannot be
+					## sure if the crash does not confuse
+					## test cases that were scheduled for
+					## execution after this one.
+					##
+					p_err "PANIC!"
+					if [ask_yesno "continue execution? "] {
+						return 1 
+					} else {
+						exit1
+					}
+				}
+				"login:" {
+					if ![login_kernel "root" "root"] {
+						p_err "could not login" 1
+					}
+					return 1
+				}
+			}
+		}
+	}
+}
+
+
