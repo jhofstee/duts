@@ -55,14 +55,8 @@ duts_tc UBootIminfoHelp {
 }
 
 duts_tc UBootIminfo {
- 	Type u-boot
-	Pre {
-		"setenv ram_ws $CFG_RAM_WS_BASE" ".*"
-		{tftp ${ram_ws} ${bootfile}} ".*"
-	}
- 	Commands {
-		"imi $CFG_RAM_WS_BASE" ".*"
-	}
+	Type u-boot
+	Commands "!userIminfo.exp"
 }
 
 duts_tc UBootHelpHelp {
