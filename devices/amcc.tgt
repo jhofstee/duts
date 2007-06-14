@@ -52,6 +52,52 @@ duts_device bubinga {
 	MakeCompile	"ppc_4xx-"
 }
 
+
+
+#
+# katmai flash layout:
+#
+# Bank #1 - 16 MB in 128 Sectors
+#
+#   FF000000 - FFFFFFFF
+#
+#   layout:
+#
+#   FFF80000 - FFF9FFFF environment
+#   FFFA0000 - FFFBFFFF environment
+#   FFFC0000 - FFFFFFFF U-Boot
+#   FF000000 - FF17FFFF kernel
+#   FF180000 - FF37FFFF ramdisk
+#
+duts_device katmai {
+	Vars {
+		CFG_ROOTPATH		"/opt/eldk-4.1-2007-01-19/ppc_4xx/"
+
+		CFG_FLASH_TST_START 	ff900000
+		CFG_FLASH_TST_END	ff97ffff
+		CFG_FLASH_TST_SIZE	40000
+		CFG_FLASH_ERASE_START	ff900000
+		CFG_FLASH_ERASE_END	ff95ffff
+
+		CFG_MTD_ERASE_DEVICE	"mtd2"
+
+		CFG_FLASH_PROT1_START	fff80000
+		CFG_FLASH_PROT1_END	ffffffff
+
+		CFG_FLASH_ERASE_SECT	"1:72-73"
+		CFG_FLASH_ERASE_BANK	"1"
+		CFG_FLASH_TST_SECT	"1:72"
+
+		CFG_KERNEL_START	ff000000
+		CFG_KERNEL_END 		ff17ffff
+		CFG_RAMDISK_START	ff180000
+		CFG_RAMDISK_END		ff37ffff
+	}
+	MakeTarget	"katmai"
+	MakeArch	"ppc"
+	MakeCompile	"ppc_4xx-"
+}
+
 #
 # luan flash layout:
 #
