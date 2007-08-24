@@ -80,16 +80,16 @@ proc _context_firmware_handler {} {
 		}
 		-re ".*any key to stop.*" {
 			send -s "\r"
-		}
-	}
-	
-	set timeout $TIMEOUT
-	expect {
-		timeout {
-			p_err "timed out while waiting for U-Boot prompt" 1
+			set timeout $TIMEOUT
+			expect {
+				timeout {
+					p_err "timed out while waiting for U-Boot prompt" 1
+				}
+				-re (.*)$_context_firmware_prompt { }
+				-re (.*)$_context_kernel_prompt { }
+			}
 		}
 		-re (.*)$_context_firmware_prompt { }
-		-re (.*)$_context_kernel_prompt { }
 	}
 }
 
