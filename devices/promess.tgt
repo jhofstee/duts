@@ -1,0 +1,49 @@
+#
+# Definitions for Promess board(s) 
+#
+
+#
+# Motionpro flash layout:
+#
+# 16MB in 256 sectors, 1 bank (1 sector = 64 KB)
+#
+# 0xFF000000 - 0xFFCFFFFF ramdisk (13 MB)
+# 0xFFD00000 - 0xFFEFFFFF kernel (2 MB)
+#
+# 0xFFF00000 - 0xFFF3FFFF U-boot (4 sectors)
+# 0xFFF40000 - 0xFFF4FFFF environment (1 sector)
+# 0xFFF50000 - 0xFFF5FFFF environment redundant (1 sector)
+# 0xFFF60000 - 0xFFF6FFFF dtb
+# 0xFFF70000 - 0xFFFFFFFF user data
+#
+duts_device motionpro {
+	MakeTarget	"motionpro"
+	MakeArch	"ppc"
+	MakeCompile	"ppc_6xx-"
+	MakeToolPath	"/opt/eldk-4.1-2007-01-19/usr/bin/"
+
+	Vars {
+		CFG_RAM_WS_BASE 	200000
+		CFG_ROOTPATH		"/opt/eldk-4.1-2007-01-19/ppc_6xx/"
+		CFG_KERNEL_START	FFD00000
+		CFG_KERNEL_END		FFEFFFFF
+		CFG_RAMDISK_START	FF000000
+		CFG_RAMDISK_END		FFCFFFFF
+
+		CFG_MTD_ERASE_DEVICE	"mtd6"
+
+		CFG_FLASH_PROT1_START	FFF00000
+		CFG_FLASH_PROT1_END	FFF6FFFF
+
+		CFG_FLASH_TST_START	FFF70000
+		CFG_FLASH_TST_END	FFFFFFFF
+		CFG_FLASH_TST_SIZE 	10000
+
+		CFG_FLASH_ERASE_START	FFF80000
+		CFG_FLASH_ERASE_END	FFFAFFFF
+
+		CFG_FLASH_ERASE_SECT	"1:249-250"
+		CFG_FLASH_ERASE_BANK	"1"
+		CFG_FLASH_TST_SECT	"1:249"
+	}
+}
