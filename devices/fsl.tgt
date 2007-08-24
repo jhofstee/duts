@@ -21,5 +21,6 @@ duts_device lite5200b {
 
 	Vars {
 		CFG_ROOTPATH		"/opt/eldk-4.1-2007-01-19/ppc_6xx/"
+		CFG_MTD_ERASE_DEVICE	"mtd4"
 	}
 }
