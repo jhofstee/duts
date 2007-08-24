@@ -17,6 +17,11 @@ expect {
 		p_err "timed out after 'flash_self'"
 		return 0
 	}
+	"not defined" {
+		# ## Error: "flash_self" not defined
+		p_err "'flash_self' not defined"
+		return 0
+	}
 	"Bad Magic Number" {
 		p_err "problems finding image?!"
 		return 0

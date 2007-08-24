@@ -41,6 +41,11 @@ expect {
 		p_err "timed out after 'flash_nfs'"
 		return 0
 	}
+	"not defined" {
+		# ## Error: "flash_nfs" not defined
+		p_err "'flash_nfs' not defined"
+		return 0
+	}
 	"TFTP error" {
 		p_err "TFTP problems"
 		# send CTRL-C
