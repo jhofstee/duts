@@ -152,7 +152,8 @@ proc login_kernel {user {pass ""}} {
 
 proc boot_kernel_net_nfs {} {
 
-	global _context_kernel_image TIMEOUT CFG_ROOTPATH console_con
+	global _context_kernel_image TIMEOUT console_con
+	global CFG_FDT_FILE CFG_ROOTPATH
 
 	set spawn_id $console_con
 	expect "*"
@@ -185,6 +186,14 @@ proc boot_kernel_net_nfs {} {
 	## set bootfile
 	##
 	_context_firmware_command "setenv bootfile $_context_kernel_image" ".*"
+
+	##
+	## set fdt_file - only for arch/powerpc kernels
+	##
+
+	if {[get_device_attr "makearch"] == "powerpc"} {
+		_context_firmware_command "setenv fdt_file $CFG_FDT_FILE" ".*"
+	}
 
 	##
 	## set rootpath
