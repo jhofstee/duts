@@ -1,0 +1,12 @@
+#
+# WARNING! Testcase contained herein attempts to manipulate board flash
+# contents. It assumes the parameters in board config file "devices/*.tgt"
+# (addresses' ranges etc.) are properly set for the given board, so beware and
+# triple check everything makes sense before running these.
+#
+
+duts_tc InstallBlobTftp {
+	Type u-boot
+	Timeout 600
+	Commands "!userInstallBlobTftp.exp"
+}

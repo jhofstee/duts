@@ -1,0 +1,80 @@
+#
+# Testcases for the "fdt - Flattened Device Tree utility commands" section
+#
+
+global CFG_FDT_ADDR_R CFG_FDT_FILE
+
+
+duts_tc UBootFDTCmdHelp {
+	Type u-boot
+	Commands {
+		"help fdt" ".*"
+	}
+}
+
+duts_tc UBootFDTCmdAddr {
+	Type u-boot
+	Timeout 600
+	Pre {
+		"sete fdt_addr $CFG_FDT_ADDR_R" ".*"
+		"sete fdt_file $CFG_FDT_FILE" ".*"
+	}
+	Commands "!userUBootFDTCmdAddr.exp"
+}
+
+duts_tc UBootFDTCmdPrint {
+	Type u-boot
+	Commands {
+		"fdt print /" ".*"
+	}
+}
+
+duts_tc UBootFDTCmdCreateNode {
+	Type u-boot
+	Commands {
+		"fdt list /" ".*"
+		"fdt mknode / testnode" ".*"
+		"fdt list /" ".*"
+		"fdt list /testnode" ".*"
+	}
+}
+
+duts_tc UBootFDTCmdCreateProperty {
+	Type u-boot
+	Commands {
+		"fdt set /testnode testprop testvalue" ".*"
+		"fdt list /testnode" ".*"
+	}
+}
+
+duts_tc UBootFDTCmdRemove {
+	Type u-boot
+	Commands {
+		"fdt rm /testnode testprop" ".*"
+		"fdt list /testnode" ".*"
+		"fdt rm /testnode" ".*"
+		"fdt list /" ".*"
+	}
+}
+
+duts_tc UBootFDTCmdMove {
+	Type u-boot
+	Commands {
+		"fdt move ${fdt_addr_r} 200000" ".*"
+		"fdt list /" ".*"
+		"fdt mknod / foobar" ".*"
+		"fdt list /" ".*"
+		"fdt addr ${fdt_addr_r}" ".*"
+		"fdt list /" ".*"
+	}
+}
+
+duts_tc UBootFDTCmdChosen {
+	Type u-boot
+	Commands {
+		"fdt list /" ".*"
+		"fdt chosen" ".*"
+		"fdt list /" ".*"
+		"fdt list /chosen" ".*"
+	}
+}
