@@ -45,6 +45,9 @@ proc usage {} {
 	puts "    -n        (do NOT execute real actions)"
 	puts "    -v        (verbose)"
 	puts " " 
+	puts "For more information and examples see\
+		http://www.denx.de/wiki/DUTS/DUTSDocs."
+	puts " " 
 	exit 1
 }
 
