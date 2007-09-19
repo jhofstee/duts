@@ -1,0 +1,47 @@
+- The LinuxTelnet test -
+
+The LinuxTelnet test is designed to confirm that the telnet target service daemon
+included in the ELDK is functioning properly.
+
+At first, the test checks that the bash prompt is ready on the target device,
+using the "_context_kernel_get_prompt" function of the DUTS framework.
+If there is no bash prompt, this function turns on the target device
+and boots it up to the prompt. The test then enables the telnet server in the
+xinetd configuration file, restarts the xinetd server and tries to connect
+and log in to the target device via telnet using the 'root' account.
+If the test gets a bash prompt via telnet, the test is passed.
+
+The DUTS framework LinuxTelnet test case description is located in 
+ testsystems/dulg/testcases/02_non-59.tc
+The LinuxTelnet test file is located in 
+testsystems/dulg/testcases/userLinuxTelnet.exp
+
+There are two ways of running the test: the target device can be booted
+up with NFS or a ramdisk root filesystem. Below are the descriptions of
+both methods:
+
+  -- Running the Telnet test with an NFS root filesystem --
+The target board can be powered on prior to running the test and than booted
+up to the bash prompt. Otherwise, the working "net_nfs" macro should be
+configured in the U-Boot environment of the target board.
+
+The test is run via the following command:
+		#./duts t <board_name> -t LinuxTelnet
+
+  -- Running the Telnet test with a ramdisk root filesystem --
+
+The target board can be powered on  and booted up to the bash prompt using 
+ramdisk rootfs image prior to running the test. Otherwise, the DUTS tests
+UBootInstallRamdisk and LinuxBootSelf are useful to boot the board
+with the ramdisk rootfs image.
+
+The prerequisites for the UBootInstallRamdisk and LinuxBootSelf tests are
+the following:
+
+- The "uRamdisk" ramdisk image under the test should be located at the 
+"/tftpboot/$board_name/" tftp server location.
+- There should be a preconfigured U-Boot "flash_self" macro that boots the 
+board with the ramdisk root filesystem. 
+
+The tests are run via the following command:
+		 # ./duts t <board_name> -t UBootInstallRamdisk LinuxBootSelf LinuxTelnet

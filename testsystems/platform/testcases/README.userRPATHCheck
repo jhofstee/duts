@@ -1,0 +1,33 @@
+This is a description of new tests for DENX Unix Test Suite
+
+
+- The RPATH_Check test -
+
+The test is designed to check that the DT_RPATH tag in the target ELF files
+to does not refer to the build host directories (this had happened before
+because the packages are built with 'libtool', which is not suitable
+for cross-compilation on default configurations).
+
+The test searches for the binary files and shared libraries on the given
+path and checks if the files contain correct a DT_RPATH value.
+The following hard-coded DT_RPATH values are assumed to be correct:
+"/usr/lib", "/lib", "/usr/lib64", "/lib64", "/etc/appWeb/bin",
+"/usr/local/xenomai/lib", "$ORIGIN".
+
+
+The RPATH_Check test file can be found at the following location: 
+	testsystems/platform/testcases/userRPATHCheck.exp
+The DUTS framework RPATH_Check test description file is located at
+testsystems/platform/testcases/host/rpath_check.tc
+
+The test should be run with the following command line:
+	# ROOTPATH=<eldk-target-path-to-check> ./duts -d testsystems/platform t \
+      host -t RPATH_Check
+where ROOTPATH is the path where the files should be checked; the "-d
+testsystems/platform" switch enables test cases located in the
+testsystems/platform directory; the "t host" switch chooses "host"
+target device and the "-t RPATH_Check" switch launches the RPATH_Check
+test case.
+
+If the ROOTPATH is not defined, the CFG_ROOTPATH variable defined in the
+devices/host.tgt file is used ("/opt/eldk").
