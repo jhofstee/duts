@@ -96,6 +96,8 @@ proc bld_image {{to 600}} {
 	# closing strings:
 	# Image: arch/ppc/boot/images/uImage is ready
 	# make[1]: `arch/ppc/boot/images/uImage' is up to date.
+	# for arch/powerpc:
+	# Entry Point:  0x00000000
 	#
 	# error strings:
 	# make: *** No rule to make target `dfdsf'.  Stop.
@@ -129,6 +131,9 @@ proc bld_image {{to 600}} {
 			p_verb "command '$c' OK"
 		}
 		-re ".*boot/images/uImage.*is\\ up\\ to\\ date.*$p$" {
+			 p_verb "command '$c' OK"
+		}
+		-re "Entry Point:.*$p$" {
 			 p_verb "command '$c' OK"
 		}
 	}
