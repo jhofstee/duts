@@ -86,15 +86,19 @@ proc check_linux_config {} {
 # 1. check tools
 #   - path makes sense, gcc, ld etc. exist?
 #
-# 2. check src dir
+# 2. check obj dir - valid only for linux 2.6
+#  - variable set
+#  - directory exists, writable?
+#
+# 3. check src dir
 #   - exists, writable?
 #   - looks like a kernel tree?
 #
-# 3. check dst
+# 4. check dst
 #   - if dir: exists, writable?
 #   - if endfile: already exists?
 #
-# 4. check kernel config file
+# 5. check kernel config file
 #   - exists _defconfig
 #
 # v: version
@@ -103,6 +107,7 @@ proc check_linux_config {} {
 proc valid_linux_env {v p} {
 
 	global img_name img_src img_dst
+	global obj_dir
 	global build_tools build_arch build_cross
 	global build_timeout overwrite no_clean
 	global env
@@ -140,7 +145,35 @@ proc valid_linux_env {v p} {
 	p_verb "all tools in place, proceeding"
 
 
-	## 2. check src dir
+	## 2. check obj dir - valid only for linux 2.6
+
+	##
+	## validate obj dir
+	##  - variable set
+	##  - directory exists, writable?
+	##
+
+	if {[var_exists obj_dir] && ($obj_dir != "")} {
+		if {($v == "2") && ($p == "6")} {
+			# strip trailing slash
+			set obj_dir [string trimright $obj_dir "/"]
+			if ![valid_dir $obj_dir 1] {
+				p_err "Problems accessing obj dir?!"
+				return 0
+			}
+
+			# set the env variable
+			set env(KBUILD_OUTPUT) $obj_dir
+			p_verb "working with obj dir: '$obj_dir'"
+		} else {
+			p_err "attempted to use obj dir feature for a non 2.6\
+				kernel"
+			return 0;
+		}
+	}
+
+
+	## 3. check src dir
 
 	##
 	## validate source dir
@@ -151,7 +184,14 @@ proc valid_linux_env {v p} {
 
 	# strip trailing slash
 	set img_src [string trimright $img_src "/"]
-	if ![valid_dir $img_src 1] {
+
+	# img_src needs to be writable only when obj_dir isn't used
+	if {[var_exists obj_dir] && ($obj_dir != "")} {
+		set src_dir_ok [valid_dir $img_src]
+	} else {
+		set src_dir_ok [valid_dir $img_src 1]
+	}
+	if {!$src_dir_ok} {
 		p_err "Problems accessing source dir?! Check your -s value."
 		return 0
 	}
@@ -163,7 +203,8 @@ proc valid_linux_env {v p} {
 	}
 	p_verb "working with source dir: '$img_src'"
 
-	## 3. check dst
+
+	## 4. check dst
 
 	##
 	## validate  destination location
@@ -176,7 +217,7 @@ proc valid_linux_env {v p} {
 		return 0
 	}
 	
-	## 4. check kernel config file 
+	## 5. check kernel config file
 	##
 	## - exists <name>_config, <name>_defconfig
 

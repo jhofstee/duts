@@ -143,13 +143,29 @@ proc bld_image {{to 600}} {
 
 proc bld_post {} {
 
-	global build_arch img_dst img_src
+	global build_arch img_dst img_src obj_dir
 
 	##
 	## copy image to the desired location
 	##
 	p_banner "copy image to destination" *
-	set img_file "$img_src/arch/$build_arch/boot/images/uImage"
+
+
+	if {$build_arch == "ppc"} {
+		set img_file "arch/ppc/boot/images/uImage"
+	} elseif {$build_arch == "powerpc"} {
+		set img_file "arch/powerpc/boot/uImage"
+	} else {
+		p_err "uknown build arch: '$build_arch'"
+		return 0
+	}
+
+	if {[var_exists obj_dir] && ($obj_dir != "")} {
+		set img_file "$obj_dir/$img_file"
+	} else {
+		set img_file "$img_src/$img_file"
+	}
+
 	if {$img_dst == ""} {
 		p_verb "no destination location specified, nothing to do.."
 	} else {

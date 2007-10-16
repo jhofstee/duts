@@ -23,7 +23,7 @@
 #
 # This script builds image of Linux kernel or U-Boot according to user
 # supplied parameters. Please use -h for help.
-# 
+#
 #
 #  usage examples:
 # ./build_image -n TQM834x_config -t linux-24 -s /home/raj/linuxppc_2_4_devel \
@@ -32,10 +32,17 @@
 # ./build_image -n TQM834x_defconfig -t linux-26 -s /home/raj/linux-2.6-denx \
 #               -d /tftpboot/tqm834x/uImage-26-raj -to 600
 #
-
+# ./build_image -n motionpro -t linux-26 -s /home/tur/git/linux-2.6-denx \
+#               -obj /home/tur/tmp/linux-26_build -a powerpc \
+#               -d /tftpboot/tur/motionpro/uImage-26-test -to 600
+#
+# ./build_image -n motionpro -t uboot -s /home/tur/git/u-boot \
+#               -obj /home/tur/tmp/u-boot_build \
+#               -d /tftpboot/tur/motionpro/u-boot.bin-test -to 300
+#
 
 ##
-## locate our dependency base dir  
+## locate our dependency base dir
 ##
 
 # we have to do everything by hand as we are trying to load some helper
@@ -92,6 +99,7 @@ set opt_table {
 	{img_name "n" "TQM834x"}
 	{img_src "s" ""}
 	{img_dst "d" ""}
+	{obj_dir "obj" ""}
 
 	{build_timeout  "to" "600"}
 	{build_tools "m" "/opt/eldk-4.0/usr/bin/"}
@@ -123,6 +131,7 @@ proc usage {} {
 	/home/$env(USER)/linuxppc_2_4_devel)"
 	puts "  -d  <img_dst>\t\tdst location (can be filename or\
 	directory)"
+	puts "  -obj <obj>\t\tlocation for object files (linux-26 and u-boot)"
 	puts "  -to <timeout>\t\ttimeout in seconds to wait for build to\
 	complete"
 	puts "  -m  <build_tools>\tpath to build tools (e.g.\

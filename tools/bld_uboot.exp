@@ -80,20 +80,25 @@ proc make_mrproper {sid p {to 180}} {
 # 1. check tools
 #   - path makes sense, gcc, ld etc. exist?
 #
-# 2. check src dir
+# 3. check obj dir
+#   - variable set
+#   - exists, writable?
+#
+# 3. check src dir
 #   - exists, writable?
 #   - looks like a U-Boot tree?
 #
-# 3. check dst
+# 4. check dst
 #   - if dir: exists, writable?
 #   - if endfile: already exists?
 #
-# 4. check config file
+# 5. check config file
 #   - exists include/config.h
 #
 proc bld_valid_env {} {
 	
 	global img_name img_src img_dst
+	global obj_dir
 	global build_tools build_arch build_cross
 	global overwrite no_clean
 	global env
@@ -131,7 +136,29 @@ proc bld_valid_env {} {
 	p_verb "all tools in place, proceeding"
 
 
-	## 2. check src dir
+	## 2. check obj dir
+
+	##
+	## validate obj dir
+	##  - variable set
+	##  - directory exists, writable?
+	##
+
+	if {[var_exists obj_dir] && ($obj_dir != "")} {
+		# strip trailing slash
+		set obj_dir [string trimright $obj_dir "/"]
+		if ![valid_dir $obj_dir 1] {
+			p_err "Problems accessing obj dir?!"
+			return 0
+		}
+
+		# set the env variable
+		set env(BUILD_DIR) $obj_dir
+		p_verb "working with obj dir: '$obj_dir'"
+	}
+
+
+	## 3. check src dir
 
 	##
 	## validate source dir
@@ -142,7 +169,14 @@ proc bld_valid_env {} {
 
 	# strip trailing slash
 	set img_src [string trimright $img_src "/"]
-	if ![valid_dir $img_src 1] {
+
+	# img_src needs to be writable only when obj_dir isn't used
+	if {[var_exists obj_dir] && ($obj_dir != "")} {
+		set src_dir_ok [valid_dir $img_src]
+	} else {
+		set src_dir_ok [valid_dir $img_src 1]
+	}
+	if {!$src_dir_ok} {
 		p_err "Problems accessing source dir?!"
 		return 0
 	}
@@ -154,7 +188,8 @@ proc bld_valid_env {} {
 	}
 	p_verb "working with source dir: '$img_src'"
 
-	## 3. check dst
+
+	## 4. check dst
 
 	##
 	## validate  destination location
@@ -167,7 +202,7 @@ proc bld_valid_env {} {
 		return 0
 	}
 	
-	## 4. check U-Boot config file 
+	## 5. check U-Boot config file
 	##
 	## - exists include/configs/<name>.h
 
@@ -293,7 +328,7 @@ proc bld_image {{to 600}} {
 			p_err "build failed"
 			set rv 0
 		}
-		-re ".*objcopy.*binary\\ u-boot\\ u-boot\\.bin.*$p$" {
+		-re ".*objcopy.*binary.*u-boot\\.bin.*$p$" {
 			p_verb "command '$c' OK"
 		}
 	}
@@ -303,13 +338,19 @@ proc bld_image {{to 600}} {
 
 proc bld_post {} {
 
-	global img_dst img_src build_sid
+	global img_dst img_src build_sid obj_dir
 
 	##
 	## copy image to the desired location
 	##
 	p_banner "copy image to destination" *
-	set img_file "$img_src/u-boot.bin"
+
+	if {[var_exists obj_dir] && ($obj_dir != "")} {
+		set img_file "$obj_dir/u-boot.bin"
+	} else {
+		set img_file "$img_src/u-boot.bin"
+	}
+
 	if {$img_dst == ""} {
 		p_verb "no destination location specified, nothing to do.."
 	} else {
