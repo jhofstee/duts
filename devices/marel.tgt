@@ -16,10 +16,13 @@
 # 0xFFB00000 - 0xFFFFFFFF Spare (5MB)
 #
 duts_device v38b {
-	MakeTarget	"v38b"
-	MakeArch	"ppc"
-	MakeCompile	"ppc_6xx-"
-	MakeToolPath	"/opt/eldk-4.1-2007-01-19/usr/bin/"
+	MakeTarget		"v38b"
+	MakeArch		"ppc"
+	MakeCompile		"ppc_6xx-"
+	MakeToolPath		"/opt/eldk-4.1-2007-01-19/usr/bin/"
+	# MakeSrcKernelPath is relative to the directory where duts is executed
+	MakeSrcKernelPath	"linuxppc_2_4_devel"
+	MakeObjPath		""
 
 	Vars {
 		CFG_RAM_WS_BASE 	200000

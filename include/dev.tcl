@@ -57,7 +57,7 @@ proc duts_device {name args} {
 }
 
 #
-# processes MakeTarget/Arch/Compile section in duts_device description
+# processes MakeTarget/Arch/Compile etc. section in duts_device description
 #
 proc make {type p} {
 	global cur_device a_devices
@@ -79,6 +79,14 @@ proc MakeCompile {p} {
 
 proc MakeToolPath {p} {
 	make "toolpath" $p
+}
+
+proc MakeSrcKernelPath {p} {
+	make "srckernelpath" $p
+}
+
+proc MakeObjPath {p} {
+	make "objpath" $p
 }
 
 #
@@ -129,6 +137,26 @@ proc Vars {vars} {
 		set a_devices($cur_device,varlist) $l_vars
 	}
 }
+
+
+#
+# Checks if attribute is defined for the current board or for the _common.
+#
+proc is_device_attr {a} {
+	global a_devices board_name DEVICE_COMMON_NAME
+	
+	if [in_array a_devices "$board_name,$a" ] {
+		p_verb "attribute '$a' defined for device '$board_name'"
+		return 1
+	} elseif [is_device_common_defined $a ] {
+		p_verb "attribute '$a' found for common device"
+		return 1
+	} else {
+		p_verb "attribute '$a' not found for device '$board_name'"
+		return 0
+	}
+}
+
 
 #
 # Retrieves attribute for the current board, or the _common device.
@@ -323,5 +351,9 @@ proc show_device {} {
 	puts ""
 	puts "  make params:\n    target\t'$t'\n    arch\t'$a'"
 	puts "    ccompile\t'$c'\n    toolpath\t'$p'"
+	if [is_device_attr "makeobjpath"] {
+		set obj_dir [get_device_attr "makeobjpath"]
+		puts "    obj_dir\t'$obj_dir'"
+	}
 	puts ""
 }

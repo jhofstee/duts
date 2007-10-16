@@ -454,6 +454,19 @@ proc set_host_tool_path {p} {
 }
 
 #
+# Return absolute version of non-empty, non-absolute path.
+# Assume it is relative to the pwd.
+#
+proc absolutize_path {path} {
+	global env
+	if {($path != "") && ([string index $path 0] != "/")} {
+		set pwd $env(PWD)
+		return "$pwd/$path"
+	}
+	return $path
+}
+
+#
 # spawns bash shell on host, returns its $spawn_id
 #
 proc host_bash_shell {{prompt ""} {opt ""}} {
