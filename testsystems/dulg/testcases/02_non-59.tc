@@ -78,3 +78,9 @@ duts_tc UBootConfig {
  	Type host
  	Commands { "" ".*" }
 }
+
+# this will try to connect via telnet
+duts_tc LinuxTelnet {
+	Type linux
+	Commands "!userLinuxTelnet.exp"
+}

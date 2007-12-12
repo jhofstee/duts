@@ -1,0 +1,10 @@
+#
+#
+#
+#
+
+duts_tc RPATH_Check {
+	Type host
+	Commands "!userRPATHCheck.exp"
+}
+

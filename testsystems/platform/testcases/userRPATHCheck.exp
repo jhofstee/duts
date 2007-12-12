@@ -1,0 +1,127 @@
+#
+# Check for RPATH
+#
+global CFG_ROOTPATH
+global env
+
+proc _walk dir { 
+
+    set files [list]
+    foreach f [glob -nocomplain [file join $dir *]] {
+        set type [file type $f]
+        switch $type {
+            directory {
+                set files [concat $files [_walk $f]]
+            }
+            file {
+                lappend files $f
+            }
+            default {
+                # Goofy file types -- just ignore them
+            }
+        }
+    }
+    return $files
+}
+
+proc valid_tool {t} {
+	
+	set rv 1
+	if [file exists $t] {
+		if {([file readable $t]) && ([file executable $t])} {
+			p_verb "tool '$t' OK"
+		} else {
+			p_err "tool '$t' not accessible"
+			set rv 0
+		}
+	} else {
+		p_err "tool '$t' not found"
+		set rv 0
+	}
+
+	return $rv
+}
+
+proc rpath_check {p} {
+	global tool
+	p_verb "rpath_check func"
+	set files [_walk $p]
+	set cnt 0
+	set res 1
+	log_user 0
+	exp_internal 0
+	foreach file $files {
+		incr cnt
+		if [string match ".*a" [file extension $file]] {
+			p_verb "$file  == .a(.la)"
+			continue
+		}
+		if {[file extension "$file"] != ".so" && ![file executable "$file"]} {
+			p_verb "$file != .so || exec"
+			continue
+		}
+		p_verb "pass 1 $file"
+		spawn file $file
+		p_verb "SPWN: $spawn_id"
+		expect {
+			-re "^.*:.*ELF.*$" {
+				p_verb "ELF file: $file"
+				close
+				wait
+			} eof {
+				p_verb "skip non-ELF file: $file"
+				wait
+				continue
+			}
+		}
+		p_verb "pass 2 $file"
+                spawn readelf -d $file
+		p_verb "SPWN: $spawn_id"
+		expect {
+			-re {Library rpath: \[([^\]]*)} {
+				set temp $expect_out(1,string)
+				p_verb "temp match: $temp"
+                                if ![expr [string equal "/usr/lib" $temp] || \
+				  [string equal "/usr/lib64" $temp] || \
+				  [string equal "/lib" $temp] || \
+				  [string equal "/lib64" $temp] || \
+				  [string equal "/etc/appWeb/bin" $temp] || \
+				  [string equal "/usr/local/xenomai/lib" $temp] || \
+				  [string equal "\$ORIGIN" $temp]] {
+					puts "---------------------------------"
+					puts "$file contains wrong RPATH: $temp"
+					set res 0
+				}
+				close
+				wait
+			} eof wait
+		}
+	}
+	puts "Number of files $cnt"
+	return $res
+}
+
+set tool "/usr/bin/readelf"
+
+if ![valid_tool $tool] {
+	puts "$tool doesn't exists"
+	return 0
+}
+
+if [in_array env ROOTPATH]  {
+	p_verb "ROOTPATH in env array"
+	set check_path $env(ROOTPATH)
+} elseif [var_exists CFG_ROOTPATH] {
+	p_warn "ROOTPATH is not set, CFG_ROOTPATH will be used"
+	set check_path $CFG_ROOTPATH
+} else {
+	p_err "ROOTPATH or CFG_ROOTPATH is not set"
+	return 0
+}
+
+p_verb "checkpath = $check_path"
+if ![valid_dir $check_path 0] {
+	return 0
+}
+
+rpath_check $check_path
