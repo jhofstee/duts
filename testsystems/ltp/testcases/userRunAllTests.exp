@@ -8,8 +8,14 @@
 #
 
 global _context_kernel_prompt board_name
+global curdate
+
 set p $_context_kernel_prompt
-set ltp_dir "/tmp/ltp-full-20061222"
+
+# default ltp testcases to run - this is what ltp assumes as default set
+# we may rely on a default suite will pick, but it's better to know such
+# explicitly
+set LTP_TESTLIST "syscalls,fs,fsx,dio,mm,ipc,sched,nptl,containers"
 
 expect "*"
 
@@ -17,12 +23,33 @@ expect "*"
 ## Get a new bash shell on the target, ignore rc, profile so we have a clean
 ## output without color formatting and such
 ##
+
+# First let's kill already spawned noprofile sessions if any...
+# There seem to be to consistent way to figure out if session existing
+set cmd "pkill -9 -f noprofile"
+set res [_context_kernel_command $cmd ".*"]
+if !{$res} {
+	p_err "error invoking commant on target"
+	return 0
+}
+
 set cmd "bash --norc --noprofile"
 set res [_context_kernel_command $cmd ".*"]
 if !{$res} {
 	p_err "could not execute a new shell"
 	return 0
 }
+
+#it is nearly mandatory to have a synced date/time with the host
+set cmd "date $curdate"
+set res [_context_kernel_command $cmd ".*"]
+if !{$res} {
+	p_err "could not set current date/time"
+	return 0
+}
+
+set ltp_dir "/opt/ltp"
+p_verb "LTP expected in $ltp_dir"
 
 ##
 ## Check if the LTP is installed
@@ -81,7 +108,7 @@ for {set i 1} {$i <= $rounds} {incr i 1} {
 
 	set results_log [format "%s_%02d.log" $board_name $i]
 
-	set c "./runltp -p -l $results_log"
+	set c "./runltp -f $LTP_TESTLIST -p -l $results_log"
 	send -s "$c\r"
 	set timeout 20
 	expect {
