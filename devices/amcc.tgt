@@ -323,7 +323,7 @@ duts_device sequoia {
 		CFG_RAMDISK_END		FC37FFFF
 	}
 	MakeTarget	"sequoia"
-	MakeArch	"ppc"
+	MakeArch	"powerpc"
 	MakeCompile	"ppc_4xxFP-"
 }
 
