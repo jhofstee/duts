@@ -5,15 +5,15 @@
 
 
 duts_tc UBootAutoscrHelp {
- 	Type u-boot
- 	Commands {
+	Type u-boot
+	Commands {
 		"help autoscr" ".*"
 	}
 }
 
 duts_tc UBootAutoscrScript {
- 	Type u-boot
- 	Commands {
+	Type u-boot
+	Commands {
 		"!userScr.exp"
 	}
 }
@@ -24,8 +24,8 @@ duts_tc UBootAutoscrMkimage {
 }
 
 duts_tc UBootAutoscr {
- 	Type u-boot
- 	Commands {
+	Type u-boot
+	Commands {
 		"tftp $CFG_RAM_WS_BASE /tftpboot/$BOARD/example.img" ".*"
 		"imi" ".*"
 		"autoscr $CFG_RAM_WS_BASE" ".*"
@@ -33,15 +33,15 @@ duts_tc UBootAutoscr {
 }
 
 duts_tc UBootBootmHelp {
- 	Type u-boot
- 	Commands {
+	Type u-boot
+	Commands {
 		"help bootm" ".*"
 	}
 }
 
 duts_tc UBootGoHelp {
- 	Type u-boot
- 	Commands {
+	Type u-boot
+	Commands {
 		"help go" ".*"
 	}
 }

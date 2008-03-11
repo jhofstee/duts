@@ -21,13 +21,13 @@
 
 proc valid_kernel_file {f} {
 	global control_con
-	
+
 	set rv 0
 	set cmd "file"
 
 	if [catch {spawn -noecho $cmd $f}] {
 		p_err "couldn't spawn '$cmd' command" 1
-	}	
+	}
 
 	expect {
 		timeout {

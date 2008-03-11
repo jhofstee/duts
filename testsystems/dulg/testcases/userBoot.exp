@@ -1,5 +1,5 @@
 #
-# 
+#
 #
 
 expect "*"
@@ -13,7 +13,7 @@ send -s "reset\r"
 
 #
 # get "Hit any key to stop autoboot"
-# key press 
+# key press
 # get prompt
 #
 expect {

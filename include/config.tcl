@@ -124,7 +124,7 @@ proc context {type name c} {
 				# possible variable here, so need to make an
 				# explicit substitution
 				set BOARD $board_name
-				set _context_${type}_image [subst $val] 
+				set _context_${type}_image [subst $val]
 			}
 			"descr" {
 				# this is a file with internal context
@@ -134,7 +134,7 @@ proc context {type name c} {
 					set config_errors 1
 					continue
 				}
-				
+
 				set err ""
 				if [catch {source $p} err] {
 					p_err "problems with source'ing '$p'?!"
@@ -154,7 +154,7 @@ proc context {type name c} {
 				set config_errors 1
 			}
 		}
-	}	
+	}
 
 	# set global name for the sourced context implementation
 	set _context_$type $name
@@ -190,7 +190,7 @@ proc cfg_context_host {name c} {
 #
 proc cfg_device_ops {p} {
 	global cur_device a_devices device_errors BASE_DIR
-	
+
 	##
 	## validate file
 	##
@@ -213,7 +213,7 @@ proc cfg_device_ops {p} {
 #
 proc valid_configs {} {
 	global config_errors was_selected_config selected_config
-	
+
 	set rv 1
 	if {$config_errors > 0} {
 		set rv 0
@@ -244,20 +244,20 @@ proc valid_configs {} {
 
 #
 # loads config description files
-# 
+#
 # e: extension
 #
 proc load_configs {{e ""}} {
 
-	global BASE_DIR CONFIG_DESCR_DIR CONFIG_DESCR_EXT configs_no 
-	
+	global BASE_DIR CONFIG_DESCR_DIR CONFIG_DESCR_EXT configs_no
+
 	set d "$BASE_DIR/$CONFIG_DESCR_DIR"
 	if ![valid_dir $d] {
 		p_err "Invalid device dir: $d" 1
 	}
 
 	set e [expr {($e == "") ? $CONFIG_DESCR_EXT : $e}]
-	
+
 	foreach f [find_files $d $e] {
 		p_verb "loading configs from $f"
 
@@ -274,7 +274,7 @@ proc load_configs {{e ""}} {
 
 	if {$configs_no > 0} {
 		p_verb "loaded $configs_no config decriptions"
-		
+
 		##
 		## validate
 		##
@@ -293,7 +293,7 @@ proc list_all_configs {} {
 
 
 #
-# shows config details 
+# shows config details
 #
 proc show_config {} {
 	#TODO
@@ -331,7 +331,7 @@ proc context_class {ctx} {
 
 #
 # changes context by invoking appropriate methods
-# 
+#
 #
 proc context_switch {ctx} {
 	global cur_context dst_context
@@ -345,9 +345,9 @@ proc context_switch {ctx} {
 		## transition off->kernel needs additional stage: firmware
 		## context
 		##
-		
+
 		p_verb "switching context to intermediate: $ctx"
-		
+
 		# call handler
 		_context_firmware_handler
 		set cur_context $ctx
@@ -360,7 +360,7 @@ proc context_switch {ctx} {
 	##
 	set handler "_context_${ctx}_handler"
 	$handler
-	
+
 	##
 	## we have a new context..
 	##

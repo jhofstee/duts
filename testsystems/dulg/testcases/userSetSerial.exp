@@ -1,8 +1,8 @@
 #
-# 
+#
 #
 
-global _context_firmware_prompt 
+global _context_firmware_prompt
 
 # generate a pseudo number
 proc rndom {{limit 65536}} {

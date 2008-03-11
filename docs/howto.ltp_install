@@ -8,13 +8,13 @@ transfer the prepared installation to the target accessible location.
 
 
 1. Become superuser
-  
+
   su -
 
 
 2. Unpack the LTP package
 
-  # tar -xzf ltp-full-20061222.tgz 
+  # tar -xzf ltp-full-20061222.tgz
   # cd ltp-full-20061222
 
 

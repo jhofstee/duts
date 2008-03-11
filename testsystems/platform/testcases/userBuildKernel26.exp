@@ -1,5 +1,5 @@
 #
-# Build 2.6 kernel 
+# Build 2.6 kernel
 #
 
 ##
@@ -14,7 +14,7 @@ set repo_dst "./${linux}${duts_ext}"
 
 set build_type "linux-26"
 
-set timeout_co 1600 
+set timeout_co 1600
 set timeout_build 1000
 
 ##
@@ -28,4 +28,4 @@ if ![valid_file $generic_build_kernel] {
 	return 0
 }
 set rv [source $generic_build_kernel]
-return $rv 
+return $rv

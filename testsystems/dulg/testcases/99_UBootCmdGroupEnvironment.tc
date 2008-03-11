@@ -5,50 +5,50 @@
 
 
 duts_tc UBootPrintenvHelp {
- 	Type u-boot
- 	Commands {
+	Type u-boot
+	Commands {
 		"help printenv" ".*"
 	}
 }
 
 duts_tc UBootPrintenvWithArgs {
- 	Type u-boot
- 	Commands {
+	Type u-boot
+	Commands {
 		"printenv ipaddr hostname netmask" ".*"
 	}
 }
 
 duts_tc UBootPrintenvNoArgs {
- 	Type u-boot
- 	Commands {
+	Type u-boot
+	Commands {
 		"printenv" ".*"
 	}
 }
 
 duts_tc UBootSaveenvHelp {
- 	Type u-boot
- 	Commands {
+	Type u-boot
+	Commands {
 		"help saveenv" ".*"
 	}
 }
 
 duts_tc UBootSaveenv {
- 	Type u-boot
- 	Commands {
+	Type u-boot
+	Commands {
 		"saveenv" ".*"
 	}
 }
 
 duts_tc UBootSetenvHelp {
- 	Type u-boot
- 	Commands {
+	Type u-boot
+	Commands {
 		"help setenv" ".*"
 	}
 }
 
 duts_tc UBootSetenvDelete {
- 	Type u-boot
- 	Commands {
+	Type u-boot
+	Commands {
 		"setenv foo This is an example value." ".*"
 		"printenv foo" ".*"
 		"setenv foo" ".*"
@@ -57,11 +57,11 @@ duts_tc UBootSetenvDelete {
 }
 
 duts_tc UBootSetenvSet {
- 	Type u-boot
+	Type u-boot
 	Pre {
 		"setenv bar" ".*"
 	}
- 	Commands {
+	Commands {
 		"printenv bar" ".*"
 		"setenv bar This is a new example." ".*"
 		"printenv bar" ".*"
@@ -69,23 +69,23 @@ duts_tc UBootSetenvSet {
 }
 
 duts_tc UBootSetenvQuote {
- 	Type u-boot
- 	Commands {
+	Type u-boot
+	Commands {
 		{setenv cons_opts 'console=tty0 console=ttyS0,${baudrate}'} ".*"
 		"printenv cons_opts" ".*"
 	}
 }
 
 duts_tc UBootRunHelp {
- 	Type u-boot
- 	Commands {
+	Type u-boot
+	Commands {
 		"help run" ".*"
 	}
 }
 
 duts_tc UBootRun {
- 	Type u-boot
- 	Commands {
+	Type u-boot
+	Commands {
 		{setenv test echo This is a test\;printenv ipaddr\;echo Done.} ".*"
 		"printenv test" ".*"
 		"run test" ".*"
@@ -93,8 +93,8 @@ duts_tc UBootRun {
 }
 
 duts_tc UBootRunSequence {
- 	Type u-boot
- 	Commands {
+	Type u-boot
+	Commands {
 		{setenv test2 echo This is another Test\;printenv hostname\;echo Done.} ".*"
 		"printenv test test2" ".*"
 		"run test test2" ".*"
@@ -102,8 +102,8 @@ duts_tc UBootRunSequence {
 }
 
 duts_tc UBootBootdHelp {
- 	Type u-boot
- 	Commands {
+	Type u-boot
+	Commands {
 		"help boot" ".*"
 	}
 }

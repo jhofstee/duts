@@ -4,28 +4,28 @@
 global CFG_ROOTPATH
 global env
 
-proc _walk dir { 
+proc _walk dir {
 
     set files [list]
     foreach f [glob -nocomplain [file join $dir *]] {
-        set type [file type $f]
-        switch $type {
-            directory {
-                set files [concat $files [_walk $f]]
-            }
-            file {
-                lappend files $f
-            }
-            default {
-                # Goofy file types -- just ignore them
-            }
-        }
+	set type [file type $f]
+	switch $type {
+	    directory {
+		set files [concat $files [_walk $f]]
+	    }
+	    file {
+		lappend files $f
+	    }
+	    default {
+		# Goofy file types -- just ignore them
+	    }
+	}
     }
     return $files
 }
 
 proc valid_tool {t} {
-	
+
 	set rv 1
 	if [file exists $t] {
 		if {([file readable $t]) && ([file executable $t])} {
@@ -75,13 +75,13 @@ proc rpath_check {p} {
 			}
 		}
 		p_verb "pass 2 $file"
-                spawn readelf -d $file
+		spawn readelf -d $file
 		p_verb "SPWN: $spawn_id"
 		expect {
 			-re {Library rpath: \[([^\]]*)} {
 				set temp $expect_out(1,string)
 				p_verb "temp match: $temp"
-                                if ![expr [string equal "/usr/lib" $temp] || \
+				if ![expr [string equal "/usr/lib" $temp] || \
 				  [string equal "/usr/lib64" $temp] || \
 				  [string equal "/lib" $temp] || \
 				  [string equal "/lib64" $temp] || \

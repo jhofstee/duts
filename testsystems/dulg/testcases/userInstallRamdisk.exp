@@ -1,5 +1,5 @@
 #
-# install Ramdisk image in flash 
+# install Ramdisk image in flash
 #
 
 global board_name

@@ -1,5 +1,5 @@
 #
-# Build linux kernel 
+# Build linux kernel
 #
 
 set tools_dir "$BASE_DIR/tools"
@@ -7,7 +7,7 @@ set tool_co "get_src"
 set tool_build "build_image"
 
 proc valid_tool {t} {
-	
+
 	set rv 1
 	if [file exists $t] {
 		if {([file readable $t]) && ([file executable $t])} {
@@ -41,22 +41,22 @@ proc check_tools {l} {
 #
 # tools/get_src
 # -s /home/git/<...>
-# -d ./ 
+# -d ./
 # -to
 # -b (batch mode)
 #
 proc checkout {{to 1600}} {
 
-	upvar repo_dst dst 
+	upvar repo_dst dst
 	upvar repo_src src
 	upvar tools_dir tools_dir
 	upvar tool_co tool_co
-	
+
 	if [valid_dir $dst] {
 		# TODO - validate it is actually a kernel tree - like we do in
 		# check_linux_ver{} (tools/bld_linux.exp) - maybe put it in
 		# some common file
-		
+
 		# seems the specified repo directory is already checked
 		# out so don't bother with executing get_src
 		p_warn "using already checked out source tree: '$dst'"
@@ -86,7 +86,7 @@ proc checkout {{to 1600}} {
 #
 # -t linux-26
 # -n <board_name>
-# -s <path to the repo tha was just checked out> 
+# -s <path to the repo tha was just checked out>
 # -d /tftpboot/<board_name>
 # -to 600
 # -m  <build_tools>
@@ -105,7 +105,7 @@ proc build {{to 600}} {
 
 	# note the repo location we checked out to in a previous (checkout)
 	# stage is now our kernel source directory!
-	upvar repo_dst src 
+	upvar repo_dst src
 
 	set dst $_context_kernel_image
 	set dst_dir [file dirname $dst]
@@ -126,12 +126,12 @@ proc build {{to 600}} {
 	set cross [get_device_attr "makecompile"]
 
 	##
-	## get toolchain path 
+	## get toolchain path
 	##
 	set toolchain [get_device_attr "maketoolpath"]
 
 	##
-	## run build_image to build the image 
+	## run build_image to build the image
 	##
 	set tool_cmd "$tools_dir/$tool_build"
 	set tool_arg "-t $build_type -s $src -d $dst -n $target -m $toolchain\

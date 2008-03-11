@@ -5,51 +5,51 @@
 
 
 duts_tc UBootBdinfoHelp {
- 	Type u-boot
- 	Commands {
+	Type u-boot
+	Commands {
 		"help bdinfo" ".*"
 	}
 }
 
 duts_tc UBootBdinfo {
- 	Type u-boot
- 	Commands {
+	Type u-boot
+	Commands {
 		"bdi" ".*"
 	}
 }
 
 duts_tc UBootConinfoHelp {
- 	Type u-boot
- 	Commands {
+	Type u-boot
+	Commands {
 		"help conin" ".*"
 	}
 }
 
 duts_tc UBootConinfo {
- 	Type u-boot
- 	Commands {
+	Type u-boot
+	Commands {
 		"conin" ".*"
 	}
 }
 
 duts_tc UBootFlinfoHelp {
- 	Type u-boot
- 	Commands {
+	Type u-boot
+	Commands {
 		"help flinfo" ".*"
 	}
 }
 
 duts_tc UBootFlinfo {
- 	Type u-boot
+	Type u-boot
 	Timeout 60
- 	Commands {
+	Commands {
 		"fli" ".*"
 	}
 }
 
 duts_tc UBootIminfoHelp {
- 	Type u-boot
- 	Commands {
+	Type u-boot
+	Commands {
 		"help iminfo" ".*"
 	}
 }
@@ -60,15 +60,15 @@ duts_tc UBootIminfo {
 }
 
 duts_tc UBootHelpHelp {
- 	Type u-boot
- 	Commands {
+	Type u-boot
+	Commands {
 		"help help" ".*"
 	}
 }
 
 duts_tc UBootProtectHelp {
- 	Type u-boot
- 	Commands {
+	Type u-boot
+	Commands {
 		"help protect" ".*"
 	}
 }

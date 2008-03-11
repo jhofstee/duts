@@ -1,5 +1,5 @@
 #
-# install kernel image in flash 
+# install kernel image in flash
 #
 
 global a_devices _context_kernel_image board_name
@@ -20,7 +20,7 @@ lappend a_devices($board_name,varlist) "CFG_KERNEL_IMAGE"
 # not needed any longer
 #
 #set last_el [llength $a_devices($board_name,varlist)]
-#lreplace $a_devices($board_name,varlist) $last_el $last_el 
+#lreplace $a_devices($board_name,varlist) $last_el $last_el
 #puts $a_devices($board_name,varlist)
 
 

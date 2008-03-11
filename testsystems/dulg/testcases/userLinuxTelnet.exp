@@ -1,5 +1,5 @@
 #
-# 
+#
 #
 
 global _context_kernel_prompt cur_context TIMEOUT
@@ -7,7 +7,7 @@ global CFG_ROOTPATH
 global board_name
 
 ##
-## Check rootpath 
+## Check rootpath
 ##
 if ![info exists CFG_ROOTPATH] {
 	p_err "variable CFG_ROOTPATH is not set, please update the\

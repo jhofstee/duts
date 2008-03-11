@@ -37,7 +37,7 @@ proc logname {tc {ext "log"}} {
 		# use arbitrary log filename if specified for a TC
 		set lf $board_name$a_testcases($tc,logfile)
 	} else {
-		# default is derived from test cases's name 
+		# default is derived from test cases's name
 		set lf $board_name$tc.$ext
 	}
 	set logs [file dirname $logs_location]
@@ -159,7 +159,7 @@ proc boot_kernel_net_nfs {} {
 	expect "*"
 
 	##
-	## check rootpath 
+	## check rootpath
 	##
 	if ![var_exists CFG_ROOTPATH] {
 		p_err "variable CFG_ROOTPATH is not set, please update the\
@@ -243,7 +243,7 @@ proc boot_kernel_net_nfs {} {
 					##
 					p_err "PANIC!"
 					if [ask_yesno "continue execution? "] {
-						return 1 
+						return 1
 					} else {
 						exit1
 					}

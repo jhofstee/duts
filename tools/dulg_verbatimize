@@ -24,7 +24,7 @@
 # prepares .log files for use with DULG wiki (adds tags, renames, makes
 # tarball)
 #
-# $1: board name 
+# $1: board name
 #
 
 #TODO exceptions file list - do not verbatimize

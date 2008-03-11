@@ -34,8 +34,8 @@ proc tc_skel {tc_name} {
 	set tc "duts_tc $tc_name \{\n\
 		\tType u-boot\n\
 		\tCommands \{\n\t\t\"\" \".\*\"\n\t\}\n\}\n"
-		
-	return $tc	
+
+	return $tc
 }
 
 proc create_tc_skel {tgf} {
@@ -48,10 +48,10 @@ proc create_tc_skel {tgf} {
 
 		set tc_file "$tg.tc"
 		set f [open $tc_file w+ ]
-	
+
 		puts $f "#\n#\n# This is a skeleton TC definition file\n#\
 			generated from $tgf\n#\n#\n\n"
-	
+
 		set tc_list $a_testgroups($tg)
 		set max [expr [llength $a_testgroups($tg)]]
 		foreach tc $tc_list {
@@ -72,8 +72,8 @@ set argc [llength $argv]
 if { $argc == 0 } {
 	puts "Usage: $argv0 <TGfile>\n"
 	exit 1
-}	
-		
+}
+
 set tg_file [ lindex $argv 0 ]
 
 

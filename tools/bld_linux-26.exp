@@ -34,13 +34,13 @@ if [catch {source $_f} err] {
 }
 
 proc bld_valid_env {} {
-	
+
 	return [valid_linux_env 2 6]
 }
 
 proc bld_pre {} {
 	global build_sid build_prompt
-	
+
 	p_banner "make mrproper" #
 	return [make_mrproper $build_sid $build_prompt]
 }
@@ -88,7 +88,7 @@ proc bld_image {{to 600}} {
 	set p $build_prompt
 	set timeout $to
 	set rv 1
-	
+
 	set c "make uImage"
 	p_banner $c #
 	send -s "$c\r"

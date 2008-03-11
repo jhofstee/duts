@@ -40,13 +40,13 @@ proc check_linux_ver {v p} {
 
 	if [catch {set o [eval exec $cmd $cmd_arg]}] {
 		p_verb "version does not match"
-        	set rv 0
+		set rv 0
 	}
 
 	set cmd_arg "-r \"PATCHLEVEL = $p\" $img_src/Makefile"
 	if [catch {set o [eval exec $cmd $cmd_arg]}] {
 		p_verb "patchlevel does not match"
-        	set rv 0
+		set rv 0
 	}
 
 	if {!$rv} {
@@ -66,7 +66,7 @@ proc check_linux_config {} {
 
 	global img_src img_name build_arch
 	set rv 1
-	
+
 	set c $img_name
 	append c "_defconfig"
 	set cf "$img_src/arch/$build_arch/configs/$c"
@@ -124,13 +124,13 @@ proc valid_linux_env {v p} {
 	## set PATH so the desired toolchain is available
 	##
 	if ![set_host_tool_path $build_tools] {
-        	p_err "path to the build tools not accessible: '$p'?!"
+		p_err "path to the build tools not accessible: '$p'?!"
 		return 0
 	}
 
 	##
 	## check tools availability:
-	##  - a selected tool from cross build suite, let's have a look at 
+	##  - a selected tool from cross build suite, let's have a look at
 	##    gcc and ld
 	##
 	set cmd_gcc $build_cross
@@ -216,7 +216,7 @@ proc valid_linux_env {v p} {
 	if ![check_dst $img_dst $o] {
 		return 0
 	}
-	
+
 	## 5. check kernel config file
 	##
 	## - exists <name>_config, <name>_defconfig
@@ -224,7 +224,7 @@ proc valid_linux_env {v p} {
 	#
 	# if user-provided kernel config name was '.+config' we only save the
 	# core of the name for further processing when it will be personalized
-	# with _config or _defconfig suffix depending on context. This is 
+	# with _config or _defconfig suffix depending on context. This is
 	# mainly due to different handling of config name in Linux 2.4
 	# (make <name>_config) vs. 2.6 (make <name>_defconfig)
 	# e.g. for TQM834x_defconfig save only the 'TQM834x' part
@@ -238,7 +238,7 @@ proc valid_linux_env {v p} {
 		return 0
 	}
 	p_verb "using '$img_name' kernel config"
-	
+
 	##
 	## verify if we can skip configuration steps
 	##
@@ -257,7 +257,7 @@ proc valid_linux_env {v p} {
 }
 
 proc make_mrproper {sid p {to 180}} {
-	
+
 	set spawn_id $sid
 	set rv 1
 

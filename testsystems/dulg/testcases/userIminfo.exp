@@ -1,5 +1,5 @@
 #
-# 
+#
 #
 
 global _context_kernel_image CFG_RAM_WS_BASE _context_firmware_prompt
@@ -11,7 +11,7 @@ if ![var_exists CFG_RAM_WS_BASE] {
 	p_err "variable CFG_RAM_WS_BASE is not set, please update the\
 	       .tgt definition file for your board"
 	       return 0
-} 
+}
 
 ##
 ## check if the kernel file is ok

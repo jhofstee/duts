@@ -15,7 +15,7 @@ The following hard-coded DT_RPATH values are assumed to be correct:
 "/usr/local/xenomai/lib", "$ORIGIN".
 
 
-The RPATH_Check test file can be found at the following location: 
+The RPATH_Check test file can be found at the following location:
 	testsystems/platform/testcases/userRPATHCheck.exp
 The DUTS framework RPATH_Check test description file is located at
 testsystems/platform/testcases/host/rpath_check.tc

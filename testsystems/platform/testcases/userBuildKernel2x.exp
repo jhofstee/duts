@@ -3,7 +3,7 @@
 #
 
 proc valid_tool {t} {
-	
+
 	set rv 1
 	if [file exists $t] {
 		if {([file readable $t]) && ([file executable $t])} {

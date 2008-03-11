@@ -28,7 +28,7 @@ set debugging "yes"
 
 ##
 ## Discover base dir
-## 
+##
 set BASE_DIR [file dirname $argv0]
 
 ##
@@ -86,7 +86,7 @@ if {[in_array env DUTS_DIR]} {
 	if { $env(DUTS_DIR) != "" } {
 		set working_dir $env(DUTS_DIR)
 	} else {
-		set working_dir $DEFAULT_DIR 
+		set working_dir $DEFAULT_DIR
 	}
 } else {
 	set working_dir $DEFAULT_DIR
@@ -98,7 +98,7 @@ set l_testcases [list]
 # associative array for internal representation of all test cases
 array set a_testcases ""
 
-# current test case 
+# current test case
 set cur_tc ""
 
 
@@ -116,7 +116,7 @@ set l_boards [list]
 array set a_devices ""
 set cur_device ""
 
-# board name 
+# board name
 set board_name ""
 
 # global list of defined configuration views
@@ -137,7 +137,7 @@ set powered_on "no"
 
 
 # default location for log files
-set logs_location $LOG_DIR 
+set logs_location $LOG_DIR
 
 
 set dry_run "no"

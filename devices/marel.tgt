@@ -1,5 +1,5 @@
 #
-# Definitions for Marel board(s) 
+# Definitions for Marel board(s)
 #
 
 #
@@ -30,7 +30,7 @@ duts_device v38b {
 		CFG_KERNEL_START	FF100000
 		CFG_KERNEL_END		FF1FFFFF
 		CFG_RAMDISK_START	FF200000
-		CFG_RAMDISK_END		FF4FFFFF 
+		CFG_RAMDISK_END		FF4FFFFF
 
 		CFG_MTD_ERASE_DEVICE	"mtd4"
 

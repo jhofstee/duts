@@ -27,7 +27,7 @@
 # turns on/off logging
 #
 proc logging {onoff {lf ""}} {
-	
+
 	if {$onoff == "on"} {
 		log_file -noappend $lf
 
@@ -40,7 +40,7 @@ proc logging {onoff {lf ""}} {
 
 
 ###############################################################################
-# user interface 
+# user interface
 ###############################################################################
 
 #
@@ -100,7 +100,7 @@ proc p_banner {msg {p "* "}} {
 #
 #
 proc ask_yesno {msg} {
-	
+
 	set timeout -1
 	send_user "$msg\[y] "
 	expect_user -re "(.*)\n" {
@@ -128,7 +128,7 @@ proc niy {msg} {
 }
 
 #
-# debug 
+# debug
 #
 proc debug {msg {subsystem ""}} {
 	# TODO debug to file
@@ -151,7 +151,7 @@ proc proc_name {} {
 	set self_name [lindex [info level 0] 0]
 
 	if {$name == $self_name} {
-		# called from the main script level 
+		# called from the main script level
 		set name "MAIN"
 	}
 	return $name
@@ -166,7 +166,7 @@ proc proc_exists {p} {
 	set rv 1
 
 	if ![llength [info procs $p]] {
-		set rv 0 
+		set rv 0
 	}
 	return $rv
 }
@@ -196,7 +196,7 @@ proc var_exists {v} {
 #
 proc in_array {a k} {
 	upvar $a ar
-	
+
 	if {[array get ar $k] > 0} {
 		set rv 1
 	} else {
@@ -236,11 +236,11 @@ proc find_files {dir ext {recursive "no"}} {
 
 	if {$recursive == "yes"} {
 		# unix 'find' needs to be used here, glob is to weak...
-		niy "recursive find"	
+		niy "recursive find"
 	}
-	
+
 	set l_files [lsort [glob -nocomplain -dir $dir *.$ext]]
-	
+
 	if {!([llength $l_files]  > 0)} {
 		p_verb "No files with extension $ext in dir $dir?!"
 	}
@@ -283,7 +283,7 @@ proc valid_dir {dir {check_write "0"}} {
 			p_verb "$dir is not a directory..?!"
 			set rv 0
 		}
-		
+
 	} else {
 		p_verb "no such directory: '$dir'"
 		set rv 0
@@ -326,7 +326,7 @@ proc valid_file {f {check_write "0"}} {
 		p_verb "no such file: '$f'?!"
 		set rv 0
 	}
-	
+
 	return $rv
 }
 
@@ -343,11 +343,11 @@ proc valid_host_tool {t} {
 	set which_cmd "/usr/bin/which"
 	set which_opt "--tty-only --show-dot --show-tilde"
 	set rv 1
-	
+
 	if [file exists $which_cmd] {
 		if {([file readable $which_cmd]) &&
 		    ([file executable $which_cmd])} {
-	
+
 			if [catch {set o [eval exec $which_cmd $which_opt $t]}] {
 				p_verb "tool '$t' not found"
 				set rv 0
@@ -371,9 +371,9 @@ proc valid_host_tool {t} {
 # tools_list: NAME of the list with tools to find
 #
 proc check_host_tools {tools_list} {
-	
+
 	upvar $tools_list tools
-	
+
 	set rv 1
 	foreach t $tools {
 		if ![valid_host_tool $t] {
@@ -386,7 +386,7 @@ proc check_host_tools {tools_list} {
 
 #
 # table of strings in the path identifying build tools similar to what we want
-# to set 
+# to set
 #
 set alike {"eldk" "crosstool" "tool"}
 
@@ -394,7 +394,7 @@ set alike {"eldk" "crosstool" "tool"}
 # if a piece from $alike is found in $p returns 1, otherwise 0
 #
 proc is_similar_path {p} {
-	global alike 
+	global alike
 
 	set found 0
 	foreach a $alike {
@@ -414,7 +414,7 @@ proc set_host_tool_path {p} {
 	global env
 
 	if ![valid_dir $p] {
-	        return 0
+		return 0
 	}
 
 	##
@@ -430,22 +430,22 @@ proc set_host_tool_path {p} {
 	##
 	set len [llength $pl]
 	for {set i 0} {$i < $len} {incr i} {
-        	set el [lindex $pl $i]
+		set el [lindex $pl $i]
 		if [is_similar_path $el] {
-        	        # there's already a path to build tools - change it to
+			# there's already a path to build tools - change it to
 			# our newly desired path
-                	set pl_new [lreplace $pl $i $i $p]
+			set pl_new [lreplace $pl $i $i $p]
 			break
-        	}
+		}
 	}
 	if [llength $pl_new] {
-        	set path_new [join $pl_new ":"]
+		set path_new [join $pl_new ":"]
 	} else {
-        	# if there is no updated path list it means there was no other
+		# if there is no updated path list it means there was no other
 		# build tools path found in the current PATH so we need to add
 		# ours
-        	lappend pl $p
-	        set path_new [join $pl ":"]
+		lappend pl $p
+		set path_new [join $pl ":"]
 	}
 	# now we can set the [new] PATH
 	set env(PATH) $path_new
@@ -510,29 +510,29 @@ proc host_bash_shell {{prompt ""} {opt ""}} {
 proc host_copy {s d} {
 
 	if ![valid_file $s] {
-		return 0	
+		return 0
 	}
 	set c "cp $s $d"
 	if [catch {set o [eval exec $c]}] {
 		p_err "copy command failed: '$c'"
 		return 0
 	}
-	
+
 	return 1
 }
 
 ###############################################################################
-# process mgmt 
+# process mgmt
 ###############################################################################
 
 #
-# spawns process and returns spawn_id or -1 
+# spawns process and returns spawn_id or -1
 #
 proc process_spawn {p {params ""}} {
 	if {$p == ""} {
-		return -1 
+		return -1
 	}
-	
+
 	if [catch {set sid [eval spawn -noecho $p $params]}] {
 		p_verb "couldn't spawn '$p'"
 		return -1
@@ -556,7 +556,7 @@ proc process_close {sid} {
 ###############################################################################
 #
 # - there are two global structures required:
-# 
+#
 #   1. opt_table -  table of user interface options, has to be created
 #   manually; each element is:
 #
@@ -566,12 +566,12 @@ proc process_close {sid} {
 #   opt_table), gets created automatically in opt_create_globals{}
 #
 #
-# - usage: 
+# - usage:
 #
 #   1. provide opt_table structure
 #   2. call opt_create_globals{} to initialize everything
 #   3. use opt_process{} in your params parsing routine
-# 
+#
 #
 
 #
@@ -591,11 +591,11 @@ proc opt_create_globals {} {
 		set opt_str [lindex $o 1]
 		set def_val [lindex $o 2]
 
-		# set global var - note we 'dereference' a variable by its 
+		# set global var - note we 'dereference' a variable by its
 		# name - hence the $ in set's first argument is needed
 		global $var_name
 		set $var_name $def_val
-		
+
 		# add opt string to the list
 		lappend opt_list $opt_str
 	}
@@ -634,7 +634,7 @@ proc opt_process {o_txt o_val {check_list "0"}} {
 	}
 
 	if {$check_list} {
-		# return failed if option not recognized 
+		# return failed if option not recognized
 		if ![on_list opt_list $o_txt] {
 			return 0
 		}
@@ -656,10 +656,10 @@ proc opt_process {o_txt o_val {check_list "0"}} {
 	# set the global with supplied value: we 'dereference' a variable by
 	# its name - hence the $ in argument is needed
 	global $o_var
-	set $o_var $o_val 
+	set $o_var $o_val
 
 	# to get the var value we need to force substitution
 	p_verb "$o_txt = '[subst $$o_var]'"
 
-	return $rv 
+	return $rv
 }

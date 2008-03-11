@@ -4,8 +4,8 @@
 #
 
 duts_tc UBootI2cHelp {
- 	Type u-boot
- 	Commands {
+	Type u-boot
+	Commands {
 		"help iprobe" ".*"
 		"help icrc32" ".*"
 		"help imw" ".*"
@@ -17,15 +17,15 @@ duts_tc UBootI2cHelp {
 }
 
 duts_tc UBootIdeHelp {
- 	Type u-boot
- 	Commands {
+	Type u-boot
+	Commands {
 		"help ide" ".*"
 	}
 }
 
 duts_tc UBootDiskbootHelp {
- 	Type u-boot
- 	Commands {
+	Type u-boot
+	Commands {
 		"help disk" ".*"
 	}
 }

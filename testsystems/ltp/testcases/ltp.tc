@@ -1,6 +1,6 @@
 
 duts_tc LTPRunAllTests {
-	Type linux 
+	Type linux
 	Commands "!userRunAllTests.exp"
 }
 

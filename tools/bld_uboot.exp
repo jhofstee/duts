@@ -37,7 +37,7 @@ proc check_uboot_tree {} {
 
 	if [catch {set o [eval exec $cmd $cmd_arg]}] {
 		p_verb "U_BOOT_VERSION string not found"
-        	set rv 0
+		set rv 0
 	} else {
 		p_verb "U-Boot source tree recognized, OK"
 	}
@@ -46,7 +46,7 @@ proc check_uboot_tree {} {
 }
 
 proc make_mrproper {sid p {to 180}} {
-	
+
 	set spawn_id $sid
 	set rv 1
 
@@ -96,7 +96,7 @@ proc make_mrproper {sid p {to 180}} {
 #   - exists include/config.h
 #
 proc bld_valid_env {} {
-	
+
 	global img_name img_src img_dst
 	global obj_dir
 	global build_tools build_arch build_cross
@@ -115,13 +115,13 @@ proc bld_valid_env {} {
 	## set PATH so the desired toolchain is available
 	##
 	if ![set_host_tool_path $build_tools] {
-        	p_err "path to the build tools not accessible: '$p'?!"
+		p_err "path to the build tools not accessible: '$p'?!"
 		return 0
 	}
 
 	##
 	## check tools availability:
-	##  - a selected tool from cross build suite, let's have a look at 
+	##  - a selected tool from cross build suite, let's have a look at
 	##    gcc and ld
 	##
 	set cmd_gcc $build_cross
@@ -201,7 +201,7 @@ proc bld_valid_env {} {
 	if ![check_dst $img_dst $o "u-boot.bin"] {
 		return 0
 	}
-	
+
 	## 5. check U-Boot config file
 	##
 	## - exists include/configs/<name>.h
@@ -222,7 +222,7 @@ proc bld_valid_env {} {
 		return 0
 	}
 	p_verb "using U-Boot config: '$img_name'"
-	
+
 	##
 	## verify if we can skip configuration steps
 	##
@@ -243,7 +243,7 @@ proc bld_valid_env {} {
 
 proc bld_pre {} {
 	global build_sid build_prompt
-	
+
 	p_banner "make mrproper" #
 	return [make_mrproper $build_sid $build_prompt]
 }
@@ -291,7 +291,7 @@ proc bld_image {{to 600}} {
 	set p $build_prompt
 	set timeout $to
 	set rv 1
-	
+
 	set c "make all"
 	p_banner $c #
 	send -s "$c\r"

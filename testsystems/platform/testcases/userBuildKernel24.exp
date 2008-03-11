@@ -1,5 +1,5 @@
 #
-# Build 2.4 kernel 
+# Build 2.4 kernel
 #
 
 ##
@@ -14,7 +14,7 @@ set repo_dst "./${linux}${duts_ext}"
 
 set build_type "linux-24"
 
-set timeout_co 1600 
+set timeout_co 1600
 set timeout_build 600
 
 ##

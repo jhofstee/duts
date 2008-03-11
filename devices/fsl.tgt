@@ -1,5 +1,5 @@
 #
-# Definitions for Freescale boards 
+# Definitions for Freescale boards
 #
 
 duts_device mpc8349emds {

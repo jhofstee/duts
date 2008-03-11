@@ -68,7 +68,7 @@ proc _device_connect_target {} {
 # method implementing connecting to the host (VL), it is only required for
 # the remote VL set up, so systems with local VL may have it a no-op. returns
 # spawn_id of the created process
-# 
+#
 proc _device_connect_host {} {
 }
 
@@ -106,7 +106,7 @@ proc _device_current_context {} {
 	set spawn_id $console_con
 
 	if [is_powered_on] {
-		send -s " \r" 
+		send -s " \r"
 		expect {
 			timeout {
 				p_err "timed out - context unknown..?!" 1

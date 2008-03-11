@@ -2,7 +2,7 @@
 # This file describes test cases in a set of structure descriptions.
 #
 # An individual test case is described by the duts_tc structure
-# 
+#
 # duts_tc <name> {
 #	Type
 #	Commands
@@ -26,7 +26,7 @@ duts_tc UBootBase {
 	#	etc.
 	#
 	# please note the context specified here needs to be defined in a
-	# respective duts_config structure (/<testsystem_dir>/config/*.cfg 
+	# respective duts_config structure (/<testsystem_dir>/config/*.cfg
 	# files) in order for the TC to execute
 	######################################################################
 	Type u-boot
@@ -43,7 +43,7 @@ duts_tc UBootBase {
 	# section Commands, mandatory
 	#
 	# describes flow of commands to be executed in the test case and the
-	# expected output the framework validates. 
+	# expected output the framework validates.
 	#
 	# can have two forms: regular and special handling:
 	#
@@ -58,7 +58,7 @@ duts_tc UBootBase {
 	#   cases with white spaces, multiple commands)
 	#
 	#   - <expected result> field can be a regexp
-	# 
+	#
 	# Example: Commands { "setenv foo bar;printenv foo" "foo" pass }
 	#
 	# 2. special handling - has only one line (braces not required) which
@@ -122,23 +122,23 @@ duts_tc UBootBase {
 	# Commands/Pre/Post sections, as some test cases require it longer
 	# than the default. Has the scope of one test case i.e. consecutive
 	# test cases get default timeout again (unless overwritten with their
-	# Timeout section). 
-	# 
+	# Timeout section).
+	#
 	######################################################################
-	Timeout 300 
-	
+	Timeout 300
+
 	######################################################################
 	# section Result, optional
-	# 
+	#
 	# indicates the desired outcome of the test case and influences the
-	# final report statement on the test case's outcome; can have one of 
+	# final report statement on the test case's outcome; can have one of
 	# the following two values:
 	#
 	#	pass - this is the default, usually not needed, requires that
 	#	the test case pass (see below for 'passing' definition)
 	#
 	#	fail - this flag denotes the test case is known (and allowed)
-	#	to fail; a failing test case with 'fail' value for the Result 
+	#	to fail; a failing test case with 'fail' value for the Result
 	#	section	will be reported passed in the final report
 	#
 	# A given test case is considered 'passed' when output received for a
@@ -147,7 +147,7 @@ duts_tc UBootBase {
 	# fail.
 	######################################################################
 	Result pass
-	
+
 	######################################################################
 	# section Info, optional
 	#
@@ -164,7 +164,7 @@ duts_tc UBootCrcStore {
 		"crc 100004 3FC 100000" "CRC32 for .*"
 		"md 100000 4" "00100000: .*"
 	}
-	
+
 	Info {This is a CRC test case comment}
 }
 

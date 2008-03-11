@@ -31,23 +31,23 @@
 proc usage {} {
 	global argv0
 	global duts_cmds
-	
+
 	puts "usage: $argv0 \[options\] <command> \[params\]"
 	puts "  <command> is:"
-	puts "   " 
+	puts "   "
 	foreach c $duts_cmds {
 		puts [ format "    %s\t- %s" [lindex $c 1] [lindex $c 2]]
 	}
-	puts "   " 
+	puts "   "
 	puts "  \[options\] are:"
-	puts "   " 
+	puts "   "
 	puts "    -d <dir>  (alternative working directory)"
 	puts "    -n        (do NOT execute real actions)"
 	puts "    -v        (verbose)"
-	puts " " 
+	puts " "
 	puts "For more information and examples see\
 		http://www.denx.de/wiki/DUTS/DUTSDocs."
-	puts " " 
+	puts " "
 	exit 1
 }
 
@@ -82,7 +82,7 @@ proc cmd_lt {a} {
 		## load config descriptions
 		##
 		load_all_devices
-		
+
 		##
 		## load board-specific TCs
 		##
@@ -111,17 +111,17 @@ proc cmd_lt {a} {
 
 
 proc cmd_dt_usage {} {
-	
+
 	global argv0
-	
+
 	puts "usage: "
 	puts "$argv0 \[options\] dt <TC name> \[<board name>\]"
 	puts " "
 	puts "  If <board name> is present test case <TC name> is searched in\
-	        the board's custom TC list and details are shown when found."
+		the board's custom TC list and details are shown when found."
 	puts ""
 	puts "  If <board name> is empty <TC name> is searched in the common\
-	        test cases list and details shown."
+		test cases list and details shown."
 	puts " "
 	exit 1
 }
@@ -132,7 +132,7 @@ proc cmd_dt_usage {} {
 proc cmd_dt {a} {
 
 	global l_boards board_name
-	
+
 	if {[llength $a] < 1} {
 		p_err "no TC name given..?! Use 'lt' command for a list of\
 		available test cases."
@@ -152,7 +152,7 @@ proc cmd_dt {a} {
 		## load config descriptions
 		##
 		load_all_devices
-		
+
 		##
 		## load board-specific TCs
 		##
@@ -172,9 +172,9 @@ proc cmd_dt {a} {
 }
 
 proc cmd_t_usage {} {
-	
+
 	global argv0
-	
+
 	puts "usage: "
 	puts "$argv0 \[options\] t <board name> \[params\]"
 	puts "  where params are:"
@@ -211,7 +211,7 @@ proc cmd_t {a} {
 	##
 	## get board name
 	##
-	set bn [lindex $a 0] 
+	set bn [lindex $a 0]
 	set a [lrange $a 1 end]
 	set board_name $bn
 
@@ -248,7 +248,7 @@ proc cmd_t {a} {
 		set l_runlist $l_testcases
 		p_verb "ALL defined test cases selected to run"
 	}
-	
+
 	##
 	## load configuration views' definitions
 	##
@@ -260,7 +260,7 @@ proc cmd_t {a} {
 
 	##
 	## run selected TCs
-	## 
+	##
 	puts "List of selected test cases:\n$l_runlist\n"
 	if [ask_yesno "confirm to start execution? "] {
 		run_tc_list l_runlist
@@ -285,7 +285,7 @@ proc cmd_t_parse_params {a} {
 		set arg [lindex $a $i]
 
 		switch -- $arg "-t" {
-			# we have the list of individual TCs rather than 
+			# we have the list of individual TCs rather than
 			# TC file names
 			set list_type "tcs"
 			p_verb "individual TCs being selected"
@@ -294,7 +294,7 @@ proc cmd_t_parse_params {a} {
 			# user-supplied configuration view
 			incr i
 			set selected_config [lindex $a $i]
-			
+
 			p_verb "selected configuration: $selected_config"
 			continue
 		}
@@ -359,7 +359,7 @@ proc cmd_b {a} {
 
 	# read in config definition files
 	load_all_devices
-	
+
 	if {$bn == ""} {
 		##
 		## list all config definitions
@@ -424,7 +424,7 @@ proc cmd_c {a} {
 
 
 #
-# runs handler of a given command; it's assumed the handler exists i.e. a 
+# runs handler of a given command; it's assumed the handler exists i.e. a
 # procedure is defined, so the calling context needs to verify this
 #
 # c: command
@@ -432,7 +432,7 @@ proc cmd_c {a} {
 #
 proc cmd_run {c p} {
 	global duts_cmds
-	
+
 	foreach dc $duts_cmds {
 		if { [lindex $dc 1] == $c } {
 			set prc [lindex $dc 0]
@@ -466,7 +466,7 @@ proc valid_cmd {c} {
 			} else {
 				p_err "command $c does NOT have a handler..?!"
 			}
-			
+
 			break
 		}
 	}
@@ -494,11 +494,11 @@ proc parse_params {} {
 		switch -- $arg "-d" {
 			incr i
 			set working_dir [lindex $argv $i]
-			
+
 			if ![valid_dir $working_dir] {
 				p_err "Incorrect value for option -d" 1
 			}
-			
+
 			p_verb "alternative descriptions dir set: $working_dir"
 			continue
 
@@ -524,24 +524,24 @@ proc parse_params {} {
 		# pass remaining params after command
 		incr i
 		set arg [lrange $argv $i end]
-		break	
+		break
 	}
 
 	if ![info exists cmd] {
 		p_err "missing command..?!"
 		usage
 	}
-	
+
 	p_verb "command: $cmd"
 	p_verb "remaining params: $arg"
-	
+
 	##
 	## validate command
 	##
 	if ![valid_cmd $cmd] {
 		p_err "Incorrect command: $cmd" 1
 	}
-	
+
 	##
 	## run command with its (optional) params - this passes control to the
 	## main handler of a DUTS command that checks its arguments etc.

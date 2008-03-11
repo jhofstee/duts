@@ -21,13 +21,13 @@
 
 ###############################################################################
 #
-# test cases (TC) processing routines 
+# test cases (TC) processing routines
 #
 # the following globals are required to exist (must be created by the "calling"
 # layer)
 #
-# l_testcases 
-# a_testcases 
+# l_testcases
+# a_testcases
 # cur_tc
 #
 ###############################################################################
@@ -57,7 +57,7 @@ proc Type {type} {
 }
 
 proc Commands {commands} {
-	
+
 	global cur_tc
 	global a_testcases
 
@@ -69,7 +69,7 @@ proc Pre {commands} {
 	global cur_tc
 	global a_testcases
 	set a_testcases($cur_tc,pre) $commands
-		
+
 }
 
 proc Post {commands} {
@@ -172,7 +172,7 @@ proc run_cmds {cmds ctx} {
 	global dry_run board_name a_devices DEVICE_COMMON_NAME
 	set result 1
 	upvar $cmds c
-	
+
 	#
 	# if we have global vars set for the board make them available
 	# locally
@@ -187,7 +187,7 @@ proc run_cmds {cmds ctx} {
 	}
 
 	set l_vars [concat $common_varlist $board_varlist]
-	
+
 	foreach v $l_vars {
 #		p_verb "global'ling $v"
 		global $v
@@ -199,7 +199,7 @@ proc run_cmds {cmds ctx} {
 #puts "RUN: $cmds"
 #puts "CMDS:\n$c"
 
-	# number of elements 
+	# number of elements
 	set max [expr [llength $c] - 1]
 
 	if {$max == 0} {
@@ -220,15 +220,15 @@ proc run_cmds {cmds ctx} {
 		p_verb "external script result: $res"
 		return $res
 	}
-	
+
 	for {set i 0} {$i < $max} {incr i 2} {
 		##
 		## command
 		##
 		set cmd [lindex $c $i]
-		
+
 		#
-		# we need to force vars substitution (subst) as there can be 
+		# we need to force vars substitution (subst) as there can be
 		# $ vars defined and used for commands
 		#
 		if [string match "*$\{*" $cmd] {
@@ -247,7 +247,7 @@ proc run_cmds {cmds ctx} {
 		## expected response
 		##
 		set rsp [lindex $c [expr $i + 1]]
-		
+
 		if [regexp {^#.*} $cmd] {
 			# commented line starts with a hash
 			incr i
@@ -258,12 +258,12 @@ proc run_cmds {cmds ctx} {
 
 		if {$dry_run == "yes"} {
 			p_warn "dry run activated, skipping '$cmd' command"
-			continue	
+			continue
 		}
 
 		if {[string length $cmd] == 0} {
 			p_warn "empty command..."
-			continue	
+			continue
 		}
 
 		##
@@ -272,7 +272,7 @@ proc run_cmds {cmds ctx} {
 		set res 0
 		if {$ctx == "firmware"} {
 			set res [_context_firmware_command $cmd $rsp]
-			
+
 		} elseif {$ctx == "kernel"} {
 			set res [_context_kernel_command $cmd $rsp]
 
@@ -302,7 +302,7 @@ proc run_cmds {cmds ctx} {
 #
 proc tc_prologue {tc ctx} {
 
-	global dry_run 
+	global dry_run
 
 #	if {$dry_run == "yes"} {
 #		return
@@ -316,8 +316,8 @@ proc tc_prologue {tc ctx} {
 	if {$ctx == "host"} {
 		set cur_context $ctx
 
-		# we don't need to connect to target or switch device's 
-		# contexts in case of operations on host, so we're done with 
+		# we don't need to connect to target or switch device's
+		# contexts in case of operations on host, so we're done with
 		# the prologue
 		return
 	}
@@ -334,13 +334,13 @@ proc tc_prologue {tc ctx} {
 #		p_verb "CONS connection set, OK"
 
 		set connected "yes"
-		
+
 		# have console connection spawn_id be the global default
 		set spawn_id $console_con
 		expect "*"
 	}
 
-	## 
+	##
 	## try identify if the declared cur_context is really what device
 	## actually is, this might be not easy at all...
 	##
@@ -379,10 +379,10 @@ proc run_tc {tc} {
 	p_banner "running test case: $tc" "#"
 
 	##
-	## context of the TC (like u-boot or linux) 
+	## context of the TC (like u-boot or linux)
 	##
 	set ctx $a_testcases($tc,type)
-	
+
 	# get _class_ of the context [implementation] required by the TC (as the
 	# state machine only knows the classes like firmware and kernel, not
 	# their current implementation like u-boot/linux)
@@ -415,7 +415,7 @@ proc run_tc {tc} {
 	} else {
 		p_verb "no Pre section for test case '$tc'"
 	}
-	
+
 
 	##
 	## turn on logging
@@ -430,7 +430,7 @@ proc run_tc {tc} {
 		p_err "problems while while executing test cases"
 		set rv 0
 	}
-	
+
 	##
 	## logging off
 	##
@@ -461,7 +461,7 @@ proc run_tc {tc} {
 # ln: name of a list
 #
 proc run_tc_list {ln} {
-	
+
 	global board_name working_dir
 
 	upvar $ln l
@@ -486,7 +486,7 @@ proc run_tc_list {ln} {
 		set result [expr {($res == 0) ? "FAIL" : "PASS"}]
 		puts $rf "$tc:\t\t\t $result"
 	}
-	
+
 	close $rf
 
 	p_banner "finished processing test cases" "#"
@@ -521,7 +521,7 @@ proc check_tc_list {list} {
 		p_err "\nsome test case(s) not defined?!"
 		exit1 "  please verify list of defined test cases with 'lt'\
 		command"
-	}		
+	}
 }
 
 
@@ -550,7 +550,7 @@ proc load_tc_file {f} {
 			p_err "Invalid testcases dir: $d" 1
 		}
 		set f2 "$d/$f"
-		
+
 		if ![valid_file $f2] {
 			# All failed, give up.
 			p_err "could not access TC file '$f'" 1
@@ -568,11 +568,11 @@ proc load_tc_file {f} {
 }
 
 proc load_all_tc_files {d {e ""}} {
-	
+
 	global tc_filename
 	global TC_DESCR_EXT
 	set e [ expr {($e == "") ? $TC_DESCR_EXT : $e}]
-	
+
 	foreach f [find_files $d $e] {
 		p_verb "loading TCs from $f"
 
@@ -600,7 +600,7 @@ proc load_tcs {} {
 	global working_dir l_testcases TC_DESCR_DIR
 
 	set d "$working_dir/$TC_DESCR_DIR"
-	
+
 	if ![valid_dir $d] {
 		p_err "Invalid testcases dir: $d" 1
 	}
@@ -633,14 +633,14 @@ proc load_custom_tcs {{b ""}} {
 	##
 	set d "$working_dir/$TC_DESCR_DIR/$b"
 	if ![valid_dir $d] {
-		p_verb "no target specific TCs for $b"	
+		p_verb "no target specific TCs for $b"
 	} else {
 		load_all_tc_files $d
 
 		set n [llength $l_testcases]
 		if {$n > 0 } {
 			p_verb "loaded $n test cases decriptions"
-		} 
+		}
 	}
 }
 

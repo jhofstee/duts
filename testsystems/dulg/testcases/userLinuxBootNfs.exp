@@ -1,12 +1,12 @@
 #
-# 
+#
 #
 
 global _context_kernel_prompt cur_context TIMEOUT
 global CFG_ROOTPATH
 
 ##
-## Check rootpath 
+## Check rootpath
 ##
 if ![info exists CFG_ROOTPATH] {
 	p_err "variable CFG_ROOTPATH is not set, please update the\
@@ -28,7 +28,7 @@ if ![_context_firmware_get_prompt] {
 }
 
 ##
-## Set rootpath 
+## Set rootpath
 ##
 set rv [_context_firmware_command "setenv rootpath $CFG_ROOTPATH" ".*"]
 if {!$rv} {

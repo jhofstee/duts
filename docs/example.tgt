@@ -20,7 +20,7 @@
 # should have names with .tgt suffix and be placed in
 # testsystems/<testsystem_dir>/devices sub-dir in order for DUTS to recognize
 # and read them in.
-# 
+#
 # Each .tgt file can have any number of duts_device structures and there can
 # by any number of .tgt files in 'devices' sub-directory.
 #
@@ -48,7 +48,7 @@ duts_device _common {
 	# section Vars, optional
 	#
 	# defines user-provided variables that can be used in test cases'
-	# sections Commands, Pre and Post. When setting Vars please follow 
+	# sections Commands, Pre and Post. When setting Vars please follow
 	# guidelines and notes:
 	#
 	# 1. there are no restrictions for varnames, the important notice is
@@ -63,7 +63,7 @@ duts_device _common {
 	# - BOARD (it is subsituted with the currently selected board name)
 	# (only one built-in var currently exists)
 	#
-	# 3. once defined in Vars section variables (or the built-ins) can be 
+	# 3. once defined in Vars section variables (or the built-ins) can be
 	# used everywhere in TC Commands, Pre and Post sections' bodies
 	#
 	# 4. important restriction applies when using *U-Boot* vars in

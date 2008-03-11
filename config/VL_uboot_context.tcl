@@ -29,17 +29,17 @@ proc _context_firmware_handler {} {
 	global cur_context _context_firmware_prompt _context_kernel_prompt
 	global TIMEOUT
 
-#p_banner "U-Boot context handler" 
+#p_banner "U-Boot context handler"
 
 #	expect "*"
 
 	#
 	# the following cases are possible:
 	# 1. device is off
-	#	-invoke _device_power_on() method 
+	#	-invoke _device_power_on() method
 	#
 	# 2. device is in firmware (u-boot) context
-	#	-verify we're really powered on 
+	#	-verify we're really powered on
 	#	-if so do nothing, otherwise invoke _device_power_on()
 	#
 	# 3. device is in kernel (linux) context
@@ -71,7 +71,7 @@ proc _context_firmware_handler {} {
 	set timeout 20
 	#
 	# get "Hit any key to stop autoboot"
-	# key press 
+	# key press
 	# get prompt
 	#
 	expect {
@@ -150,7 +150,7 @@ proc _context_firmware_command {cmd rsp {slp 0.35}} {
 			p_err "timed out while waiting on cmd '$cmd'... Sure\
 			the board is alive?"
 
-		#TODO this should be lower i.e. where the cmd_uboot is 
+		#TODO this should be lower i.e. where the cmd_uboot is
 		#called, but we need to return result value first
 			if ![ask_yesno "do you want to continue? "] {
 				exit1

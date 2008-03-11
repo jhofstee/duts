@@ -64,9 +64,9 @@ if !{$res} {
 # <<<test_end>>>
 #INFO: pan reported some tests FAIL
 #LTP Version: LTP-20061222
-#        
+#
 #       ###############################################################"
-#        
+#
 #            Done executing testcases."
 #            result log is in the /tmp/ltp-full-20061222/results directory"
 #            LTP Version:  LTP-20061222
@@ -91,7 +91,7 @@ for {set i 1} {$i <= $rounds} {incr i 1} {
 		}
 		"<<<test_start>>>" {
 			p_verb "LTP started OK"
-			set timeout 8100 
+			set timeout 8100
 			expect {
 				timeout {
 					p_err "timed out while waiting for LTP finish"

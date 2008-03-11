@@ -4,9 +4,9 @@
 #
 
 duts_tc UBootInstallRamdisk {
- 	Type u-boot
+	Type u-boot
 	Timeout 600
- 	Commands {
+	Commands {
 		"tftp $CFG_RAM_WS_BASE /tftpboot/$BOARD/uRamdisk" ".*"
 		"imi $CFG_RAM_WS_BASE" ".*"
 		"setenv ramdisk_addr $CFG_RAMDISK_START" ".*"

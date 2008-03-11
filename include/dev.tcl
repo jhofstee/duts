@@ -37,7 +37,7 @@ proc duts_device {name args} {
 	global l_boards device_errors
 
 	set cur_device $name
-	
+
 	if {$name == $DEVICE_COMMON_NAME} {
 		if {$was_common_device == "yes"} {
 			p_verb "$DEVICE_COMMON_NAME re-defined?!"
@@ -47,7 +47,7 @@ proc duts_device {name args} {
 	}
 
 	lappend l_boards $name
-	
+
 	p_verb "Loading device description for: $cur_device"
 	uplevel 1 [lindex $args end]
 
@@ -96,7 +96,7 @@ proc Vars {vars} {
 
 	global board_name cur_device DEVICE_COMMON_NAME a_devices
 
-	if {($cur_device != $board_name) && 
+	if {($cur_device != $board_name) &&
 	    ($cur_device != $DEVICE_COMMON_NAME)} {
 		# do not parse and set global vars for boards other than
 		# currently selected or _common
@@ -115,7 +115,7 @@ proc Vars {vars} {
 
 	set l_vars ""
 	for {set i 0} {$i < $max} {incr i 2} {
-		# var name 
+		# var name
 		set var [lindex $vars $i]
 
 		# value assigned
@@ -126,9 +126,9 @@ proc Vars {vars} {
 		set $var $val
 		lappend l_vars $var
 	}
-	
+
 	p_verb "set globals: $l_vars"
-	
+
 	##
 	## save the list of [global] vars set for this board, so we can
 	## retrieve them later
@@ -144,7 +144,7 @@ proc Vars {vars} {
 #
 proc is_device_attr {a} {
 	global a_devices board_name DEVICE_COMMON_NAME
-	
+
 	if [in_array a_devices "$board_name,$a" ] {
 		p_verb "attribute '$a' defined for device '$board_name'"
 		return 1
@@ -164,7 +164,7 @@ proc is_device_attr {a} {
 proc get_device_attr {a} {
 	global a_devices board_name DEVICE_COMMON_NAME
 	set rv ""
-	
+
 	if ![in_array a_devices "$board_name,$a" ] {
 		if ![is_device_common_defined $a ] {
 			p_err "attribute '$a' not found for device\
@@ -254,7 +254,7 @@ proc valid_devices {} {
 
 #
 # loads device description files
-# 
+#
 # e: extension
 #
 proc load_all_devices {{e ""}} {
@@ -262,7 +262,7 @@ proc load_all_devices {{e ""}} {
 	global working_dir board_name l_boards
 	global DEVICE_DESCR_DIR DEVICE_DESCR_EXT DEVICE_COMMON_FILE
 	global BASE_DIR
-	
+
 	set d "$BASE_DIR/$DEVICE_DESCR_DIR"
 	if ![valid_dir $d] {
 		p_err "Invalid device dir: $d" 1
@@ -305,14 +305,14 @@ proc load_all_devices {{e ""}} {
 	set n [llength $l_boards]
 	if {$n > 0} {
 		p_verb "loaded $n device decriptions"
-		
+
 		##
 		## validate devices
 		##
 		if ![valid_devices] {
 			exit1
 		}
-		
+
 	} else {
 		p_err "No device descriptions found in '$d' dir?!" 1
 	}

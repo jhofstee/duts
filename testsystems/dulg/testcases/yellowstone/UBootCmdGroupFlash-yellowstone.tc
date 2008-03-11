@@ -17,5 +17,5 @@ duts_tc UBootProtect {
 		"prot off $CFG_FLASH_TST_SECT" ".*"
 		"fli" ".*"
 		"era $CFG_FLASH_TST_SECT" ".*"
-	}	
+	}
 }

@@ -76,9 +76,9 @@ proc _device_connect_target {} {
 	global board_name
 
 	set con_cmd "connect"
-	
+
 	expect "*"
-#TODO check if not already connected (connected global)	
+#TODO check if not already connected (connected global)
 	if [catch {spawn -noecho $con_cmd $board_name}] {
 		p_err "couldn't spawn 'connect'?!" 1
 	}
@@ -116,7 +116,7 @@ proc _device_connect_target {} {
 # method implementing connecting to the host (VL), it is only required for
 # the remote VL set up, so systems with local VL may have it a no-op. returns
 # spawn_id of the created process
-# 
+#
 proc _device_connect_host {} {
 }
 
@@ -134,7 +134,7 @@ proc _device_disconnect_host {} {
 proc is_powered_on {} {
 
 	global control_con board_name
-	
+
 	set cmd "/usr/local/bin/remote_power"
 	set rv 0
 
@@ -177,7 +177,7 @@ proc _device_current_context {} {
 	# FIXME recovery from Linux login should really be elsewhere as is context-specific
 
 	if [is_powered_on] {
-		send -s " \r" 
+		send -s " \r"
 		expect {
 			timeout {
 				p_err "timed out - context unknown..?!" 1

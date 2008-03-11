@@ -23,7 +23,7 @@
 #
 # This script fetches source tree from repository according to user
 # supplied parameters. Please use -h for help.
-# 
+#
 #
 #  usage examples:
 # ./get_src -t git -s /home/git/linuxppc_2_4_devel -d linuxppc_2_4_devel_copy -p [branchID]
@@ -33,7 +33,7 @@
 #
 
 ##
-## locate our dependency base dir  
+## locate our dependency base dir
 ##
 
 # we have to do everything by hand as we are trying to load some helper
@@ -50,7 +50,7 @@ if {[array get env $dep_env] > 0} {
 }
 
 ##
-## include helper lib.tcl 
+## include helper lib.tcl
 ##
 set lib "$dep_base_dir/include/lib.tcl"
 if [catch {source $lib} err] {
@@ -78,7 +78,7 @@ set shell_sid ""
 # table of supported SCM schemes, each element is
 # {<handler_function> "<name>"}
 #
-# <name> is the label for use in '-t' command line option or 'scm_type' field 
+# <name> is the label for use in '-t' command line option or 'scm_type' field
 # in config file
 #
 set scm_supported {
@@ -109,10 +109,10 @@ proc usage {} {
 	puts "  The script fetches source tree from -s specified source repo\
 	location to -d"
 	puts "  location, the type of repo is specified by -t"
-	puts "  " 
+	puts "  "
 	puts "  all \[parameters\] are optional and can be any combination of:"
-	puts "  " 
-#	puts "  <config>\t\tlabel of config set" 
+	puts "  "
+#	puts "  <config>\t\tlabel of config set"
 	puts "  -t  <scm_type>\tsupported SCM system (git, cvs, local)"
 	puts "  -s  <repo_src>\tsrc repo location (e.g.\
 	/home/git/u-boot)"
@@ -127,7 +127,7 @@ proc usage {} {
 	puts "  -b  \tbatch mode, no user confirmation"
 	puts "  -v  \tverbose output"
 	puts "  -h  \tthis help"
-	puts " " 
+	puts " "
 	exit
 }
 
@@ -135,7 +135,7 @@ proc usage {} {
 # dumps params
 #
 proc show_params {} {
-	
+
 	global opt_table
 	set globals [list]
 
@@ -171,7 +171,7 @@ proc git_valid_repo {r} {
 			set rv 0
 		}
 	}
-	
+
 	return $rv
 }
 
@@ -192,7 +192,7 @@ proc git_valid_src {} {
 		specify source GIT repo location"
 		return 0
 	}
-	
+
 	set repo_src [string trimright $repo_src "/"]
 	if ![git_valid_repo $repo_src] {
 		p_err "problems accessing source GIT repo: '$repo_src'"
@@ -221,7 +221,7 @@ proc git_valid_dst {} {
 	set rv 1
 
 	if {$repo_dst == ""} {
-		set repo_dst [file tail $repo_src] 
+		set repo_dst [file tail $repo_src]
 	}
 
 	set repo_dst [string trimright $repo_dst "/"]
@@ -230,7 +230,7 @@ proc git_valid_dst {} {
 			p_err "destination location already has GIT repo:\
 			'$repo_dst'?!"
 			set rv 0
-			
+
 		} else {
 			if ![valid_dir $repo_dst 1] {
 				p_err "access problems with destination:\
@@ -238,13 +238,13 @@ proc git_valid_dst {} {
 				set rv 0
 			} else {
 				# only directory was specified as destination
-				# - append it with repo name derived from 
+				# - append it with repo name derived from
 				# repo_src
 				set repo_dst "$repo_dst/[file tail $repo_src]"
 			}
 		}
 	}
-	
+
 	return $rv
 }
 
@@ -258,7 +258,7 @@ proc git_valid_params {} {
 	if {$repo_params == ""} {
 		return 1
 	}
-	
+
 	# git-cat-file -t 887e2ec9ecf49366a60a49b32b73825804909865
 	# commit
 	if {!(([string length $repo_params] == 40) &&\
@@ -270,10 +270,10 @@ proc git_valid_params {} {
 
 	set rv 1
 	set cur_dir [pwd]
-        cd $repo_src
+	cd $repo_src
 
 	set c "git-cat-file -t $repo_params"
-	if [catch {set o [eval exec $c]}] { 
+	if [catch {set o [eval exec $c]}] {
 		p_err "GIT object ID: '$repo_params' not found in repo:\
 		'$repo_src'"
 		set rv 0
@@ -288,7 +288,7 @@ proc git_valid_params {} {
 	}
 
 	cd $cur_dir
-	return $rv 
+	return $rv
 }
 
 
@@ -307,7 +307,7 @@ proc git_branch {} {
 	set rv 1
 
 	set cur_dir [pwd]
-        cd $repo_dst
+	cd $repo_dst
 
 	##
 	## create branch and check out to it
@@ -335,14 +335,14 @@ proc git_clone {} {
 
 	global shell_prompt shell_sid scm_timeout
 	global repo_src repo_dst
-	
+
 	set rv 1
 	set p $shell_prompt
 	set spawn_id $shell_sid
 
 	##
 	## prepare cg-clone command: cg-clone <repo_src> <repo_dst>
-	##  
+	##
 	set c "cg-clone"
 	set c_arg $repo_src
 	if {$repo_dst != ""} {
@@ -351,8 +351,8 @@ proc git_clone {} {
 
 	##
 	## execute command
-	##  
-	set timeout $scm_timeout 
+	##
+	set timeout $scm_timeout
 	p_banner "$c $c_arg" *
 	send -s "$c $c_arg\r"
 	#
@@ -472,8 +472,8 @@ proc do_git {} {
 	## spawn host shell
 	##
 
-	# assign spawn_id to global var so the shell is available outside 
-        # this procedure, set other sending params
+	# assign spawn_id to global var so the shell is available outside
+	# this procedure, set other sending params
 	set shell_prompt "\\$\\ "
 	set shell_sid [host_bash_shell $shell_prompt]
 	# expect buffer size
@@ -578,7 +578,7 @@ proc parse_params {} {
 
 	for {set i 0} {$i < $argc} {incr i} {
 		set a [lindex $argv $i]
-		
+
 		# check if this is -<opt> element
 		if [regexp {^-.*} $a] {
 			# eat the leading "-"
@@ -605,7 +605,7 @@ proc parse_params {} {
 				} "h" {
 					usage
 				}
-				
+
 			}
 			continue
 		}
