@@ -1,6 +1,7 @@
 #!/bin/env expect
+#                                -*- Mode: tcl -*-
 #
-# (C) Copyright 2006, 2007 DENX Software Engineering
+# (C) Copyright 2006-2008 DENX Software Engineering
 #
 # Author: Rafal Jaworowski <raj@semihalf.com>
 #
