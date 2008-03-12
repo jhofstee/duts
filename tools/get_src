@@ -1,6 +1,6 @@
 #!/bin/env expect
 #
-# (C) Copyright 2006, 2007 DENX Software Engineering
+# (C) Copyright 2006-2008 DENX Software Engineering
 #
 # Author: Rafal Jaworowski <raj@semihalf.com>
 #
@@ -329,7 +329,7 @@ proc git_branch {} {
 }
 
 #
-# performs cg-clone command, returns 0/1 upon fail/success
+# performs git-clone command, returns 0/1 upon fail/success
 #
 proc git_clone {} {
 
@@ -341,9 +341,9 @@ proc git_clone {} {
 	set spawn_id $shell_sid
 
 	##
-	## prepare cg-clone command: cg-clone <repo_src> <repo_dst>
+	## prepare git-clone command: git-clone <repo_src> <repo_dst>
 	##
-	set c "cg-clone"
+	set c "git-clone"
 	set c_arg $repo_src
 	if {$repo_dst != ""} {
 		set c_arg "$c_arg $repo_dst"
@@ -354,23 +354,17 @@ proc git_clone {} {
 	##
 	set timeout $scm_timeout
 	p_banner "$c $c_arg" *
-	send -s "$c $c_arg\r"
+	send -s "$c $c_arg 2>&1\r"
 	#
 	# strings:
-	# ...
-	#Fetching head...^M
-	#Fetching objects...^M
-	#Fetching tags...^M
-	#...
-	#New branch: f60ba0d35e13e9dcf839d4563f9436d07468b1ef^M
-	#Cloned to u-boot/ (origin /home/git/u-boot available as branch "origin")^M
+	# Initialized empty Git repository in /work/dzu/duts/duts/linux-2.6-denx_DUTS/.git/
+	# 530614 blocks
 	#
-	#
-	#cg-clone: u-boot/ already exists
+	# destination directory 'linux-2.6-denx_DUTS' already exists.
 	#
 	expect {
 		timeout {
-			p_err "timed out after cg-clone"
+			p_err "timed out after git-clone"
 			set rv 0
 		}
 		-re "already exists.*$p$" {
@@ -383,24 +377,15 @@ proc git_clone {} {
 			p_err "repo already cloned"
 			set rv 0
 		}
-		-re ".*Fetching\\ head\\.\\.\\." {
-			p_verb "fetching 1: heads"
+		-re "Initialized empty Git repository" {
+			p_verb "Cloning"
 			expect {
 				timeout {
-					p_err "timed out on 'objects'"
+					p_err "timed out on cloning"
 					set rv 0
 				}
-				-re ".*Fetching\\ objects\\.\\.\\." {
-					p_verb "fetching 2: objects"
-					expect {
-						timeout {
-							p_err "timed out on cloning"
-							set rv 0
-						}
-						-re ".*Cloned\\ to\\ .*$p$" {
-							p_verb "Cloning OK"
-						}
-					}
+				$shell_prompt {
+					p_verb "Cloning OK"
 				}
 			}
 		}
@@ -431,9 +416,9 @@ proc do_git {} {
 
 	##
 	## check tools availability:
-	##  - SCM (cogito)
+	##  - SCM (git)
 	##
-	set tools [list "cg-clone" "git-checkout" "git-branch"]
+	set tools [list "git-cat-file" "git-clone" "git-checkout"]
 	if ![check_host_tools tools] {
 		exit1
 	}
