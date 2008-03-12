@@ -1,0 +1,193 @@
+#
+# Build U-Boot
+#
+
+global BASE_DIR
+
+set duts_ext "_DUTS"
+set uboot "u-boot"
+set repo_src "/home/git/$uboot"
+set repo_dst "./${uboot}${duts_ext}"
+
+set build_type "uboot"
+
+set timeout_co 1600
+set timeout_build 1000
+
+set tools_dir "$BASE_DIR/tools"
+set tool_co "get_src"
+set tool_build "build_image"
+
+proc valid_tool {t} {
+
+	set rv 1
+	if [file exists $t] {
+		if {([file readable $t]) && ([file executable $t])} {
+			p_verb "tool '$t' OK"
+		} else {
+			p_err "tool '$t' not accessible"
+			set rv 0
+		}
+	} else {
+		p_err "tool '$t' not found"
+		set rv 0
+	}
+
+	return $rv
+}
+
+proc check_tools {l} {
+
+	upvar $l tools
+	upvar tools_dir tools_dir
+
+	set rv 1
+	foreach t $tools {
+		if ![valid_tool "$tools_dir/$t"] {
+			set rv 0
+		}
+	}
+	return $rv
+}
+
+#
+# tools/get_src
+# -s /home/git/<...>
+# -d ./
+# -to
+# -b (batch mode)
+#
+proc checkout {{to 1600}} {
+
+	upvar repo_dst dst
+	upvar repo_src src
+	upvar tools_dir tools_dir
+	upvar tool_co tool_co
+
+	if [valid_dir $dst] {
+		# TODO - validate it is actually a kernel tree - like we do in
+		# check_linux_ver{} (tools/bld_linux.exp) - maybe put it in
+		# some common file
+
+		# seems the specified repo directory is already checked
+		# out so don't bother with executing get_src
+		p_warn "using already checked out source tree: '$dst'"
+		return 1
+	}
+
+	##
+	## run get_src to check out the kernel tree
+	##
+	set tool_cmd "$tools_dir/$tool_co"
+	set tool_arg "-s $src -d $dst -b -to $to"
+	p_verb "executing: '$tool_cmd $tool_arg'"
+
+	p_banner "Checking out U-Boot source tree, please wait - this may take\
+	a while..." *
+	if [catch {set o [eval exec "$tool_cmd" $tool_arg]} err] {
+		puts "$err"
+		return 0
+	}
+#	send_user $o
+
+	p_banner "U-Boot tree checked out" *
+	return 1
+}
+
+
+#
+# -t uboot
+# -n <board_name>
+# -s <path to the repo tha was just checked out>
+# -d /tftpboot/<board_name>
+# -to 600
+# -m  <build_tools>
+# -a  <build_arch>
+# -c  <build_cross>
+#
+# -b (batch mode, no user confirmation)
+# -o (overwrite dst file if already present)
+#
+proc build {{to 600}} {
+
+	global a_devices board_name _context_firmware_image
+	upvar tools_dir tools_dir
+	upvar tool_build tool_build
+	upvar build_type build_type
+
+	# note the repo location we checked out to in a previous (checkout)
+	# stage is now our kernel source directory!
+	upvar repo_dst src
+
+	set dst $_context_firmware_image
+	set dst_dir [file dirname $dst]
+	if ![valid_dir $dst_dir 1] {
+		p_err "destination dir not accessible: '$dst_dir''"
+		return 0
+	}
+
+	##
+	## get make target name for our board
+	##
+	set target [get_device_attr "maketarget"]
+
+	##
+	## get ARCH, CROSS_COMPILE values
+	##
+	set arch [get_device_attr "makearch"]
+	set cross [get_device_attr "makecompile"]
+
+	##
+	## get toolchain path
+	##
+	set toolchain [get_device_attr "maketoolpath"]
+
+	##
+	## run build_image to build the image
+	##
+	set tool_cmd "$tools_dir/$tool_build"
+	set tool_arg "-t $build_type -s $src -d $dst -n $target -m $toolchain\
+	-a $arch -c $cross -b -to $to"
+
+	if [file exists $dst] {
+		p_warn "destination u-boot image already exists and will be\
+		overwritten: '$dst'"
+		set tool_arg "$tool_arg -o"
+	}
+
+	p_verb "executing: '$tool_cmd $tool_arg'"
+
+	p_banner "Building U-Boot, please wait - this may take a\
+	while..." *
+
+	if [catch {set o [eval exec "$tool_cmd" $tool_arg]} err] {
+		puts "$err"
+		return 0
+	}
+
+	p_banner "Finished building U-Boot" *
+
+	return 1
+}
+
+##
+## check if build helper tools are accessible
+##
+set tools [list $tool_co $tool_build]
+if ![check_tools tools] {
+	p_err "build tools not accessible"
+	return 0
+}
+p_verb "build tools in place, proceeding"
+
+##
+## get sources
+##
+if ![checkout $timeout_co] {
+	exit1
+}
+
+##
+## build kernel
+##
+build $timeout_build

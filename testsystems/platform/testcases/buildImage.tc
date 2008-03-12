@@ -17,3 +17,8 @@ duts_tc KernelBuild {
 	Type host
 	Commands "!userBuildKernel2x.exp"
 }
+
+duts_tc UBootBuild {
+	Type host
+	Commands "!userBuildUBoot.exp"
+}
