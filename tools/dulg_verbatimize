@@ -1,6 +1,7 @@
 #!/bin/bash
 #
-# (C) Copyright 2006, 2007 DENX Software Engineering
+# (C) Copyright 2006-2008 DENX Software Engineering
+# (C) Copyright 2008 Detlev Zundel <dzu@denx.de>, DENX Software Engineering
 #
 # Author: Rafal Jaworowski <raj@semihalf.com>
 #
@@ -19,24 +20,52 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston,
 # MA 02111-1307 USA
 #
-
-#
 # prepares .log files for use with DULG wiki (adds tags, renames, makes
 # tarball)
 #
-# $1: board name
-#
+usage () {
+    echo "usage: `basename $0` [-v] [boardname]"                                      1>&2
+    echo "       All log-files for board with the extension .log will be massaged"    1>&2
+    echo "       into .txt files ready for the DULGData web.  This includes removing" 1>&2
+    echo "       CRs and adding <verbatim> and </verbatim> closures."                 1>&2
+    echo "       The processed files are then tarred up into <boardname>_logs.tgz"    1>&2
+    echo "         -v be verbose about actions"                                       1>&2
+    exit 1
+}
 
-#TODO exceptions file list - do not verbatimize
+# Parse options (bash extension)
+while getopts v option
+do
+    case $option in
+	v)	verbose=1
+		;;
+	*)      usage
+		exit 1
+		;;
+    esac
+done
+shift $(( $OPTIND - 1 ))
 
-if test -z "$1"; then
-	echo "Missing board name"
-	exit 1
+if [ $# -lt 1 ]; then
+    usage
+    exit 1
 fi
 
-for f in `ls`; do
-	n=`echo $f | sed 's/\.log$/\.txt/'`;
-	echo "<verbatim>" > $n; cat $f >> $n; echo "</verbatim>" >> $n;
+if ls ${1}*.log >/dev/null 2>&1; then
+    :
+else
+    echo "No logfiles for $1 found - giving up" 1>&2
+    exit 1
+fi
+
+done=""
+for f in ${1}*.log; do
+	n=`echo $f | sed 's/\.log$/\.txt/'`
+	[ -n "$verbose" ] && echo "Processing $n"
+	( echo "<verbatim>"; sed 's/\r//g' < $f; echo "</verbatim>" ) > $n
+	done="$done $n"
 done
 
-tar -cvzf $1_logs.tgz *.txt
+[ -n "$verbose" ] && echo "Creating ${1}_logs.tgz"
+tar -czf ${1}_logs.tgz $done
+rm $done
