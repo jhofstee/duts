@@ -20,11 +20,11 @@ duts_device motionpro {
 	MakeTarget	"motionpro"
 	MakeArch	"powerpc"
 	MakeCompile	"ppc_6xx-"
-	MakeToolPath	"/opt/eldk-4.1-2007-01-19/usr/bin/"
+	MakeToolPath	"/opt/eldk-4.2/usr/bin/"
 
 	Vars {
 		CFG_RAM_WS_BASE 	200000
-		CFG_ROOTPATH		"/opt/eldk-4.1-2007-01-19/ppc_6xx/"
+		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_6xx/"
 		CFG_FDT_FILE		"/tftpboot/motionpro/motionpro.dtb"
 		CFG_KERNEL_START	FFD00000
 		CFG_KERNEL_END		FFEFFFFF

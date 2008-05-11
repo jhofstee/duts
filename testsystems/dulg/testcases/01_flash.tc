@@ -30,7 +30,7 @@ duts_tc LinuxMtdErase {
 	# some larger flash partitions can take long to erase..
 	Timeout 600
 	Commands {
-		"eraseall /dev/$CFG_MTD_ERASE_DEVICE" ".*"
+		"flash_eraseall /dev/$CFG_MTD_ERASE_DEVICE" ".*"
 		"date > /dev/$CFG_MTD_ERASE_DEVICE" ".*"
 		"head -1 /dev/$CFG_MTD_ERASE_DEVICE" ".*"
 	}
@@ -40,7 +40,7 @@ duts_tc LinuxMtdWrite {
 	Type linux
 	Timeout 600
 	Pre {
-		"eraseall /dev/$CFG_MTD_ERASE_DEVICE" ".*"
+		"flash_eraseall /dev/$CFG_MTD_ERASE_DEVICE" ".*"
 	}
 	Commands {
 		"date > /dev/$CFG_MTD_ERASE_DEVICE" ".*"

@@ -4,7 +4,7 @@
 #
 duts_device _common {
 
-	MakeToolPath		"/opt/eldk-4.1/usr/bin/"
+	MakeToolPath		"/opt/eldk-4.2/usr/bin/"
 	MakeSrcKernelPath	"/git/linux-2.6-denx"
 	# MakeObjPath is relative to the directory where duts is executed
 	MakeObjPath		"obj"

@@ -4,7 +4,7 @@
 
 duts_device bamboo {
 	Vars {
-		CFG_ROOTPATH		"/opt/eldk-4.1-2007-01-19/ppc_4xx/"
+		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xx/"
 
 		CFG_KERNEL_START ffc00000
 		CFG_KERNEL_END	 ffd7ffff
@@ -36,7 +36,7 @@ duts_device bamboo {
 
 duts_device bubinga {
 	Vars {
-		CFG_ROOTPATH		"/opt/eldk-4.1-2007-01-19/ppc_4xx/"
+		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xx/"
 
 		CFG_FLASH_TST_START fff80000
 		CFG_FLASH_TST_END fff8ffff
@@ -75,7 +75,7 @@ duts_device bubinga {
 #
 duts_device katmai {
 	Vars {
-		CFG_ROOTPATH		"/opt/eldk-4.1-2007-01-19/ppc_4xx/"
+		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xx/"
 
 		CFG_FLASH_TST_START 	ff900000
 		CFG_FLASH_TST_END	ff97ffff
@@ -129,7 +129,7 @@ duts_device katmai {
 #
 duts_device luan {
 	Vars {
-		CFG_ROOTPATH		"/opt/eldk-4.1-2007-01-19/ppc_4xx/"
+		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xx/"
 
 		CFG_MTD_ERASE_DEVICE	"mtd6"
 
@@ -159,7 +159,7 @@ duts_device luan {
 
 duts_device lwmon5 {
 	Vars {
-		CFG_ROOTPATH		"/opt/eldk-4.1-2007-01-19/ppc_4xxFP/"
+		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xxFP/"
 		CFG_KERNEL_START	f8000000
 		CFG_KERNEL_END		f817ffff
 		CFG_RAMDISK_START	fdf00000
@@ -187,7 +187,7 @@ duts_device lwmon5 {
 
 duts_device ebony {
 	Vars {
-		CFG_ROOTPATH		"/opt/eldk-4.1-2007-01-19/ppc_4xx/"
+		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xx/"
 
 		CFG_MTD_ERASE_DEVICE "mtd6"
 		CFG_FLASH_TST_START ff800000
@@ -217,7 +217,7 @@ duts_device ebony {
 
 duts_device ocotea {
 	Vars {
-		CFG_ROOTPATH		"/opt/eldk-4.1-2007-01-19/ppc_4xx/"
+		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xx/"
 
 		CFG_MTD_ERASE_DEVICE "mtd6"
 		CFG_FLASH_TST_START ff800000
@@ -263,7 +263,7 @@ duts_device ocotea {
 #
 duts_device rainier {
 	Vars {
-		CFG_ROOTPATH		"/opt/eldk-4.1-2007-01-19/ppc_4xx/"
+		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xx/"
 
 		CFG_FLASH_TST_START 	FF900000
 		CFG_FLASH_TST_END	FF97FFFF
@@ -310,7 +310,7 @@ duts_device rainier {
 #
 duts_device sequoia {
 	Vars {
-		CFG_ROOTPATH		"/opt/eldk-4.1-2007-01-19/ppc_4xxFP/"
+		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xxFP/"
 		CFG_MTD_ERASE_DEVICE	"mtd6"
 
 		CFG_FLASH_TST_START 	FF900000
@@ -339,7 +339,7 @@ duts_device sequoia {
 
 duts_device sycamore {
 	Vars {
-		CFG_ROOTPATH		"/opt/eldk-4.1-2007-01-19/ppc_4xx/"
+		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xx/"
 
 		CFG_MTD_ERASE_DEVICE "mtd6"
 		CFG_FLASH_TST_START fff80000
@@ -383,7 +383,7 @@ duts_device sycamore {
 #
 duts_device taishan {
 	Vars {
-		CFG_ROOTPATH		"/opt/eldk-4.1-2007-01-19/ppc_4xx/"
+		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xx/"
 
 		CFG_FLASH_TST_START 	FF900000
 		CFG_FLASH_TST_END	FF97FFFF
@@ -416,7 +416,7 @@ duts_device taishan {
 
 duts_device walnut {
 	Vars {
-		CFG_ROOTPATH		"/opt/eldk-4.1-2007-01-19/ppc_4xx/"
+		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xx/"
 
 		CFG_MTD_ERASE_DEVICE "mtd6"
 		CFG_FLASH_TST_START fff80000
@@ -439,7 +439,7 @@ duts_device walnut {
 
 duts_device yellowstone {
 	Vars {
-		CFG_ROOTPATH		"/opt/eldk-4.1-2007-01-19/ppc_4xx/"
+		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xx/"
 
 		CFG_MTD_ERASE_DEVICE "mtd6"
 		CFG_FLASH_TST_START fd000000
@@ -470,7 +470,7 @@ duts_device yellowstone {
 
 duts_device yosemite {
 	Vars {
-		CFG_ROOTPATH		"/opt/eldk-4.1-2007-01-19/ppc_4xxFP/"
+		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xxFP/"
 
 		CFG_MTD_ERASE_DEVICE "mtd6"
 		CFG_FLASH_TST_START fd000000
@@ -527,7 +527,7 @@ duts_device yosemite {
 #
 duts_device yucca {
 	Vars {
-		CFG_ROOTPATH		"/opt/eldk-4.1-2007-01-19/ppc_4xx/"
+		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xx/"
 
 		CFG_MTD_ERASE_DEVICE "mtd6"
 
