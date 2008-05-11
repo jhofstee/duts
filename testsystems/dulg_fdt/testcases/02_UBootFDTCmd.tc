@@ -16,7 +16,7 @@ duts_tc UBootFDTCmdAddr {
 	Type u-boot
 	Timeout 600
 	Pre {
-		"sete fdt_addr $CFG_FDT_ADDR_R" ".*"
+		"sete fdt_addr_r $CFG_FDT_ADDR_R" ".*"
 		"sete fdt_file $CFG_FDT_FILE" ".*"
 	}
 	Commands "!userUBootFDTCmdAddr.exp"
