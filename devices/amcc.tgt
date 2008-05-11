@@ -292,6 +292,167 @@ duts_device rainier {
 }
 
 #
+# kilauea flash layout:
+#
+# Bank #1 - 64 MB in 512 Sectors (1 sector = 128 KB)
+#
+#   FC000000 - FFFFFFFF
+#
+#   layout:
+#
+#   FC000000 - FC17FFFF Kernel
+#
+#   FC200000 - FC37FFFF Ramdisk
+#
+#   FFF60000 - FFF7FFFF environment
+#   FFF80000 - FFF9FFFF	environment?
+#   FFFA0000 - FFFFFFFF U-Boot
+#
+duts_device kilauea {
+	Vars {
+		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xx/"
+		CFG_MTD_ERASE_DEVICE	"mtd3"
+
+		CFG_FLASH_TST_START 	FF900000
+		CFG_FLASH_TST_END	FF97FFFF
+		CFG_FLASH_ERASE_START	FF900000
+		CFG_FLASH_ERASE_END	FF95FFFF
+
+		CFG_FDT_FILE		"/tftpboot/kilauea/kilauea.dtb"
+                CFG_FDT_ADDR_R          00B00000
+
+		CFG_FLASH_TST_SIZE	40000
+
+		CFG_FLASH_PROT1_START	FFF60000
+		CFG_FLASH_PROT1_END	FFFFFFFF
+
+		CFG_FLASH_ERASE_SECT	"1:455-456"
+		CFG_FLASH_ERASE_BANK	"1"
+		CFG_FLASH_TST_SECT	"1:455"
+
+		CFG_KERNEL_START	FC000000
+		CFG_KERNEL_END 		FC17FFFF
+
+                CFG_FDT_START           FC1E0000
+                CFG_FDT_END             FC1FFFFF
+
+		CFG_RAMDISK_START	FC200000
+		CFG_RAMDISK_END		FC37FFFF
+	}
+	MakeTarget	"kilauea"
+	MakeArch	"powerpc"
+	MakeCompile	"ppc_4xx-"
+}
+
+duts_device haleakala {
+	Vars {
+		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xx/"
+		CFG_MTD_ERASE_DEVICE	"mtd3"
+
+		CFG_FLASH_TST_START 	FF900000
+		CFG_FLASH_TST_END	FF97FFFF
+		CFG_FLASH_ERASE_START	FF900000
+		CFG_FLASH_ERASE_END	FF95FFFF
+
+		CFG_FDT_FILE		"/tftpboot/kilauea/haleakala.dtb"
+                CFG_FDT_ADDR_R          00b00000
+
+		CFG_FLASH_TST_SIZE	40000
+
+		CFG_FLASH_PROT1_START	FFF60000
+		CFG_FLASH_PROT1_END	FFFFFFFF
+
+		CFG_FLASH_ERASE_SECT	"1:455-456"
+		CFG_FLASH_ERASE_BANK	"1"
+		CFG_FLASH_TST_SECT	"1:455"
+
+		CFG_KERNEL_START	FC000000
+		CFG_KERNEL_END 		FC17FFFF
+
+                CFG_FDT_START           FC1E0000
+                CFG_FDT_END             FC1FFFFF
+
+		CFG_RAMDISK_START	FC200000
+		CFG_RAMDISK_END		FC3FFFFF
+	}
+	MakeTarget	"haleakala"
+	MakeArch	"powerpc"
+	MakeCompile	"ppc_4xx-"
+}
+
+duts_device canyonlands {
+	Vars {
+		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xxFP/"
+		CFG_MTD_ERASE_DEVICE	"mtd3"
+
+		CFG_FLASH_TST_START 	FF900000
+		CFG_FLASH_TST_END	FF97FFFF
+		CFG_FLASH_ERASE_START	FF900000
+		CFG_FLASH_ERASE_END	FF95FFFF
+
+		CFG_FDT_FILE		"/tftpboot/canyonlands/canyonlands.dtb"
+                CFG_FDT_ADDR_R          00b00000
+
+		CFG_FLASH_TST_SIZE	40000
+
+		CFG_FLASH_PROT1_START	FFF60000
+		CFG_FLASH_PROT1_END	FFFFFFFF
+
+		CFG_FLASH_ERASE_SECT	"1:455-456"
+		CFG_FLASH_ERASE_BANK	"1"
+		CFG_FLASH_TST_SECT	"1:455"
+
+		CFG_KERNEL_START	FC000000
+		CFG_KERNEL_END 		FC17FFFF
+
+                CFG_FDT_START           FC1E0000
+                CFG_FDT_END             FC1FFFFF
+
+		CFG_RAMDISK_START	FC200000
+		CFG_RAMDISK_END		FC3FFFFF
+	}
+	MakeTarget	"canyonlands"
+	MakeArch	"powerpc"
+	MakeCompile	"ppc_4xx-"
+}
+
+duts_device glacier {
+	Vars {
+		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xxFP/"
+		CFG_MTD_ERASE_DEVICE	"mtd3"
+
+		CFG_FLASH_TST_START 	FF900000
+		CFG_FLASH_TST_END	FF97FFFF
+		CFG_FLASH_ERASE_START	FF900000
+		CFG_FLASH_ERASE_END	FF95FFFF
+
+		CFG_FDT_FILE		"/tftpboot/glacier/glacier.dtb"
+                CFG_FDT_ADDR_R          00b00000
+
+		CFG_FLASH_TST_SIZE	40000
+
+		CFG_FLASH_PROT1_START	FFF60000
+		CFG_FLASH_PROT1_END	FFFFFFFF
+
+		CFG_FLASH_ERASE_SECT	"1:455-456"
+		CFG_FLASH_ERASE_BANK	"1"
+		CFG_FLASH_TST_SECT	"1:455"
+
+		CFG_KERNEL_START	FC000000
+		CFG_KERNEL_END 		FC17FFFF
+
+                CFG_FDT_START           FC1E0000
+                CFG_FDT_END             FC1FFFFF
+
+		CFG_RAMDISK_START	FC200000
+		CFG_RAMDISK_END		FC3FFFFF
+	}
+	MakeTarget	"glacier"
+	MakeArch	"powerpc"
+	MakeCompile	"ppc_4xx-"
+}
+
+#
 # sequoia flash layout:
 #
 # Bank #1 - 64 MB in 512 Sectors (1 sector = 128 KB)
