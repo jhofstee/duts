@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2006, 2007 DENX Software Engineering
+# (C) Copyright 2006-2008 DENX Software Engineering
 #
 # Author: Rafal Jaworowski <raj@semihalf.com>
 #
@@ -78,18 +78,11 @@ proc _device_connect_target {} {
 	set con_cmd "connect"
 
 	expect "*"
-#TODO check if not already connected (connected global)
+	#TODO check if not already connected (connected global)
 	if [catch {spawn -noecho $con_cmd $board_name}] {
 		p_err "couldn't spawn 'connect'?!" 1
 	}
 
-	# TODO when the port is occupied by another connection it is not
-	# reliably detected and handled
-
-	#		"Error" {
-	#			p_err "XXXXXX"
-	#			exit1
-	#		}
 	expect {
 		timeout {
 			puts ""
@@ -104,7 +97,14 @@ proc _device_connect_target {} {
 			puts ""
 			p_err "no board name given?!" 1
 		}
-		-re ".*using command.*$board_name.*" {
+		# connect succeeds by echoing used command to connect.  Wait a little for error messages.
+		-re "Connect to \"$board_name\" using command" {
+			set timeout 1
+			expect -re ".*Error.*|Connection closed" {
+				puts ""
+				p_err "target is in use: '$board_name'..." 1
+			}
+		        set timeout 10
 			p_verb "connection OK"
 		}
 	}
