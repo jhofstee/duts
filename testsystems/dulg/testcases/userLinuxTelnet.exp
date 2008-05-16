@@ -29,24 +29,24 @@ if ![_context_kernel_get_prompt] {
 }
 
 set timeout 5
-send {sed -e 's/\(disable.*\)yes/\1no/g' /etc/xinetd.d/telnet > /etc/xinetd.d/telnet_}
-expect -re "#.*"
-send "\r"
-expect -re "#.*"
-send "mv /etc/xinetd.d/telnet_ /etc/xinetd.d/telnet\r"
-expect -re "#.*"
-send "killall -HUP xinetd\r"
-expect -re "#.*"
+_context_kernel_command {sed -e 's/\(disable.*\)yes/\1no/g' /etc/xinetd.d/telnet > /etc/xinetd.d/telnet_}
+_context_kernel_command "mv /etc/xinetd.d/telnet_ /etc/xinetd.d/telnet"
+_context_kernel_command "killall -HUP xinetd"
 
 sleep 5
 spawn -noecho telnet $board_name
+set telnet_conn $spawn_id
 expect {
 	-re "Connected to $board_name.*login:" {
-		if ![login_kernel "root" ""] {
-			return 0
+		# ELDK NFS Root has no password
+		if [login_kernel "root" "" $telnet_conn] {
+			return 1
 		}
-		expect -re "#.*"
-		return 1
+		# ELDK SELF has a simple password
+		if [login_kernel "root" "root" $telnet_conn] {
+			return 1
+		}
+		return 0
 	} timeout {
 		return 0
 	}
