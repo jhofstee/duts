@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2006, 2007 DENX Software Engineering
+# (C) Copyright 2006-2008 DENX Software Engineering
 #
 # Author: Rafal Jaworowski <raj@semihalf.com>
 #
@@ -189,10 +189,20 @@ proc boot_kernel_net_nfs {} {
 
 	##
 	## set fdt_file - only for arch/powerpc kernels
+	## note that we can still continue without fdt_file if
+	## we test a bootwrapped kernel.
 	##
 
 	if {[get_device_attr "makearch"] == "powerpc"} {
-		_context_firmware_command "setenv fdt_file $CFG_FDT_FILE" ".*"
+		if ![var_exists CFG_FDT_FILE] {
+			if [var_exists CFG_FDT_START] {
+				p_err "Defined fdt start, but not CFG_FDT_NAME, config inconsistent..." 1
+			}
+			p_warn " variable CFG_FDT_FILE is not set."
+			p_warn " assuming bootwrapper-crafted cuImage."
+		} else {
+			_context_firmware_command "setenv fdt_file $CFG_FDT_FILE" ".*"
+		}
 	}
 
 	##
