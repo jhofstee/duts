@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2006, 2007 DENX Software Engineering
+# (C) Copyright 2006-2008 DENX Software Engineering
 #
 # Author: Rafal Jaworowski <raj@semihalf.com>
 #
@@ -89,7 +89,7 @@ proc _context_kernel_get_prompt {} {
 #
 # this method implements sending command and receiving response
 #
-proc _context_kernel_command {cmd rsp {slp 0.25}} {
+proc _context_kernel_command {cmd {rsp ".*"} {slp 0.25}} {
 	global _context_kernel_prompt _context_kernel_alt_prompt
 
 	set p $_context_kernel_prompt
