@@ -20,26 +20,11 @@
 #
 
 proc valid_kernel_file {f} {
-	global control_con
-
-	set rv 0
-	set cmd "file"
-
-	if [catch {spawn -noecho $cmd $f}] {
-		p_err "couldn't spawn '$cmd' command" 1
+	if [catch {set output [exec file uImage-duts 2>@1]}] {
+		p_err "cannot execute 'file' command"
+		return 0
 	}
-
-	expect {
-		timeout {
-			 p_err "timed out while validating kernel file"
-		}
-		"PPCBoot image" {
-#			p_verb "file OK"
-			set rv 1
-		}
-	}
-
-	return $rv
+	return [regexp "PPCBoot image" $output]
 }
 
 #
