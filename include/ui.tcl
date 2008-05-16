@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2006, 2007 DENX Software Engineering
+# (C) Copyright 2006-2008 DENX Software Engineering
 #
 # Author: Rafal Jaworowski <raj@semihalf.com>
 #
@@ -44,6 +44,7 @@ proc usage {} {
 	puts "    -d <dir>  (alternative working directory)"
 	puts "    -n        (do NOT execute real actions)"
 	puts "    -v        (verbose)"
+	puts "    -date <MMDDhhmmYY> (use specified date for target instead of host date)"
 	puts " "
 	puts "For more information and examples see\
 		http://www.denx.de/wiki/DUTS/DUTSDocs."
@@ -483,7 +484,7 @@ proc valid_cmd {c} {
 #
 proc parse_params {} {
 
-	global argc argv working_dir board_name
+	global argc argv working_dir board_name curdate
 
 	for {set i 0} {$i < $argc} {incr i} {
 		set arg [lindex $argv $i]
@@ -514,6 +515,11 @@ proc parse_params {} {
 			global verbose
 			set verbose "yes"
 			p_verb "verbose mode ON"
+			continue
+		} "-date" {
+			incr i
+			set curdate [lindex $argv $i]
+			p_verb "Using date $curdate instead of host time"
 			continue
 		}
 

@@ -157,5 +157,8 @@ if { $argc == 0 } {
 # increase expect's buffer size
 match_max 16384
 
+set curdate [clock format [clock seconds] -format "%m%d%H%M%y"]
+p_verb "Date is $curdate"
+
 parse_params
 exit
