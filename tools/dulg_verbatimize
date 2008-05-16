@@ -26,11 +26,15 @@
 usage () {
     echo "usage: `basename $0` [-v] [boardname]"                                      1>&2
     echo "       All log-files for board with the extension .log will be massaged"    1>&2
-    echo "       into .txt files ready for the DULGData web.  This includes removing" 1>&2
-    echo "       CRs and adding <verbatim> and </verbatim> closures."                 1>&2
-    echo "       The processed files are then tarred up into <boardname>_logs.tgz"    1>&2
+    echo "       into .txt files ready for the DULGData_<board> web.  This includes"  1>&2
+    echo "       removing CRs and adding <verbatim> and </verbatim> closures."        1>&2
+    echo "       The processed files are then tarred up into DULGData_<boardname>.tgz"1>&2
     echo "         -v be verbose about actions"                                       1>&2
     exit 1
+}
+
+cleanup() {
+    rm -fr $dulgdata
 }
 
 # Parse options (bash extension)
@@ -58,14 +62,23 @@ else
     exit 1
 fi
 
+dulgdata="DULGData_$1"
+if [ -d $dulgdata ]; then
+    echo "Directory $dulgdata exists already - giving up" 1>&2
+    exit 1
+fi
+
+trap cleanup SIGINT
+mkdir $dulgdata
+
 done=""
 for f in ${1}*.log; do
-	n=`echo $f | sed 's/\.log$/\.txt/'`
+	n=`echo $f | sed 's/\.log$/\.txt/; s/^'$1'//; s/^_//'`
 	[ -n "$verbose" ] && echo "Processing $n"
-	( echo "<verbatim>"; sed 's/\r//g' < $f; echo "</verbatim>" ) > $n
+	( echo "<verbatim>"; sed 's/\r//g' < $f; echo "</verbatim>" ) > ${dulgdata}/$n
 	done="$done $n"
 done
 
-[ -n "$verbose" ] && echo "Creating ${1}_logs.tgz"
-tar -czf ${1}_logs.tgz $done
-rm $done
+[ -n "$verbose" ] && echo "Creating ${dulgdata}.tgz"
+tar -czf ${dulgdata}.tgz $dulgdata
+cleanup
