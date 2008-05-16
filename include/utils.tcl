@@ -116,10 +116,14 @@ proc run_external_script {fn} {
 #
 # returns 0/1
 #
-proc login_kernel {user {pass ""}} {
+proc login_kernel {user {pass ""} {spid ""}} {
 	global _context_kernel_prompt TIMEOUT console_con
 
-	set spawn_id $console_con
+	if {$spid eq ""} {
+		set spawn_id $console_con
+	} else {
+		set spawn_id $spid
+	}
 	set timeout $TIMEOUT
 	send -s "$user\r"
 	expect {
@@ -268,5 +272,3 @@ proc boot_kernel_net_nfs {} {
 		}
 	}
 }
-
-
