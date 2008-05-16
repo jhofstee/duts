@@ -4,6 +4,8 @@
 
 duts_device bamboo {
 	Vars {
+		CFG_ROOTPATH		"/opt/eldk-4.1-2007-01-19/ppc_4xx/"
+
 		CFG_KERNEL_START ffc00000
 		CFG_KERNEL_END	 ffd7ffff
 		CFG_RAMDISK_START ffd80000
@@ -34,6 +36,8 @@ duts_device bamboo {
 
 duts_device bubinga {
 	Vars {
+		CFG_ROOTPATH		"/opt/eldk-4.1-2007-01-19/ppc_4xx/"
+
 		CFG_FLASH_TST_START fff80000
 		CFG_FLASH_TST_END fff8ffff
 		CFG_FLASH_ERASE_START fff80000
@@ -125,6 +129,8 @@ duts_device katmai {
 #
 duts_device luan {
 	Vars {
+		CFG_ROOTPATH		"/opt/eldk-4.1-2007-01-19/ppc_4xx/"
+
 		CFG_MTD_ERASE_DEVICE	"mtd6"
 
 		CFG_FLASH_TST_START 	ff900000
@@ -181,6 +187,8 @@ duts_device lwmon5 {
 
 duts_device ebony {
 	Vars {
+		CFG_ROOTPATH		"/opt/eldk-4.1-2007-01-19/ppc_4xx/"
+
 		CFG_MTD_ERASE_DEVICE "mtd6"
 		CFG_FLASH_TST_START ff800000
 		CFG_FLASH_TST_END ff9fffff
@@ -209,6 +217,8 @@ duts_device ebony {
 
 duts_device ocotea {
 	Vars {
+		CFG_ROOTPATH		"/opt/eldk-4.1-2007-01-19/ppc_4xx/"
+
 		CFG_MTD_ERASE_DEVICE "mtd6"
 		CFG_FLASH_TST_START ff800000
 		CFG_FLASH_TST_END ff9fffff
@@ -329,6 +339,8 @@ duts_device sequoia {
 
 duts_device sycamore {
 	Vars {
+		CFG_ROOTPATH		"/opt/eldk-4.1-2007-01-19/ppc_4xx/"
+
 		CFG_MTD_ERASE_DEVICE "mtd6"
 		CFG_FLASH_TST_START fff80000
 		CFG_FLASH_TST_END fff8ffff
@@ -404,6 +416,8 @@ duts_device taishan {
 
 duts_device walnut {
 	Vars {
+		CFG_ROOTPATH		"/opt/eldk-4.1-2007-01-19/ppc_4xx/"
+
 		CFG_MTD_ERASE_DEVICE "mtd6"
 		CFG_FLASH_TST_START fff80000
 		CFG_FLASH_TST_END fff8ffff
@@ -425,6 +439,8 @@ duts_device walnut {
 
 duts_device yellowstone {
 	Vars {
+		CFG_ROOTPATH		"/opt/eldk-4.1-2007-01-19/ppc_4xx/"
+
 		CFG_MTD_ERASE_DEVICE "mtd6"
 		CFG_FLASH_TST_START fd000000
 		CFG_FLASH_TST_END fd03ffff
@@ -454,6 +470,8 @@ duts_device yellowstone {
 
 duts_device yosemite {
 	Vars {
+		CFG_ROOTPATH		"/opt/eldk-4.1-2007-01-19/ppc_4xxFP/"
+
 		CFG_MTD_ERASE_DEVICE "mtd6"
 		CFG_FLASH_TST_START fd000000
 		CFG_FLASH_TST_END fd03ffff
@@ -509,6 +527,8 @@ duts_device yosemite {
 #
 duts_device yucca {
 	Vars {
+		CFG_ROOTPATH		"/opt/eldk-4.1-2007-01-19/ppc_4xx/"
+
 		CFG_MTD_ERASE_DEVICE "mtd6"
 
 		CFG_FLASH_TST_START 	FFF00000
