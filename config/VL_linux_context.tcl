@@ -20,7 +20,7 @@
 #
 
 proc valid_kernel_file {f} {
-	if [catch {set output [exec file uImage-duts 2>@1]}] {
+	if [catch {set output [exec file $f 2>@1]}] {
 		p_err "cannot execute 'file' command"
 		return 0
 	}
