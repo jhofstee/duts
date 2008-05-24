@@ -34,6 +34,7 @@ duts_tc UBootSaveenvHelp {
 
 duts_tc UBootSaveenv {
 	Type u-boot
+	Timeout 300
 	Commands {
 		"saveenv" ".*"
 	}
