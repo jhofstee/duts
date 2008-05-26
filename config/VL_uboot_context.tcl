@@ -59,7 +59,7 @@ proc _context_firmware_handler {} {
 				timeout {
 					p_err "timed out while rebooting" 1
 				}
-				"Restarting system" {
+				-re "Restarting sys.*" {
 					set timeout 10
 				}
 			}
