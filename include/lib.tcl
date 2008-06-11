@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2006, 2007 DENX Software Engineering
+# (C) Copyright 2006-2008 DENX Software Engineering
 #
 # Author: Rafal Jaworowski <raj@semihalf.com>
 #
@@ -18,6 +18,49 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston,
 # MA 02111-1307 USA
 #
+
+# "Exported functions":
+
+# # logging test case's flow to file
+# proc logging {onoff {lf ""}}
+
+# # user interface
+# proc p_verb {msg {pfx "DUTS: "}}
+# proc p_warn {msg}
+# proc p_err {msg {exit "0"}}
+# proc p_banner {msg {p "* "}}
+# proc ask_yesno {msg}
+# proc exit1 {{msg ""}}
+# proc niy {msg}
+# proc debug {msg {subsystem ""}}
+# proc proc_name {}
+# proc proc_exists {p}
+# proc var_exists {v}
+# proc in_array {a k}
+# proc on_list {l e}
+
+# # files operations
+# proc find_files {dir ext {recursive "no"}}
+# proc valid_dir {dir {check_write "0"}}
+# proc valid_file {f {check_write "0"}}
+
+# # operations on host environment
+# proc valid_host_tool {t}
+# proc check_host_tools {tools_list}
+# proc is_similar_path {p}
+# proc set_host_tool_path {p}
+# proc absolutize_path {path}
+# proc host_bash_shell {{prompt ""} {opt ""}}
+
+# # process mgmt
+# proc process_spawn {p {params ""}}
+# proc process_close {sid}
+
+# # user interface options handling
+# proc opt_create_globals {}
+# proc opt_val_empty {o_val {pfx "-"}}
+# proc opt_process {o_txt o_val {check_list "0"}}
+
 
 ###############################################################################
 # logging test case's flow to file
