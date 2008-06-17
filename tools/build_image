@@ -51,12 +51,12 @@
 set dep_env "DUTS_BASE_DIR"
 set dep_base_dir "."
 if {[array get env $dep_env] > 0} {
-	set dep_base_dir $env($dep_env)
-	if {$dep_base_dir == ""} {
-		set dep_base_dir "."
-	} else {
-		set dep_base_dir [string trimright $env($dep_env) "/"]
-	}
+        set dep_base_dir $env($dep_env)
+        if {$dep_base_dir == ""} {
+                set dep_base_dir "."
+        } else {
+                set dep_base_dir [string trimright $env($dep_env) "/"]
+        }
 }
 
 ##
@@ -64,9 +64,9 @@ if {[array get env $dep_env] > 0} {
 ##
 set lib "$dep_base_dir/include/lib.tcl"
 if [catch {source $lib} err] {
-	puts "ERROR: $err"
-	puts "$dep_env env var probably not set correctly: '$dep_base_dir'."
-	exit 1
+        puts "ERROR: $err"
+        puts "$dep_env env var probably not set correctly: '$dep_base_dir'."
+        exit 1
 }
 
 ##
@@ -96,58 +96,58 @@ set TIMEOUT 10
 # {<global_var_name> "<opt_string>" "<default_value>"}
 #
 set opt_table {
-	{img_type "t" "linux-26"}
-	{img_name "n" "TQM834x"}
-	{img_src "s" ""}
-	{img_dst "d" ""}
-	{obj_dir "obj" ""}
+        {img_type "t" "linux-26"}
+        {img_name "n" "TQM834x"}
+        {img_src "s" ""}
+        {img_dst "d" ""}
+        {obj_dir "obj" ""}
 
-	{build_timeout  "to" "600"}
-	{build_tools "m" "/opt/eldk-4.0/usr/bin/"}
-	{build_arch "a" "ppc"}
-	{build_cross "c" "ppc_6xx-"}
+        {build_timeout  "to" "600"}
+        {build_tools "m" "/opt/eldk-4.0/usr/bin/"}
+        {build_arch "a" "ppc"}
+        {build_cross "c" "ppc_6xx-"}
 }
 
 #
 # usage
 #
 proc usage {} {
-	global argv0 env
+        global argv0 env
 
-	puts "usage: [file tail $argv0] \[parameters\]"
-	puts ""
-	puts "  The script builds -t specified image from -s specified source\
-	tree, using"
-	puts "  tools specified with -m, -a, -c, and puts the resultant\
-	image file to -d"
-	puts "  specified location."
-	puts "  "
-	puts "  all \[parameters\] are optional and can be any combination of:"
-	puts "  "
+        puts "usage: [file tail $argv0] \[parameters\]"
+        puts ""
+        puts "  The script builds -t specified image from -s specified source\
+        tree, using"
+        puts "  tools specified with -m, -a, -c, and puts the resultant\
+        image file to -d"
+        puts "  specified location."
+        puts "  "
+        puts "  all \[parameters\] are optional and can be any combination of:"
+        puts "  "
 #	puts "  <config>\t\tlabel of config set"
-	puts "  -t  <build_type>\tsupported build (linux-24, linux-26 or\
-	uboot)"
-	puts "  -n  <target_name>\tbuild target label (e.g. TQM834x, yucca)"
-	puts "  -s  <img_src>\t\tsrc tree location (e.g.\
-	/home/$env(USER)/linuxppc_2_4_devel)"
-	puts "  -d  <img_dst>\t\tdst location (can be filename or\
-	directory)"
-	puts "  -obj <obj>\t\tlocation for object files (linux-26 and u-boot)"
-	puts "  -to <timeout>\t\ttimeout in seconds to wait for build to\
-	complete"
-	puts "  -m  <build_tools>\tpath to build tools (e.g.\
-	/opt/eldk-4.0/usr/bin/)"
-	puts "  -a  <build_arch>\tbuild arch (e.g. ppc)"
-	puts "  -c  <build_cross>\tcross build prefix (e.g. ppc_6xx-)"
-	puts ""
-	puts "  -nc \t'no-clean' build: do not wipe out and config sources"
-	puts "  -o  \toverwrite dst file (-d), if exists (default is do not\
-	overwrite)"
-	puts "  -b  \tbatch mode, no user confirmation"
-	puts "  -v  \tverbose output"
-	puts "  -h  \tthis help"
-	puts " "
-	exit
+        puts "  -t  <build_type>\tsupported build (linux-24, linux-26 or\
+        uboot)"
+        puts "  -n  <target_name>\tbuild target label (e.g. TQM834x, yucca)"
+        puts "  -s  <img_src>\t\tsrc tree location (e.g.\
+        /home/$env(USER)/linuxppc_2_4_devel)"
+        puts "  -d  <img_dst>\t\tdst location (can be filename or\
+        directory)"
+        puts "  -obj <obj>\t\tlocation for object files (linux-26 and u-boot)"
+        puts "  -to <timeout>\t\ttimeout in seconds to wait for build to\
+        complete"
+        puts "  -m  <build_tools>\tpath to build tools (e.g.\
+        /opt/eldk-4.0/usr/bin/)"
+        puts "  -a  <build_arch>\tbuild arch (e.g. ppc)"
+        puts "  -c  <build_cross>\tcross build prefix (e.g. ppc_6xx-)"
+        puts ""
+        puts "  -nc \t'no-clean' build: do not wipe out and config sources"
+        puts "  -o  \toverwrite dst file (-d), if exists (default is do not\
+        overwrite)"
+        puts "  -b  \tbatch mode, no user confirmation"
+        puts "  -v  \tverbose output"
+        puts "  -h  \tthis help"
+        puts " "
+        exit
 }
 
 #
@@ -155,23 +155,23 @@ proc usage {} {
 #
 proc show_params {} {
 
-	global opt_table
-	set globals [list]
+        global opt_table
+        set globals [list]
 
-	# create list of global vars names from opt table
-	foreach o $opt_table {
-		set var_name [lindex $o 0]
-		lappend globals $var_name
-	}
+        # create list of global vars names from opt table
+        foreach o $opt_table {
+                set var_name [lindex $o 0]
+                lappend globals $var_name
+        }
 
-	# add other interesting global vars to the list
-	lappend globals "build_config" "confirm" "verbose" "overwrite" "no_clean"
+        # add other interesting global vars to the list
+        lappend globals "build_config" "confirm" "verbose" "overwrite" "no_clean"
 
-	puts "--- Settings ---"
-	foreach g $globals {
-		global $g
-		puts "$g = '[subst $$g]'"
-	}
+        puts "--- Settings ---"
+        foreach g $globals {
+                global $g
+                puts "$g = '[subst $$g]'"
+        }
 }
 
 #
@@ -186,68 +186,68 @@ proc show_params {} {
 #
 proc check_dst {dst {ovr "0"} {dn "uImage"}} {
 
-	if {$dst == ""} {
-		return 1
-	}
+        if {$dst == ""} {
+                return 1
+        }
 
-	set rv 1
-	if [file exists $dst] {
-		# for existing paths we're only interested in file or directory
-		set ft [file type $dst]
-		switch -- $ft "file" {
-			if {$ovr} {
-				# we want to overwrite image files
-				if ![file writable $dst] {
-					p_err "destination file not\
-					overwritable: '$dst'"
-					set rv 0
-				}
+        set rv 1
+        if [file exists $dst] {
+                # for existing paths we're only interested in file or directory
+                set ft [file type $dst]
+                switch -- $ft "file" {
+                        if {$ovr} {
+                                # we want to overwrite image files
+                                if ![file writable $dst] {
+                                        p_err "destination file not\
+                                        overwritable: '$dst'"
+                                        set rv 0
+                                }
 
-			} else {
-				p_err "destination file already exists:\
-				'$dst'; use -o to overwrite"
-				set rv 0
-			}
+                        } else {
+                                p_err "destination file already exists:\
+                                '$dst'; use -o to overwrite"
+                                set rv 0
+                        }
 
-		} "directory" {
-			if ![file writable $dst] {
-				p_err "destination dir not writable: '$dst'"
-				set rv 0
-			} else {
-				# dst specifies directory, so there can exist
-				# an image with default name - check for it
-				set d "$dst/$dn"
-				global overwrite
-				set o [expr {($overwrite == "yes") ? 1 : 0}]
-				set rv [check_dst $d $o $dn]
-			}
+                } "directory" {
+                        if ![file writable $dst] {
+                                p_err "destination dir not writable: '$dst'"
+                                set rv 0
+                        } else {
+                                # dst specifies directory, so there can exist
+                                # an image with default name - check for it
+                                set d "$dst/$dn"
+                                global overwrite
+                                set o [expr {($overwrite == "yes") ? 1 : 0}]
+                                set rv [check_dst $d $o $dn]
+                        }
 
-		} default {
-			p_err "file type '$ft' not supported: '$dst'. Check\
-			your -d value"
-			set rv 0
-		}
+                } default {
+                        p_err "file type '$ft' not supported: '$dst'. Check\
+                        your -d value"
+                        set rv 0
+                }
 
-	} else {
-		# supplied path does not exist: we only accept specification
-		# for a non-existing endfile (which will get created) but not
-		# directory..
-		if [regexp {/$} $dst] {
-			p_err "no such directory: '$dst'"
-			set rv 0
-		} else {
-			# check parent dir for the file
-			set pd [file dirname $dst]
-			if ![valid_dir $pd 1] {
-				p_err "parent dir in '$dst' not valid"
-				set rv 0
-			} else {
-				p_verb "destination '$dst' OK"
-			}
-		}
-	}
+        } else {
+                # supplied path does not exist: we only accept specification
+                # for a non-existing endfile (which will get created) but not
+                # directory..
+                if [regexp {/$} $dst] {
+                        p_err "no such directory: '$dst'"
+                        set rv 0
+                } else {
+                        # check parent dir for the file
+                        set pd [file dirname $dst]
+                        if ![valid_dir $pd 1] {
+                                p_err "parent dir in '$dst' not valid"
+                                set rv 0
+                        } else {
+                                p_verb "destination '$dst' OK"
+                        }
+                }
+        }
 
-	return $rv
+        return $rv
 }
 
 #
@@ -266,67 +266,67 @@ proc check_dst {dst {ovr "0"} {dn "uImage"}} {
 #
 proc parse_params {} {
 
-	global argc argv
-	global build_config
-	global opt_table opt_list
+        global argc argv
+        global build_config
+        global opt_table opt_list
 
-	set errors 0
+        set errors 0
 
-	for {set i 0} {$i < $argc} {incr i} {
-		set a [lindex $argv $i]
+        for {set i 0} {$i < $argc} {incr i} {
+                set a [lindex $argv $i]
 
-		# check if this is -<opt> element
-		if [regexp {^-.*} $a] {
-			# eat the leading "-"
-			set o [string trimleft $a "-"]
+                # check if this is -<opt> element
+                if [regexp {^-.*} $a] {
+                        # eat the leading "-"
+                        set o [string trimleft $a "-"]
 
-			if [on_list opt_list $o] {
-				# we have option from opt_table
-				incr i
-				if ![opt_process $o [lindex $argv $i]] {
-					set errors 1
-				}
-			} else {
-				# remaining -<opt> cases (special)
-				switch -- \
-				$o "v" {
-					global verbose
-					set verbose "yes"
-					p_verb "verbose mode ON"
+                        if [on_list opt_list $o] {
+                                # we have option from opt_table
+                                incr i
+                                if ![opt_process $o [lindex $argv $i]] {
+                                        set errors 1
+                                }
+                        } else {
+                                # remaining -<opt> cases (special)
+                                switch -- \
+                                $o "v" {
+                                        global verbose
+                                        set verbose "yes"
+                                        p_verb "verbose mode ON"
 
-				} "b" {
-					global confirm
-					set confirm "no"
-					p_verb "no user confirmation"
-				} "o" {
-					global overwrite
-					set overwrite "yes"
-					p_verb "overwrite existing image file"
-				} "nc" {
-					global no_clean
-					set no_clean "yes"
-				} "h" {
-					usage
-				}
-			}
-			continue
-		}
+                                } "b" {
+                                        global confirm
+                                        set confirm "no"
+                                        p_verb "no user confirmation"
+                                } "o" {
+                                        global overwrite
+                                        set overwrite "yes"
+                                        p_verb "overwrite existing image file"
+                                } "nc" {
+                                        global no_clean
+                                        set no_clean "yes"
+                                } "h" {
+                                        usage
+                                }
+                        }
+                        continue
+                }
 
-		##
-		## get config name
-		##
-		set build_config $a
-		p_verb "config '$build_config'"
-	}
-	if {$errors > 0} {
-		exit1
-	}
+                ##
+                ## get config name
+                ##
+                set build_config $a
+                p_verb "config '$build_config'"
+        }
+        if {$errors > 0} {
+                exit1
+        }
 
-	# TODO try loading _default config
-	if {$build_config != ""} {
-		#TODO
-		# load config file
-	}
+        # TODO try loading _default config
+        if {$build_config != ""} {
+                #TODO
+                # load config file
+        }
 }
 
 #
@@ -343,91 +343,91 @@ proc parse_params {} {
 #
 proc build_main {} {
 
-	global confirm no_clean send_slow img_src
-	global build_prompt build_sid build_timeout
+        global confirm no_clean send_slow img_src
+        global build_prompt build_sid build_timeout
 
-	##
-	## show params supplied and ask user before proceeding
-	##
-	if {$confirm == "yes"} {
-		show_params
-		if ![ask_yesno "confirm to start execution? "] {
-			return
-		}
-	}
+        ##
+        ## show params supplied and ask user before proceeding
+        ##
+        if {$confirm == "yes"} {
+                show_params
+                if ![ask_yesno "confirm to start execution? "] {
+                        return
+                }
+        }
 
-	##
-	## validate build environment
-	##
-	if ![bld_valid_env] {
-		exit1
-	}
+        ##
+        ## validate build environment
+        ##
+        if ![bld_valid_env] {
+                exit1
+        }
 
-	p_banner "Starting image build, please wait." #
+        p_banner "Starting image build, please wait." #
 
-	set cur_dir [pwd]
-	cd $img_src
+        set cur_dir [pwd]
+        cd $img_src
 
-	##
-	## spawn bash shell on host
-	##
+        ##
+        ## spawn bash shell on host
+        ##
 
-	# assign spawn_id to global var so the shell is available outside
-	# this procedure, set other sending params
-	set build_prompt "\\$\\ "
-	set build_sid [host_bash_shell $build_prompt]
-	set send_slow {1 .050}
-	# expect buffer size
-	match_max 16384
+        # assign spawn_id to global var so the shell is available outside
+        # this procedure, set other sending params
+        set build_prompt "\\$\\ "
+        set build_sid [host_bash_shell $build_prompt]
+        set send_slow {1 .050}
+        # expect buffer size
+        match_max 16384
 
-	##
-	## bld_pre
-	##
-	if {$no_clean == "yes"} {
-		p_warn "no-clean build: skipping build preparation phase"
-	} else {
-		if ![bld_pre] {
-			exit1
-		}
-	}
+        ##
+        ## bld_pre
+        ##
+        if {$no_clean == "yes"} {
+                p_warn "no-clean build: skipping build preparation phase"
+        } else {
+                if ![bld_pre] {
+                        exit1
+                }
+        }
 
-	##
-	## bld_config
-	##
-	if {$no_clean == "yes"} {
-		p_warn "no-clean build: skipping build config phase"
-	} else {
-		if ![bld_config] {
-			exit1
-		}
-	}
+        ##
+        ## bld_config
+        ##
+        if {$no_clean == "yes"} {
+                p_warn "no-clean build: skipping build config phase"
+        } else {
+                if ![bld_config] {
+                        exit1
+                }
+        }
 
-	##
-	## bld_image
-	##
-	if ![bld_image $build_timeout] {
-		exit1
-	}
+        ##
+        ## bld_image
+        ##
+        if ![bld_image $build_timeout] {
+                exit1
+        }
 
-	# bld_post can possibly do different things on the host, so let's get
-	# back to our pwd once we're done with building the image
-	cd $cur_dir
+        # bld_post can possibly do different things on the host, so let's get
+        # back to our pwd once we're done with building the image
+        cd $cur_dir
 
-	##
-	## bld_post
-	##
-	if ![bld_post] {
-		exit1
-	}
+        ##
+        ## bld_post
+        ##
+        if ![bld_post] {
+                exit1
+        }
 
-	##
-	## close spawned shell process
-	##
-	process_close $build_sid
+        ##
+        ## close spawned shell process
+        ##
+        process_close $build_sid
 
-	p_banner "Finished image build, thanks for patience." #
+        p_banner "Finished image build, thanks for patience." #
 
-	return 1
+        return 1
 }
 
 #
@@ -468,40 +468,40 @@ proc build_main {} {
 # bld_<img_type>.exp - e.g. bld_linux-26.exp, bld_linux-24.exp, bld_uboot.exp
 #
 proc read_build_methods {t} {
-	global base_dir
-	set rv 1
+        global base_dir
+        set rv 1
 
-	set f "$base_dir/bld_$t.exp"
-	if ![valid_file $f] {
-		p_err "build type not supported: '$t', build methods\
-		implementation file not found?!"
-		return 0
-	}
+        set f "$base_dir/bld_$t.exp"
+        if ![valid_file $f] {
+                p_err "build type not supported: '$t', build methods\
+                implementation file not found?!"
+                return 0
+        }
 
-	if [catch {source $f} err] {
-		p_err "problems with source'ing '$f'?!"
-		puts "  $err"
-		set rv 0
-	} else {
-		p_verb "using build methods implemented in file: '$f'"
+        if [catch {source $f} err] {
+                p_err "problems with source'ing '$f'?!"
+                puts "  $err"
+                set rv 0
+        } else {
+                p_verb "using build methods implemented in file: '$f'"
 
-		# check if the implementation file has all required methods
-		set methods {
-			bld_valid_env bld_pre bld_config bld_image bld_post
-		}
-		foreach m $methods {
-			if ![proc_exists $m] {
-				p_err "build method '$m' is not implemented\
-				in file '$f'"
-				set rv 0
-			}
-		}
-		if $rv {
-			p_verb "all build methods in place, OK"
-		}
-	}
+                # check if the implementation file has all required methods
+                set methods {
+                        bld_valid_env bld_pre bld_config bld_image bld_post
+                }
+                foreach m $methods {
+                        if ![proc_exists $m] {
+                                p_err "build method '$m' is not implemented\
+                                in file '$f'"
+                                set rv 0
+                        }
+                }
+                if $rv {
+                        p_verb "all build methods in place, OK"
+                }
+        }
 
-	return $rv
+        return $rv
 }
 
 
@@ -522,7 +522,7 @@ parse_params
 ## find get build methods implementation
 ##
 if ![read_build_methods $img_type] {
-	exit1
+        exit1
 }
 
 ##
