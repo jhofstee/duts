@@ -81,6 +81,72 @@ proc logging {onoff {lf ""}} {
 }
 
 
+###############################################################################
+# Convenience wrapper functions for exec
+###############################################################################
+
+# Execute cmd and capture stdout and stderr.  If monitor is true, pass all output
+# to regular stdout
+proc exec2 {cmd stdout stderr {monitor 0}} {
+	upvar $stdout out
+	upvar $stderr err
+
+	if [catch {set f [open "| $cmd" r]} res] {
+		return -1
+	}
+	set out ""
+	while { [gets $f line] >= 0 } {
+		if { $monitor } {
+			puts $line
+		}
+		if { [string length $out] > 0} {
+			set out "$out\n$line"
+		} else {
+			set out $line
+		}
+	}
+# Only in tcl8.5 :(
+# 	catch {close $f} err options
+# 	set details [dict get $options -errorcode]
+# 	if {[lindex $details 0] eq "CHILDSTATUS"} {
+# 		return [lindex $details 2]
+# 	}
+	if [catch {close $f} err] {
+		return 1
+	} else {
+		return 0
+	}
+}
+
+# Append a string to a file
+proc append_str_file {str fname} {
+	if [catch {set f [open $fname w+]} res] {
+		return 0
+	}
+	puts $f $str
+	close $f
+}
+
+# Execute command, possibly logging output, return exit status and stderr
+proc exec2_log {cmd stderr {logfile ""}} {
+	upvar $stderr err
+	global cur_logfile
+
+	set out ""
+	set err ""
+
+	set res [exec2 $cmd out err 1]
+
+	# Override logfile if empty and if cur_logfile is set
+	if { $logfile == ""  && [info exists cur_logfile] } {
+		set logfile $cur_logfile
+	}
+
+	if { $logfile != "" } {
+		append_str_file $out $logfile
+	}
+	return [expr $res == 0 ]
+}
 
 ###############################################################################
 # user interface

@@ -1,9 +1,8 @@
-#!/bin/env expect
+#!/bin/env tclsh
 #                                -*- Mode: tcl -*-
 #
-# (C) Copyright 2006-2008 DENX Software Engineering
-#
-# Author: Rafal Jaworowski <raj@semihalf.com>
+# (C) Copyright 2006, 2007 Rafal Jaworowski <raj@semihalf.com> for DENX Software Engineering
+# (C) Copyright 2008 Detlev Zundel <dzu@denx.de>, DENX Software Engineering
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -21,15 +20,17 @@
 # MA 02111-1307 USA
 #
 
+package require cmdline
+
 #
 # This script fetches source tree from repository according to user
 # supplied parameters. Please use -h for help.
 #
 #
 #  usage examples:
-# ./get_src -t git -s /home/git/linuxppc_2_4_devel -d linuxppc_2_4_devel_copy -p [branchID]
+# ./get_src -t git -s /home/git/linuxppc_2_4_devel -d linuxppc_2_4_devel_copy -r [branchID]
 #
-# ./get_src -s /git/duts/linuxppc_2_4_devel -d old_duts -p 373d8583b609f378dd6b81d7d45aef97e6ada526
+# ./get_src -s /git/duts/linuxppc_2_4_devel -d old_duts -r 373d8583b609f378dd6b81d7d45aef97e6ada526
 #
 #
 
@@ -61,49 +62,11 @@ if [catch {source $lib} err] {
 }
 
 
-##
-## default values
-##
-set verbose "no"
-set confirm "yes"
-
-set scm_config ""
-set scm_handler ""
-
-set TIMEOUT 10
-
-set shell_prompt ""
-set shell_sid ""
-
-#
-# table of supported SCM schemes, each element is
-# {<handler_function> "<name>"}
-#
-# <name> is the label for use in '-t' command line option or 'scm_type' field
-# in config file
-#
-set scm_supported {
-	{do_git "git"}
-	{do_cvs "cvs"}
-	{do_local "local"}
-}
-
-#
-# table of user interface options, each element is
-# {<global_var_name> "<opt_string>" "<default_value>"}
-set opt_table {
-	{repo_type "t" "git"}
-	{repo_src "s" "/home/git/"}
-	{repo_dst "d" ""}
-	{repo_params "p" ""}
-	{scm_timeout  "to" "180"}
-}
-
 #
 # usage
 #
-proc usage {} {
-	global argv0 env
+proc usage {optlist} {
+	global argv0
 
 	puts "usage: [file tail $argv0] \[parameters\]"
 	puts ""
@@ -111,100 +74,47 @@ proc usage {} {
 	location to -d"
 	puts "  location, the type of repo is specified by -t"
 	puts "  "
-	puts "  all \[parameters\] are optional and can be any combination of:"
+	puts "  possible \[parameters\] are listed below, defaults are in <>."
 	puts "  "
-#	puts "  <config>\t\tlabel of config set"
-	puts "  -t  <scm_type>\tsupported SCM system (git, cvs, local)"
-	puts "  -s  <repo_src>\tsrc repo location (e.g.\
-	/home/git/u-boot)"
-	puts "  -d  <repo_dst>\tdst location: can be new or existing\
-	directory; if not"
-	puts "                \tspecified, the source repo name is used"
-	puts "  -p  <private>\t\tprivate repo params (e.g. branch ID for 'git'\
-	type)"
-	puts "  -to <timeout>\t\ttimeout in seconds for repo\
-	operation to complete"
-	puts ""
-	puts "  -b  \tbatch mode, no user confirmation"
-	puts "  -v  \tverbose output"
-	puts "  -h  \tthis help"
-	puts " "
-	exit
+	puts [cmdline::usage $optlist]
+	exit 1
 }
 
 #
-# dumps params
-#
-proc show_params {} {
-
-	global opt_table
-	set globals [list]
-
-	# create list of global vars names from opt table
-	foreach o $opt_table {
-		set var_name [lindex $o 0]
-		lappend globals $var_name
-	}
-
-	# add other interesting global vars to the list
-	lappend globals "confirm" "verbose" "scm_config"
-
-	puts "--- Settings ---"
-	foreach g $globals {
-		global $g
-		puts "$g = '[subst $$g]'"
-	}
-}
-
-#
-# checks if the path to repo $r is accessible and resembles GIT, returns 0/1
+# checks if the path to repo $r is accessible and resembles git, returns 0/1
 #
 proc git_valid_repo {r} {
-
-	set rv 1
-
 	if ![valid_dir $r] {
-		set rv 0
+		return 0
 	} else {
 		# check if .git present in the src dir
 		if ![file exists $r/.git] {
-			p_warn "doesn't look like GIT repo: '$r'?!"
-			set rv 0
+			p_err "'$r' is not a git repository"
+			return 0
 		}
 	}
 
-	return $rv
+	return 1
 }
 
 #
-# checks the src GIT repo specified, returns 0/1.
+# checks the src git repo specified, returns 0/1.
 #
-# GIT src can be specified as:
+# git src can be specified as:
 #
 # "-s /home/git/u-boot"
 #
-proc git_valid_src {} {
-
-	global repo_src
-	set rv 1
-
-	if {$repo_src == ""} {
-		p_err "empty source repo parameter, use -s option to\
-		specify source GIT repo location"
+proc git_valid_src {src} {
+	if ![git_valid_repo $src] {
+		p_err "Not a valid git repository: '$src'"
 		return 0
 	}
 
-	set repo_src [string trimright $repo_src "/"]
-	if ![git_valid_repo $repo_src] {
-		p_err "problems accessing source GIT repo: '$repo_src'"
-		set rv 0
-	}
-
-	return $rv
+	return 1
 }
 
 #
-# checks GIT dest location - it can be specified in the following conventions:
+# checks git dest location - it can be specified in the following conventions:
 #
 # "-d <some_dir>/<name>" e.g. for U-Boot: -d ~/u-boot.mycopy
 #
@@ -216,282 +126,125 @@ proc git_valid_src {} {
 #
 # returns 0/1
 #
-proc git_valid_dst {} {
-
-	global repo_dst repo_src
-	set rv 1
-
-	if {$repo_dst == ""} {
-		set repo_dst [file tail $repo_src]
-	}
-
-	set repo_dst [string trimright $repo_dst "/"]
-	if [file exists $repo_dst] {
-		if [file exists "$repo_dst/.git"] {
-			p_err "destination location already has GIT repo:\
-			'$repo_dst'?!"
-			set rv 0
-
+proc git_valid_dst {dst} {
+	set dst [string trimright $dst "/"]
+	if [file exists $dst] {
+		if [file exists "$dst/.git"] {
+			p_err "destination location already has git repo:\
+			'$dst'"
+			return 0
 		} else {
-			if ![valid_dir $repo_dst 1] {
+			if ![valid_dir $dst 1] {
 				p_err "access problems with destination:\
-				'$repo_dst'"
-				set rv 0
-			} else {
-				# only directory was specified as destination
-				# - append it with repo name derived from
-				# repo_src
-				set repo_dst "$repo_dst/[file tail $repo_src]"
+				'$dst'"
+				return 0
 			}
 		}
 	}
 
-	return $rv
+	return 1
 }
 
 #
-# checks if supplied param valid for GIT object ID, returns 0/1
+# checks if supplied param valid for git object ID, returns 0/1
 #
-proc git_valid_params {} {
-
-	global repo_params repo_src
-
-	if {$repo_params == ""} {
-		return 1
-	}
-
+proc git_valid_params {params} {
 	# git-cat-file -t 887e2ec9ecf49366a60a49b32b73825804909865
 	# commit
-	if {!(([string length $repo_params] == 40) &&\
-	      ([regexp {^[0-9a-fA-F]+$} $repo_params]))} {
-		p_err "supplied value doesn't look like a GIT object ID:\
-		'$repo_params'"
+	if {(([string length $params] == 40) && (![regexp {^[0-9a-fA-F]+$} $params]))} {
+		p_err "supplied value doesn't look like a git object ID:\
+		'$params'"
 		return 0
 	}
 
-	set rv 1
-	set cur_dir [pwd]
-	cd $repo_src
-
-	set c "git-cat-file -t $repo_params"
-	if [catch {set o [eval exec $c]}] {
-		p_err "GIT object ID: '$repo_params' not found in repo:\
-		'$repo_src'"
-		set rv 0
-
+	set c "git-cat-file -t $params"
+	if [catch  {eval exec $c 2>@1} res] {
+		p_err $res
+		return 0
 	} else {
-		if {$o != "commit"} {
-			p_err "supplied ID is not 'commit' type: '$o'"
+		if {$res != "commit"} {
+			p_err "supplied ID is not 'commit' type: '$res'"
 			set rv 0
 		} else {
-			p_verb "GIT ID ok: '$repo_params'"
+			p_verb "git ID ok: '$params'"
 		}
 	}
 
-	cd $cur_dir
-	return $rv
+	return 1
 }
 
 
 #
-# checks out a tree to object ID in $repo_params, creates a new branch for this
+# checks out a tree to object ID in $params, creates a new branch for this
 # purpose
 #
-proc git_branch {} {
-
-	global repo_params repo_dst
-
-	if {$repo_params == ""} {
-		return 1
+proc git_create_branch {branch} {
+	set c "git-checkout -f -b $branch"
+	p_banner "$c" *
+	if ![exec2_log "$c 2>&1" res] {
+		p_err "$res"
+		return 0
 	}
 
-	set rv 1
-
-	set cur_dir [pwd]
-	cd $repo_dst
-
-	##
-	## create branch and check out to it
-	##
-
-	# branch name
-	set bn "DUTS-internal"
-
-	set c "git-checkout -f -b $bn $repo_params"
-	p_banner $c *
-	if [catch {set o [eval exec $c]}] {
-		p_err "failed command: '$c'"
-		set rv 0
-	}
-
-	# TODO what to do with this created branch? issue an info warning?
-	cd $cur_dir
-	return $rv
+	return 1
 }
 
 #
 # performs git-clone command, returns 0/1 upon fail/success
 #
-proc git_clone {} {
-
-	global shell_prompt shell_sid scm_timeout
-	global repo_src repo_dst
-
-	set rv 1
-	set p $shell_prompt
-	set spawn_id $shell_sid
-
-	##
-	## prepare git-clone command: git-clone <repo_src> <repo_dst>
-	##
-	set c "git-clone"
-	set c_arg $repo_src
-	if {$repo_dst != ""} {
-		set c_arg "$c_arg $repo_dst"
+proc git_clone {src dst} {
+	set c "git-clone $src $dst"
+	p_banner "$c" *
+	if ![exec2_log "$c 2>@1" res] {
+		p_err "$res"
+		return 0
 	}
 
-	##
-	## execute command
-	##
-	set timeout $scm_timeout
-	p_banner "$c $c_arg" *
-	send -s "$c $c_arg 2>&1\r"
-	#
-	# strings:
-	# Initialized empty Git repository in /work/dzu/duts/duts/linux-2.6-denx_DUTS/.git/
-	# 530614 blocks
-	#
-	# destination directory 'linux-2.6-denx_DUTS' already exists.
-	#
-	expect {
-		timeout {
-			p_err "timed out after git-clone"
-			set rv 0
-		}
-		-re "already exists.*$p$" {
-			#
-			# this actually shouldn't happen as we checked earlier
-			# for such condition, but let's handle it still - we're
-			# in a multi-user environment after all and things can
-			# happen behind our back...
-			#
-			p_err "repo already cloned"
-			set rv 0
-		}
-		-re "Initialized empty Git repository" {
-			p_verb "Cloning"
-			expect {
-				timeout {
-					p_err "timed out on cloning"
-					set rv 0
-				}
-				$shell_prompt {
-					p_verb "Cloning OK"
-				}
-			}
-		}
-	}
-
-	return $rv
+	return 1
 }
 
 #
-# handler function to perform GIT operations to get local repo of
+# handler function to perform git operations to get local repo of
 # the sources
 #
-proc do_git {} {
-
-	global repo_type repo_src repo_dst repo_params
-	global scm_timeout confirm TIMEOUT send_slow
-	global shell_prompt shell_sid
-
-	##
-	## show supplied params and ask user before proceeding
-	##
-	if {$confirm == "yes"} {
-		show_params
-		if ![ask_yesno "confirm to start execution? "] {
-			exit
-		}
-	}
-
-	##
-	## check tools availability:
-	##  - SCM (git)
-	##
-	set tools [list "git-cat-file" "git-clone" "git-checkout"]
-	if ![check_host_tools tools] {
+proc do_git {src dst params} {
+	if ![git_valid_src $src] {
 		exit1
 	}
-	p_verb "all tools in place, proceeding"
+	p_verb "Working with source repo: '$src'"
 
-	##
-	## validate git source repo location
-	##
-	if ![git_valid_src] {
+	if ![git_valid_dst $dst] {
 		exit1
 	}
-	p_verb "Working with source repo: '$repo_src'"
+	p_verb "Working with destination repo: '$dst'"
 
-	##
-	## validate git destination location
-	##
-	if ![git_valid_dst] {
+	set opwd [pwd]
+	cd $src
+	if ![git_valid_params $params] {
 		exit1
 	}
-	p_verb "Working with destination repo: '$repo_dst'"
-
-	##
-	## validate git parameters
-	##
-	if ![git_valid_params] {
-		exit1
-	}
-	p_verb "Using supplied param: '$repo_params'"
+	p_verb "Using supplied param: '$params'"
+	cd $opwd
 
 	##
 	## validations passed, let's do something real
 	##
-	p_banner "Starting GIT operation, please wait..." "#"
+	p_banner "Starting git operation, please wait..." "#"
 
-	##
-	## spawn host shell
-	##
-
-	# assign spawn_id to global var so the shell is available outside
-	# this procedure, set other sending params
-	set shell_prompt "\\$\\ "
-	set shell_sid [host_bash_shell $shell_prompt]
-	# expect buffer size
-	match_max 16384
-	set send_slow {1 .050}
-
-	##
-	## checkout
-	##
-	if ![git_clone] {
-		process_close $shell_sid
+	if ![git_clone $src $dst] {
 		exit1
 	}
 
-	##
-	## handle branch
-	##
-	if ![git_branch] {
-		p_warn "repo '$repo_src' cloned successfully to\
-		'$repo_dst' but subsequent GIT branch operation(s)\
+	cd $dst
+	if ![git_create_branch "DUTS-Internal"] {
+		p_warn "repo '$src' cloned successfully to\
+		'$dst' but subsequent git branch operation(s)\
 		failed. Therefore the repo may be in inconsistent\
 		state, please check and manage this manually."
-		process_close $shell_sid
 		exit1
 	}
 
-	##
-	## close spawned process
-	##
-	process_close $shell_sid
-
-	p_banner "Finished GIT operation, thanks for patience." "#"
+	p_banner "Finished git operation, thanks you for your patience." "#"
 }
 
 proc do_cvs {} {
@@ -518,120 +271,47 @@ proc do_local {} {
 	##
 }
 
+##
+## default values
+##
+set verbose "no"
 
-#
-# searches $scm_supported table for $repo_typer SCM name and calls associated
-# handler, if found.
-#
-proc scm_handler {} {
-	global scm_supported repo_type
-	set found 0
-
-	foreach scm $scm_supported {
-		if {[lindex $scm 1] == $repo_type} {
-			set found 1
-			set h [lindex $scm 0]
-			p_verb "calling '$h' SCM handler"
-			$h
-		}
-	}
-	if {!$found} {
-		p_err "SCM type '$repo_type' not supported" 1
-	}
+# Option handling
+set options {
+	{d.arg		""	"destination directory"}
+	{r.arg		"HEAD"	"revision to check out"}
+	{s.arg		""	"source directory"}
+	{t.arg		"git"	"scm to use"}
+	{v              	"be verbose"}
 }
 
-#
-# parameters are taken from (highest to lowest prio):
-# 1. user-supplied in command line
-# 2. config file
-# 3. env vars
-# 4. built-in defaults
-#
-# TODO config file
-# TODO support for setting params via env vars
-#
+# Actually parse the parameters
+if {[catch {cmdline::getoptions argv $options} res]} {
+	puts "Hey!"
+	usage $options
+} else {
+	array set params $res
+}
 
-#
-# parses command line parameters supplied by the user
-#
-proc parse_params {} {
-
-	global argc argv
-	global scm_config
-	global opt_table opt_list
-
-	set errors 0
-
-	for {set i 0} {$i < $argc} {incr i} {
-		set a [lindex $argv $i]
-
-		# check if this is -<opt> element
-		if [regexp {^-.*} $a] {
-			# eat the leading "-"
-			set o [string trimleft $a "-"]
-
-			if [on_list opt_list $o] {
-				# we have option from opt_table
-				incr i
-				if ![opt_process $o [lindex $argv $i]] {
-					set errors 1
-				}
-			} else {
-				# remaining -<opt> cases (special)
-				switch -- \
-				$o "v" {
-					global verbose
-					set verbose "yes"
-					p_verb "verbose mode ON"
-
-				} "b" {
-					global confirm
-					set confirm "no"
-					p_verb "no user confirmation"
-				} "h" {
-					usage
-				}
-
-			}
-			continue
-		}
-
-		##
-		## get config name
-		##
-		set scm_config $a
-		p_verb "config '$scm_config'"
-	}
-	if {$errors > 0} {
-		exit1
-	}
-
-	# TODO try loading _default config
-	if {$scm_config != ""} {
-		#TODO
-		# load config file
-	}
+# Check parameter validity
+if {$params(s) == ""} {
+	puts "No source given, please specify one with -s"
+	exit 1
+}
+if {$params(d) == ""} {
+	puts "No destination given, please specify one with -d"
+	exit 1
+}
+if {$params(v)} {
+	verbose = 1
 }
 
 
-set argc [llength $argv]
-
-##
-## create global variables out of options table
-##
-opt_create_globals
-
-##
-## parse paramters
-##
-parse_params
-
-##
-## run SCM handler
-##
-scm_handler
-
-##
-## exit successfully if we got this far
-##
-exit
+# Toggle between handlers
+switch $params(t) {
+	"git"	{ do_git $params(s) $params(d) $params(r) }
+	"scm"	{ do_scm $params(s) $params(d) $params(r) }
+	"cvs"	{ do_cvs $params(s) $params(d) $params(r) }
+	"local" { do_local $params(s) $params(d) $params(r) }
+	default	{ p_err "SCM type '$params(t)' not supported" 1 }
+}
