@@ -1,7 +1,6 @@
 #
-# (C) Copyright 2006, 2007 DENX Software Engineering
-#
-# Author: Rafal Jaworowski <raj@semihalf.com>
+# (C) Copyright 2006, 2007 Rafal Jaworowski <raj@semihalf.com> for DENX Software Engineering
+# (C) Copyright 2008 Detlev Zundel <dzu@denx.de>, DENX Software Engineering
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -337,8 +336,8 @@ proc list_all_devices {} {
 #
 # shows device details for the $board_name
 #
-proc show_device {} {
-	global board_name a_devices
+proc show_device {board_name} {
+	global a_devices
 
 	set vl [get_device_attr "varlist"]
 	set t [get_device_attr "maketarget"]
@@ -347,7 +346,11 @@ proc show_device {} {
 	set p [get_device_attr "maketoolpath"]
 
 	puts "Configuration for board: $board_name"
-	puts "  vars set: $vl"
+	puts "  vars set:"
+	foreach var [split $vl " "] {
+		global $var
+		eval puts "\"$var = $$var\""
+	}
 	puts ""
 	puts "  make params:\n    target\t'$t'\n    arch\t'$a'"
 	puts "    ccompile\t'$c'\n    toolpath\t'$p'"
