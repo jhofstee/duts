@@ -74,7 +74,7 @@ duts_tc UBootBase {
 	# command line because when using U-Boot vars they must NOT be
 	# substituted (and delimited with {} brackets, not "")! Please refer
 	# to UBootInstallRamdisk TC for example how to handle this
-	# (testsystems/dulg/testcases/non-59.tc file)
+	# (testsystems/dulg/testcases/02_non-59.tc file)
 	#
 	# ** THE ABOVE NOTICE APPLIES TO Pre AND Post SECTIONS ALSO! **
 	######################################################################
