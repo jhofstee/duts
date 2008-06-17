@@ -1,7 +1,6 @@
 #
-# (C) Copyright 2006, 2007 DENX Software Engineering
-#
-# Author: Rafal Jaworowski <raj@semihalf.com>
+# (C) Copyright 2006, 2007 Rafal Jaworowski <raj@semihalf.com> for DENX Software Engineering
+# (C) Copyright 2008 Detlev Zundel <dzu@denx.de>, DENX Software Engineering
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -31,47 +30,29 @@ proc check_uboot_tree {} {
 
 	global img_src
 
-	set rv 1
 	set cmd "grep"
 	set cmd_arg "-r \"U_BOOT_VERSION =\" $img_src/Makefile"
 
 	if [catch {set o [eval exec $cmd $cmd_arg]}] {
 		p_verb "U_BOOT_VERSION string not found"
-		set rv 0
+		return 0
 	} else {
 		p_verb "U-Boot source tree recognized, OK"
 	}
 
-	return $rv
+	return 1
 }
 
-proc make_mrproper {sid p {to 180}} {
+proc make_mrproper {} {
 
-	set spawn_id $sid
-	set rv 1
-
-	set timeout $to
-	set c "make mrproper"
-	send -s "$c\r"
-	#
-	# error strings:
-	# make: *** No rule to make target `dfdsf'.  Stop.
-	#
-	expect {
-		timeout {
-			p_err "timed out after '$c' command"
-			set rv 0
-		}
-		-re "No\\ rule\\ to\\ make\\ target.*Stop" {
-			p_err "no target"
-			set rv 0
-		}
-		-re ".*$p$" {
-			p_verb "command '$c' OK"
-		}
+	if ![exec2_log "make mrproper" res] {
+		p_err "$res"
+		return 0
+	} else {
+		p_verb "make mrproper OK"
 	}
 
-	return $rv
+	return 1
 }
 
 #
@@ -242,103 +223,50 @@ proc bld_valid_env {} {
 }
 
 proc bld_pre {} {
-	global build_sid build_prompt
+	global build_prompt
 
 	p_banner "make mrproper" #
-	return [make_mrproper $build_sid $build_prompt]
+	return [make_mrproper]
 }
 
-proc bld_config {{to 180}} {
+proc bld_config {} {
 
-	global build_sid build_prompt img_name
-	set spawn_id $build_sid
-	set p $build_prompt
-	set timeout $to
-	set rv 1
+	global img_name
 
 	set c "make $img_name"
 	append c "_config"
 	p_banner $c #
-	send -s "$c\r"
-	#
-	# closing strings:
-	# Configuring for BAB7xx board...
-	#
-	# error strings:
-	# make: *** No rule to make target `dfdsf'.  Stop.
-	#
-	expect {
-		timeout {
-			p_err "timed out after '$c' command"
-			set rv 0
-		}
-		-re "No\\ rule\\ to\\ make\\ target.*Stop" {
-			p_err "no target"
-			set rv 0
-		}
-		-re "Configuring\\ for\\ $img_name\\ board.*$p$" {
-			p_verb "command '$c' OK"
-		}
+
+	if ![exec2_log $c res] {
+		p_err "$res"
+		return 0
+	} else {
+		p_verb "make ${img_name}_config OK"
 	}
 
-	return $rv
+	return 1
 }
 
-proc bld_image {{to 600}} {
+proc bld_image {} {
 
-	global build_sid build_prompt img_name
-	set spawn_id $build_sid
-	set p $build_prompt
-	set timeout $to
-	set rv 1
+	global img_name cur_logfile
 
 	set c "make all"
 	p_banner $c #
-	send -s "$c\r"
-	#
-	# closing strings:
-	# ppc_6xx-objcopy --gap-fill=0xff -O srec u-boot u-boot.srec
-	# ppc_6xx-objcopy --gap-fill=0xff -O binary u-boot u-boot.bin
-	#
-	# error strings:
-	# make: *** No rule to make target `dfdsf'.  Stop.
-	# host/ehci-q.c:185: error: invalid storage class for func
-	# make[3]: *** [host/ehci-hcd.o] Error 1
-	#
-	# make[2]: *** [arch/powerpc/kernel/vdso32/gettimeofday.o] Error 1
-	# make[1]: *** [arch/powerpc/kernel/vdso32] Error 2
-	# make: *** [arch/powerpc/kernel] Error 2
-	#
-	expect {
-		timeout {
-			p_err "timed out after '$c' command"
-			set rv 0
-		}
-		-re "No\\ rule\\ to\\ make\\ target.*Stop" {
-			p_err "no target"
-			set rv 0
-		}
-		-re ".*:\\ error:.*" {
-			send_user -- "\n"
-			p_err "build failed"
-			set rv 0
-		}
-		-re ".*make.+\\ Error\\ .*" {
-			send_user -- "\n"
-			p_err "build failed"
-			set rv 0
-		}
-		-re ".*objcopy.*binary.*u-boot\\.bin.*$p$" {
-			p_verb "command '$c' OK"
-		}
+
+	if ![exec2_log $c res] {
+		p_err "$res"
+		return 0
+	} else {
+		p_verb "make all OK"
 	}
 
-	return $rv
+	return 1
 }
 
 proc bld_post {} {
 
-	global img_dst img_src build_sid obj_dir
+	global img_dst img_src obj_dir
 
 	##
 	## copy image to the desired location

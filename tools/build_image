@@ -1,9 +1,8 @@
-#!/bin/env expect
+#!/bin/env tclsh
 #                                -*- Mode: tcl -*-
 #
-# (C) Copyright 2006-2008 DENX Software Engineering
-#
-# Author: Rafal Jaworowski <raj@semihalf.com>
+# (C) Copyright 2006, 2007 Rafal Jaworowski <raj@semihalf.com> for DENX Software Engineering
+# (C) Copyright 2008 Detlev Zundel <dzu@denx.de>, DENX Software Engineering
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -27,20 +26,22 @@
 #
 #
 #  usage examples:
-# ./build_image -n TQM834x_config -t linux-24 -s /home/raj/linuxppc_2_4_devel \
-#               -d /tftpboot/tqm834x -to 600
+# ./build_image -n TQM834x_config -s /home/raj/linuxppc_2_4_devel \
+#               -d /tftpboot/tqm834x linux-24
 #
-# ./build_image -n TQM834x_defconfig -t linux-26 -s /home/raj/linux-2.6-denx \
-#               -d /tftpboot/tqm834x/uImage-26-raj -to 600
+# ./build_image -n TQM834x_defconfig -s /home/raj/linux-2.6-denx \
+#               -d /tftpboot/tqm834x/uImage-26-raj linux-26
 #
-# ./build_image -n motionpro -t linux-26 -s /home/tur/git/linux-2.6-denx \
+# ./build_image -n motionpro -s /home/tur/git/linux-2.6-denx \
 #               -obj /home/tur/tmp/linux-26_build -a powerpc \
-#               -d /tftpboot/tur/motionpro/uImage-26-test -to 600
+#               -d /tftpboot/tur/motionpro/uImage-26-test linux-26
 #
-# ./build_image -n motionpro -t uboot -s /home/tur/git/u-boot \
+# ./build_image -n motionpro -s /home/tur/git/u-boot \
 #               -obj /home/tur/tmp/u-boot_build \
-#               -d /tftpboot/tur/motionpro/u-boot.bin-test -to 300
+#               -d /tftpboot/tur/motionpro/u-boot.bin-test uboot
 #
+
+package require cmdline
 
 ##
 ## locate our dependency base dir
@@ -86,92 +87,25 @@ set no_clean "no"
 set build_config ""
 set build_handler ""
 
-set build_prompt ""
-set build_sid ""
-
-set TIMEOUT 10
-
-#
-# table of user interface options, each element is
-# {<global_var_name> "<opt_string>" "<default_value>"}
-#
-set opt_table {
-        {img_type "t" "linux-26"}
-        {img_name "n" "TQM834x"}
-        {img_src "s" ""}
-        {img_dst "d" ""}
-        {obj_dir "obj" ""}
-
-        {build_timeout  "to" "600"}
-        {build_tools "m" "/opt/eldk-4.0/usr/bin/"}
-        {build_arch "a" "ppc"}
-        {build_cross "c" "ppc_6xx-"}
-}
-
 #
 # usage
 #
-proc usage {} {
+proc usage {optlist} {
         global argv0 env
 
-        puts "usage: [file tail $argv0] \[parameters\]"
+        puts "usage: [file tail $argv0] \[options\] <build-type>"
         puts ""
-        puts "  The script builds -t specified image from -s specified source\
+        puts "  The script builds a specified image from specified source\
         tree, using"
         puts "  tools specified with -m, -a, -c, and puts the resultant\
         image file to -d"
         puts "  specified location."
-        puts "  "
-        puts "  all \[parameters\] are optional and can be any combination of:"
-        puts "  "
-#	puts "  <config>\t\tlabel of config set"
-        puts "  -t  <build_type>\tsupported build (linux-24, linux-26 or\
-        uboot)"
-        puts "  -n  <target_name>\tbuild target label (e.g. TQM834x, yucca)"
-        puts "  -s  <img_src>\t\tsrc tree location (e.g.\
-        /home/$env(USER)/linuxppc_2_4_devel)"
-        puts "  -d  <img_dst>\t\tdst location (can be filename or\
-        directory)"
-        puts "  -obj <obj>\t\tlocation for object files (linux-26 and u-boot)"
-        puts "  -to <timeout>\t\ttimeout in seconds to wait for build to\
-        complete"
-        puts "  -m  <build_tools>\tpath to build tools (e.g.\
-        /opt/eldk-4.0/usr/bin/)"
-        puts "  -a  <build_arch>\tbuild arch (e.g. ppc)"
-        puts "  -c  <build_cross>\tcross build prefix (e.g. ppc_6xx-)"
         puts ""
-        puts "  -nc \t'no-clean' build: do not wipe out and config sources"
-        puts "  -o  \toverwrite dst file (-d), if exists (default is do not\
-        overwrite)"
-        puts "  -b  \tbatch mode, no user confirmation"
-        puts "  -v  \tverbose output"
-        puts "  -h  \tthis help"
-        puts " "
-        exit
-}
-
-#
-# dumps params
-#
-proc show_params {} {
-
-        global opt_table
-        set globals [list]
-
-        # create list of global vars names from opt table
-        foreach o $opt_table {
-                set var_name [lindex $o 0]
-                lappend globals $var_name
-        }
-
-        # add other interesting global vars to the list
-        lappend globals "build_config" "confirm" "verbose" "overwrite" "no_clean"
-
-        puts "--- Settings ---"
-        foreach g $globals {
-                global $g
-                puts "$g = '[subst $$g]'"
-        }
+        puts "  possible \[options\] are listed below, defaults are in <>."
+        puts ""
+        puts [cmdline::usage $optlist]
+        puts ""
+        exit 1
 }
 
 #
@@ -250,84 +184,6 @@ proc check_dst {dst {ovr "0"} {dn "uImage"}} {
         return $rv
 }
 
-#
-# parameters are taken from (highest to lowest prio):
-# 1. user-supplied in command line
-# 2. config file
-# 3. env vars
-# 4. built-in defaults
-#
-# TODO config file
-# TODO support for setting params via env vars
-#
-
-#
-# parses command line parameters supplied by the user
-#
-proc parse_params {} {
-
-        global argc argv
-        global build_config
-        global opt_table opt_list
-
-        set errors 0
-
-        for {set i 0} {$i < $argc} {incr i} {
-                set a [lindex $argv $i]
-
-                # check if this is -<opt> element
-                if [regexp {^-.*} $a] {
-                        # eat the leading "-"
-                        set o [string trimleft $a "-"]
-
-                        if [on_list opt_list $o] {
-                                # we have option from opt_table
-                                incr i
-                                if ![opt_process $o [lindex $argv $i]] {
-                                        set errors 1
-                                }
-                        } else {
-                                # remaining -<opt> cases (special)
-                                switch -- \
-                                $o "v" {
-                                        global verbose
-                                        set verbose "yes"
-                                        p_verb "verbose mode ON"
-
-                                } "b" {
-                                        global confirm
-                                        set confirm "no"
-                                        p_verb "no user confirmation"
-                                } "o" {
-                                        global overwrite
-                                        set overwrite "yes"
-                                        p_verb "overwrite existing image file"
-                                } "nc" {
-                                        global no_clean
-                                        set no_clean "yes"
-                                } "h" {
-                                        usage
-                                }
-                        }
-                        continue
-                }
-
-                ##
-                ## get config name
-                ##
-                set build_config $a
-                p_verb "config '$build_config'"
-        }
-        if {$errors > 0} {
-                exit1
-        }
-
-        # TODO try loading _default config
-        if {$build_config != ""} {
-                #TODO
-                # load config file
-        }
-}
 
 #
 # skeleton build routine - uses abstracted build methods that perform specific
@@ -344,17 +200,7 @@ proc parse_params {} {
 proc build_main {} {
 
         global confirm no_clean send_slow img_src
-        global build_prompt build_sid build_timeout
-
-        ##
-        ## show params supplied and ask user before proceeding
-        ##
-        if {$confirm == "yes"} {
-                show_params
-                if ![ask_yesno "confirm to start execution? "] {
-                        return
-                }
-        }
+        global build_prompt
 
         ##
         ## validate build environment
@@ -367,18 +213,6 @@ proc build_main {} {
 
         set cur_dir [pwd]
         cd $img_src
-
-        ##
-        ## spawn bash shell on host
-        ##
-
-        # assign spawn_id to global var so the shell is available outside
-        # this procedure, set other sending params
-        set build_prompt "\\$\\ "
-        set build_sid [host_bash_shell $build_prompt]
-        set send_slow {1 .050}
-        # expect buffer size
-        match_max 16384
 
         ##
         ## bld_pre
@@ -405,7 +239,7 @@ proc build_main {} {
         ##
         ## bld_image
         ##
-        if ![bld_image $build_timeout] {
+        if ![bld_image] {
                 exit1
         }
 
@@ -420,11 +254,6 @@ proc build_main {} {
                 exit1
         }
 
-        ##
-        ## close spawned shell process
-        ##
-        process_close $build_sid
-
         p_banner "Finished image build, thanks for patience." #
 
         return 1
@@ -436,9 +265,6 @@ proc build_main {} {
 #
 #
 # each method:
-#   - assumes the shell is already open and available via globals:
-#     $build_sid (spawn_id), $build_prompt
-#
 #   - returns 0/1 upon fail/success
 #
 #
@@ -504,19 +330,69 @@ proc read_build_methods {t} {
         return $rv
 }
 
+# Option handling
+set options {
+        {a.arg		""	"override ARCH setting"}
+        {c.arg		""	"override CROSS_COMPILE setting"}
+        {d.arg		""	"destination path name"}
+        {m.arg		""	"path to build tools"}
+        {n.arg		""	"name of configuration to use"}
+        {obj.arg	""	"pathname for build directory (linux-26 and u-boot)"}
+        {s.arg		""	"src tree location"}
+        {nc			"'no-clean' build: don't clean and configure source"}
+        {o			"force overwrite of destination file"}
+        {v                      "be verbose"}
+}
 
-set argc [llength $argv]
+# Actually parse the parameters
+if {[catch {cmdline::getoptions argv $options} res]} {
+        puts "Unknown option\n"
+        usage $options
+} else {
+        array set params $res
+}
 
-##
-## create global variables out of options table
-##
-opt_create_globals
+# No parameter gives help
+if {[llength $argv] == 0} {
+        puts "Need to specify a build-type (linux-24, linux-26 pr u-boot)\n"
+        usage $options
+}
 
-##
-## parse paramters
-##
-parse_params
+# Parse boolean parameters
+if {$params(v)} {
+        set verbose "yes"
+        p_verb "verbose mode ON"
+}
+if {$params(o)} {
+        set overwrite "yes"
+        p_verb "overwrite existing image file"
+}
+if {$params(nc)} {
+        set no_clean "yes"
+}
 
+set img_name $params(n)
+set img_src $params(s)
+set img_dst $params(d)
+set obj_dir $params(obj)
+set build_tools $params(m)
+set build_arch $params(a)
+set build_cross $params(c)
+set img_type [lindex $argv 0]
+
+# Validate options
+if {$img_src == ""} {
+        p_err "No source given, aborting"
+        exit 1
+}
+if {$img_dst == ""} {
+        p_err "No destination given, aborting"
+        exit 1
+}
+if {$img_name == ""} {
+        p_err "No configuration name given, aborting"
+        exit 1
+}
 
 ##
 ## find get build methods implementation
@@ -529,8 +405,3 @@ if ![read_build_methods $img_type] {
 ## get started
 ##
 build_main
-
-##
-## exit successfully if we got this far
-##
-exit

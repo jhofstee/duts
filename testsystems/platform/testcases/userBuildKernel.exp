@@ -42,10 +42,8 @@ proc check_tools {l} {
 # tools/get_src
 # -s /home/git/<...>
 # -d ./
-# -to
-# -b (batch mode)
 #
-proc checkout {{to 1600}} {
+proc checkout {} {
 
 	upvar repo_dst dst
 	upvar repo_src src
@@ -67,12 +65,12 @@ proc checkout {{to 1600}} {
 	## run get_src to check out the kernel tree
 	##
 	set tool_cmd "$tools_dir/$tool_co"
-	set tool_arg "-s $src -d $dst -b -to $to"
+	set tool_arg "-s $src -d $dst"
 	p_verb "executing: '$tool_cmd $tool_arg'"
 
 	p_banner "Checking out kernel source tree, please wait - this may take\
 	a while..." *
-	if [catch {set o [eval exec "$tool_cmd" $tool_arg]} err] {
+	if ![exec2_log "$tool_cmd $tool_arg" err] {
 		puts "$err"
 		return 0
 	}
@@ -84,19 +82,18 @@ proc checkout {{to 1600}} {
 
 
 #
-# -t linux-26
 # -n <board_name>
 # -s <path to the repo tha was just checked out>
 # -d /tftpboot/<board_name>
-# -to 600
 # -m  <build_tools>
 # -a  <build_arch>
 # -c  <build_cross>
 #
 # -b
-# -o ???
+# -o
+# linux-26
 #
-proc build {{to 600}} {
+proc build {} {
 
 	global a_devices board_name _context_kernel_image
 	upvar tools_dir tools_dir
@@ -134,8 +131,8 @@ proc build {{to 600}} {
 	## run build_image to build the image
 	##
 	set tool_cmd "$tools_dir/$tool_build"
-	set tool_arg "-t $build_type -s $src -d $dst -n $target -m $toolchain\
-	-a $arch -c $cross -b -to $to"
+	set tool_arg "-s $src -d $dst -n $target -m $toolchain\
+	-a $arch -c $cross $build_type"
 
 	if [file exists $dst] {
 		p_warn "destination kernel image already exists and will be\
@@ -148,7 +145,7 @@ proc build {{to 600}} {
 	p_banner "Building kernel image, please wait - this may take a\
 	while..." *
 
-	if [catch {set o [eval exec "$tool_cmd" $tool_arg]} err] {
+	if ![exec2_log "$tool_cmd $tool_arg" err] {
 		puts "$err"
 		return 0
 	}
@@ -171,11 +168,11 @@ p_verb "build tools in place, proceeding"
 ##
 ## get sources
 ##
-if ![checkout $timeout_co] {
+if ![checkout] {
 	exit1
 }
 
 ##
 ## build kernel
 ##
-build $timeout_build
+build

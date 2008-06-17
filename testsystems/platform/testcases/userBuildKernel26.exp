@@ -14,9 +14,6 @@ set repo_dst "./${linux}${duts_ext}"
 
 set build_type "linux-26"
 
-set timeout_co 1600
-set timeout_build 1000
-
 ##
 ## include generic kernel build script
 ##

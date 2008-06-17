@@ -1,7 +1,6 @@
 #
-# (C) Copyright 2006, 2007 DENX Software Engineering
-#
-# Author: Rafal Jaworowski <raj@semihalf.com>
+# (C) Copyright 2006, 2007 by Rafal Jaworowski <raj@semihalf.com> for DENX Software Engineering
+# (C) Copyright 2008 by Detlev Zundel <dzu@denx.de>, DENX Software Engineering
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -34,28 +33,23 @@ proc check_linux_ver {v p} {
 
         global img_src
 
-        set rv 1
         set cmd "grep"
         set cmd_arg "-r \"VERSION = $v\" $img_src/Makefile"
 
         if [catch {set o [eval exec $cmd $cmd_arg]}] {
                 p_verb "version does not match"
-                set rv 0
+                return 0
         }
 
         set cmd_arg "-r \"PATCHLEVEL = $p\" $img_src/Makefile"
         if [catch {set o [eval exec $cmd $cmd_arg]}] {
                 p_verb "patchlevel does not match"
-                set rv 0
+                return 0
         }
 
-        if {!$rv} {
-                p_verb "Linux version '$v.$p' do not match, check your sources"
-        } else {
-                p_verb "Linux tree version '$v.$p' OK"
-        }
+        p_verb "Linux tree version '$v.$p' OK"
 
-        return $rv
+        return 1
 }
 
 #
@@ -65,7 +59,6 @@ proc check_linux_ver {v p} {
 proc check_linux_config {} {
 
         global img_src img_name build_arch
-        set rv 1
 
         set c $img_name
         append c "_defconfig"
@@ -74,10 +67,10 @@ proc check_linux_config {} {
                 p_verb "found config file '$cf'"
         } else {
                 p_err "no kernel config file: '$cf'"
-                set rv 0
+                return 0
         }
 
-        return $rv
+        return 1
 }
 
 #
@@ -109,7 +102,7 @@ proc valid_linux_env {v p} {
         global img_name img_src img_dst
         global obj_dir
         global build_tools build_arch build_cross
-        global build_timeout overwrite no_clean
+        global overwrite no_clean
         global env
 
         ## 1. check tools
@@ -256,31 +249,14 @@ proc valid_linux_env {v p} {
         return 1
 }
 
-proc make_mrproper {sid p {to 180}} {
+proc make_mrproper {} {
 
-        set spawn_id $sid
-        set rv 1
-
-        set timeout $to
-        set c "make mrproper"
-        send -s "$c\r"
-        #
-        # error strings:
-        # make: *** No rule to make target `dfdsf'.  Stop.
-        #
-        expect {
-                timeout {
-                        p_err "timed out after '$c' command"
-                        set rv 0
-                }
-                -re "No\\ rule\\ to\\ make\\ target.*Stop" {
-                        p_err "no target"
-                        set rv 0
-                }
-                -re ".*$p$" {
-                        p_verb "command '$c' OK"
-                }
+        if ![exec2_log "make mrproper" res] {
+                p_err "$res"
+                return 0
+        } else {
+                p_verb "make mrproper OK"
         }
 
-        return $rv
+        return 1
 }

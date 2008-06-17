@@ -89,20 +89,18 @@ proc get_linux_ver {} {
 
 
 #
-# -t linux-26
 # -n <board_name>
 # -s <path to the src tree>
 # -d /tftpboot/<board_name>
-# -to 600
 # -m  <build_tools>
 # -a  <build_arch>
 # -c  <build_cross>
 # -obj <build_directory> - optional
 #
-# -b
 # -o
+# linux-26
 #
-proc build {{to 600}} {
+proc build {} {
 
 	global a_devices board_name _context_kernel_image
 	upvar tools_dir tools_dir
@@ -138,8 +136,8 @@ proc build {{to 600}} {
 	## run build_image to build the image
 	##
 	set tool_cmd "$tools_dir/$tool_build"
-	set tool_arg "-t $build_type -s $src -d $dst -n $target -m $toolchain\
-	-a $arch -c $cross -b -to $to"
+	set tool_arg "-s $src -d $dst -n $target -m $toolchain\
+	-a $arch -c $cross $build_type"
 	if {[var_exists obj_dir] && ($obj_dir != "")} {
 		set tool_arg "$tool_arg -obj $obj_dir"
 	}
@@ -155,7 +153,7 @@ proc build {{to 600}} {
 	p_banner "Building kernel image, please wait - this may take a\
 	while..." *
 
-	if [catch {set o [eval exec "$tool_cmd" $tool_arg]} err] {
+	if ![exec2_log "$tool_cmd $tool_arg" err] {
 		puts "$err"
 		return 0
 	}
@@ -222,10 +220,8 @@ if !$pl {
 ##
 if {$pl == 4} {
 	set build_type "linux-24"
-	set timeout_build 600
 } elseif {$pl == 6} {
 	set build_type "linux-26"
-	set timeout_build 1000
 } else {
 	p_err "Unsupported Linux version"
 	return 0
