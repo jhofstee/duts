@@ -1,7 +1,6 @@
 #
-# (C) Copyright 2006, 2007 DENX Software Engineering
-#
-# Author: Rafal Jaworowski <raj@semihalf.com>
+# (C) Copyright 2006, 2007 Rafal Jaworowski <raj@semihalf.com> for DENX Software Engineering
+# (C) Copyright 2008 Detlev Zundel <dzu@denx.de>, DENX Software Engineering
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -47,6 +46,11 @@ proc duts_tc {name args} {
 
         # save the filename the TC lives in
         set a_testcases($cur_tc,filename) $tc_filename
+
+        # setup defaults
+        if {![in_array a_testcases "$name,logfile"]} {
+                set a_testcases($cur_tc,logfile) "$name.log"
+        }
 }
 
 proc Type {type} {
@@ -369,7 +373,8 @@ proc tc_prologue {tc ctx} {
 proc run_tc {tc} {
 
         global l_testcases a_testcases TIMEOUT
-        global timeout cur_context
+        global timeout cur_context cur_logfile
+        global board_name logs_location
 
         set rv 1
 
@@ -420,8 +425,8 @@ proc run_tc {tc} {
         ##
         ## turn on logging
         ##
-        set log [logname $tc]
-        logging "on" $log
+        set cur_logfile "[file dirname $logs_location]/$board_name$a_testcases($tc,logfile)"
+        logging "on" $cur_logfile
 
         ##
         ## proper TC commands
@@ -532,8 +537,8 @@ proc check_tc_list {list} {
 # testsystem's 'testcases' subdir i.e. specified by one of the following
 # convetions:
 #
-#   - ./duts -v t luan testsystems/dulg/testcases/01_flash.tc
-#   - ./duts -v t luan 01_flash.tc
+#   - ./duts -v -tc testsystems/dulg/testcases/01_flash.tc luan
+#   - ./duts -v -tc luan 01_flash.tc luan
 #
 proc load_tc_file {f} {
 

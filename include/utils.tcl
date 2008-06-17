@@ -20,34 +20,6 @@
 #
 
 ###############################################################################
-# logging test case's flow to file
-###############################################################################
-
-#
-# produces and returns log filename for a TC
-#
-proc logname {tc {ext "log"}} {
-
-	global logs_location
-	global board_name
-
-	# a TC has individual log file
-	if {[in_array a_testcases "$tc,logfile"]} {
-		# TODO check if this is not empty string etc.
-		# use arbitrary log filename if specified for a TC
-		set lf $board_name$a_testcases($tc,logfile)
-	} else {
-		# default is derived from test cases's name
-		set lf $board_name$tc.$ext
-	}
-	set logs [file dirname $logs_location]
-	# TODO - check if dir exists, we have access etc.
-
-	return "$logs/$lf"
-}
-
-
-###############################################################################
 # misc
 ###############################################################################
 
@@ -59,19 +31,15 @@ proc logname {tc {ext "log"}} {
 proc valid_board_name {{bn ""}} {
 
 	global board_name l_boards
-	set rv 0
 
 	if {$bn == ""} {
 		set bn $board_name
 	}
 	if {[lsearch $l_boards $bn] < 0} {
-		p_err "board $board_name NOT known?! Use 'b' command for list\
-		       of supported devices"
+		return 0
 	} else {
-		p_verb "board $board_name found, OK"
-		set rv 1
+		return 1
 	}
-	return $rv
 }
 
 
