@@ -1,7 +1,6 @@
-
 duts_tc LTPRunAllTests {
-	Type linux
-	Commands "!userRunAllTests.exp"
+        Type linux
+        Commands "!userRunAllTests.exp"
 }
 
 #duts_tc LTPNetworkTests {

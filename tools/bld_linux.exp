@@ -31,25 +31,25 @@
 #
 proc check_linux_ver {v p} {
 
-        global img_src
+	global img_src
 
-        set cmd "grep"
-        set cmd_arg "-r \"VERSION = $v\" $img_src/Makefile"
+	set cmd "grep"
+	set cmd_arg "-r \"VERSION = $v\" $img_src/Makefile"
 
-        if [catch {set o [eval exec $cmd $cmd_arg]}] {
-                p_verb "version does not match"
-                return 0
-        }
+	if [catch {set o [eval exec $cmd $cmd_arg]}] {
+		p_verb "version does not match"
+		return 0
+	}
 
-        set cmd_arg "-r \"PATCHLEVEL = $p\" $img_src/Makefile"
-        if [catch {set o [eval exec $cmd $cmd_arg]}] {
-                p_verb "patchlevel does not match"
-                return 0
-        }
+	set cmd_arg "-r \"PATCHLEVEL = $p\" $img_src/Makefile"
+	if [catch {set o [eval exec $cmd $cmd_arg]}] {
+		p_verb "patchlevel does not match"
+		return 0
+	}
 
-        p_verb "Linux tree version '$v.$p' OK"
+	p_verb "Linux tree version '$v.$p' OK"
 
-        return 1
+	return 1
 }
 
 #
@@ -58,19 +58,19 @@ proc check_linux_ver {v p} {
 #
 proc check_linux_config {} {
 
-        global img_src img_name build_arch
+	global img_src img_name build_arch
 
-        set c $img_name
-        append c "_defconfig"
-        set cf "$img_src/arch/$build_arch/configs/$c"
-        if {([file exists $cf]) && ([file readable $cf])} {
-                p_verb "found config file '$cf'"
-        } else {
-                p_err "no kernel config file: '$cf'"
-                return 0
-        }
+	set c $img_name
+	append c "_defconfig"
+	set cf "$img_src/arch/$build_arch/configs/$c"
+	if {([file exists $cf]) && ([file readable $cf])} {
+		p_verb "found config file '$cf'"
+	} else {
+		p_err "no kernel config file: '$cf'"
+		return 0
+	}
 
-        return 1
+	return 1
 }
 
 #
@@ -99,164 +99,164 @@ proc check_linux_config {} {
 #
 proc valid_linux_env {v p} {
 
-        global img_name img_src img_dst
-        global obj_dir
-        global build_tools build_arch build_cross
-        global overwrite no_clean
-        global env
+	global img_name img_src img_dst
+	global obj_dir
+	global build_tools build_arch build_cross
+	global overwrite no_clean
+	global env
 
-        ## 1. check tools
+	## 1. check tools
 
-        ##
-        ## set env vars: ARCH, CROSS_COMPILE
-        ##
-        set env(ARCH) $build_arch
-        set env(CROSS_COMPILE) $build_cross
+	##
+	## set env vars: ARCH, CROSS_COMPILE
+	##
+	set env(ARCH) $build_arch
+	set env(CROSS_COMPILE) $build_cross
 
-        ##
-        ## set PATH so the desired toolchain is available
-        ##
-        if ![set_host_tool_path $build_tools] {
-                p_err "path to the build tools not accessible: '$p'?!"
-                return 0
-        }
+	##
+	## set PATH so the desired toolchain is available
+	##
+	if ![set_host_tool_path $build_tools] {
+		p_err "path to the build tools not accessible: '$p'?!"
+		return 0
+	}
 
-        ##
-        ## check tools availability:
-        ##  - a selected tool from cross build suite, let's have a look at
-        ##    gcc and ld
-        ##
-        set cmd_gcc $build_cross
-        append cmd_gcc "gcc"
-        set cmd_ld $build_cross
-        append cmd_ld "ld"
+	##
+	## check tools availability:
+	##  - a selected tool from cross build suite, let's have a look at
+	##    gcc and ld
+	##
+	set cmd_gcc $build_cross
+	append cmd_gcc "gcc"
+	set cmd_ld $build_cross
+	append cmd_ld "ld"
 
-        set tools [list $cmd_gcc $cmd_ld]
-        if ![check_host_tools tools] {
-                return 0
-        }
-        p_verb "all tools in place, proceeding"
-
-
-        ## 2. check obj dir - valid only for linux 2.6
-
-        ##
-        ## validate obj dir
-        ##  - variable set
-        ##  - directory exists, writable?
-        ##
-
-        if {[var_exists obj_dir] && ($obj_dir != "")} {
-                if {($v == "2") && ($p == "6")} {
-                        # strip trailing slash
-                        set obj_dir [string trimright $obj_dir "/"]
-                        if ![valid_dir $obj_dir 1] {
-                                p_err "Problems accessing obj dir?!"
-                                return 0
-                        }
-
-                        # set the env variable
-                        set env(KBUILD_OUTPUT) $obj_dir
-                        p_verb "working with obj dir: '$obj_dir'"
-                } else {
-                        p_err "attempted to use obj dir feature for a non 2.6\
-                                kernel"
-                        return 0;
-                }
-        }
+	set tools [list $cmd_gcc $cmd_ld]
+	if ![check_host_tools tools] {
+		return 0
+	}
+	p_verb "all tools in place, proceeding"
 
 
-        ## 3. check src dir
+	## 2. check obj dir - valid only for linux 2.6
 
-        ##
-        ## validate source dir
-        ##
-        ##  - exists, writable?
-        ##  - looks like a kernel tree?
-        ##
+	##
+	## validate obj dir
+	##  - variable set
+	##  - directory exists, writable?
+	##
 
-        # strip trailing slash
-        set img_src [string trimright $img_src "/"]
+	if {[var_exists obj_dir] && ($obj_dir != "")} {
+		if {($v == "2") && ($p == "6")} {
+			# strip trailing slash
+			set obj_dir [string trimright $obj_dir "/"]
+			if ![valid_dir $obj_dir 1] {
+				p_err "Problems accessing obj dir?!"
+				return 0
+			}
 
-        # img_src needs to be writable only when obj_dir isn't used
-        if {[var_exists obj_dir] && ($obj_dir != "")} {
-                set src_dir_ok [valid_dir $img_src]
-        } else {
-                set src_dir_ok [valid_dir $img_src 1]
-        }
-        if {!$src_dir_ok} {
-                p_err "Problems accessing source dir?! Check your -s value."
-                return 0
-        }
-
-        if ![check_linux_ver $v $p] {
-                p_err "Doesn't look like Linux $v.$p source tree: '$img_src'?!\
-                Check your -t value."
-                return 0
-        }
-        p_verb "working with source dir: '$img_src'"
+			# set the env variable
+			set env(KBUILD_OUTPUT) $obj_dir
+			p_verb "working with obj dir: '$obj_dir'"
+		} else {
+			p_err "attempted to use obj dir feature for a non 2.6\
+				kernel"
+			return 0;
+		}
+	}
 
 
-        ## 4. check dst
+	## 3. check src dir
 
-        ##
-        ## validate  destination location
-        ## - if dir: exists, writable?
-        ## - if endfile: already exists?
-        ##
-        set o [expr {($overwrite == "yes") ? 1 : 0}]
-        set img_dst [string trimright $img_dst "/"]
-        if ![check_dst $img_dst $o] {
-                return 0
-        }
+	##
+	## validate source dir
+	##
+	##  - exists, writable?
+	##  - looks like a kernel tree?
+	##
 
-        ## 5. check kernel config file
-        ##
-        ## - exists <name>_config, <name>_defconfig
+	# strip trailing slash
+	set img_src [string trimright $img_src "/"]
 
-        #
-        # if user-provided kernel config name was '.+config' we only save the
-        # core of the name for further processing when it will be personalized
-        # with _config or _defconfig suffix depending on context. This is
-        # mainly due to different handling of config name in Linux 2.4
-        # (make <name>_config) vs. 2.6 (make <name>_defconfig)
-        # e.g. for TQM834x_defconfig save only the 'TQM834x' part
-        #
-        regexp {(.+)(_.*config)} $img_name in1 in2 in3]
-        if [info exists in1] {
-                set img_name $in2
-        }
+	# img_src needs to be writable only when obj_dir isn't used
+	if {[var_exists obj_dir] && ($obj_dir != "")} {
+		set src_dir_ok [valid_dir $img_src]
+	} else {
+		set src_dir_ok [valid_dir $img_src 1]
+	}
+	if {!$src_dir_ok} {
+		p_err "Problems accessing source dir?! Check your -s value."
+		return 0
+	}
 
-        if ![check_linux_config] {
-                return 0
-        }
-        p_verb "using '$img_name' kernel config"
+	if ![check_linux_ver $v $p] {
+		p_err "Doesn't look like Linux $v.$p source tree: '$img_src'?!\
+		Check your -t value."
+		return 0
+	}
+	p_verb "working with source dir: '$img_src'"
 
-        ##
-        ## verify if we can skip configuration steps
-        ##
-        if {$no_clean == "yes"} {
-                if [file exists $img_src/.config] {
-                        p_verb "performing 'no-clean' build, config steps will\
-                        be skipped"
-                } else {
-                        p_verb "'no-clean' build specified but no .config\
-                        file found so doing full build anyway..."
-                        set no_clean "no"
-                }
-        }
 
-        return 1
+	## 4. check dst
+
+	##
+	## validate  destination location
+	## - if dir: exists, writable?
+	## - if endfile: already exists?
+	##
+	set o [expr {($overwrite == "yes") ? 1 : 0}]
+	set img_dst [string trimright $img_dst "/"]
+	if ![check_dst $img_dst $o] {
+		return 0
+	}
+
+	## 5. check kernel config file
+	##
+	## - exists <name>_config, <name>_defconfig
+
+	#
+	# if user-provided kernel config name was '.+config' we only save the
+	# core of the name for further processing when it will be personalized
+	# with _config or _defconfig suffix depending on context. This is
+	# mainly due to different handling of config name in Linux 2.4
+	# (make <name>_config) vs. 2.6 (make <name>_defconfig)
+	# e.g. for TQM834x_defconfig save only the 'TQM834x' part
+	#
+	regexp {(.+)(_.*config)} $img_name in1 in2 in3]
+	if [info exists in1] {
+		set img_name $in2
+	}
+
+	if ![check_linux_config] {
+		return 0
+	}
+	p_verb "using '$img_name' kernel config"
+
+	##
+	## verify if we can skip configuration steps
+	##
+	if {$no_clean == "yes"} {
+		if [file exists $img_src/.config] {
+			p_verb "performing 'no-clean' build, config steps will\
+			be skipped"
+		} else {
+			p_verb "'no-clean' build specified but no .config\
+			file found so doing full build anyway..."
+			set no_clean "no"
+		}
+	}
+
+	return 1
 }
 
 proc make_mrproper {} {
 
-        if ![exec2_log "make mrproper" res] {
-                p_err "$res"
-                return 0
-        } else {
-                p_verb "make mrproper OK"
-        }
+	if ![exec2_log "make mrproper" res] {
+		p_err "$res"
+		return 0
+	} else {
+		p_verb "make mrproper OK"
+	}
 
-        return 1
+	return 1
 }

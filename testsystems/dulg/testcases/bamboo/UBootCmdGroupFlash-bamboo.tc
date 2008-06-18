@@ -14,4 +14,3 @@ duts_tc UBootEraseAll {
 		"era all" ".*"
 	}
 }
-

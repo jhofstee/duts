@@ -26,20 +26,20 @@
 package require cmdline
 
 proc usage {optlist} {
-        global argv0
+	global argv0
 
-        puts "usage: $argv0 \[options\] <board>"
-        puts ""
-        puts "  runs selected testcase on <board>. Specifying ? lists available choices."
-        puts ""
-        puts "  possible \[options\] are listed below, defaults are in <>."
-        puts ""
-        puts [cmdline::usage $optlist]
-        puts ""
-        puts "For more information and examples see\
-                http://www.denx.de/wiki/DUTS/DUTSDocs."
-        puts ""
-        exit 1
+	puts "usage: $argv0 \[options\] <board>"
+	puts ""
+	puts "  runs selected testcase on <board>. Specifying ? lists available choices."
+	puts ""
+	puts "  possible \[options\] are listed below, defaults are in <>."
+	puts ""
+	puts [cmdline::usage $optlist]
+	puts ""
+	puts "For more information and examples see\
+		http://www.denx.de/wiki/DUTS/DUTSDocs."
+	puts ""
+	exit 1
 }
 
 set verbose "no"
@@ -56,25 +56,25 @@ set BASE_DIR [file dirname $argv0]
 set duts_dirs {config devices include testsystems}
 set errors 0
 foreach dd $duts_dirs {
-        set dpath "$BASE_DIR/$dd"
-        if [file exists $dpath] {
-                if [file isdirectory $dpath] {
-                        if ![file readable $dpath] {
-                                puts "ERROR: directory not accessible: '$dpath'"
-                                set errors 1
-                        }
-                } else {
-                        puts "ERROR: file exists but is not a directory: '$dpath'"
-                        set errors 1
-                }
-        } else {
-                puts "ERROR: DUTS directory not found: '$dpath'"
-                set errors 1
-        }
+	set dpath "$BASE_DIR/$dd"
+	if [file exists $dpath] {
+		if [file isdirectory $dpath] {
+			if ![file readable $dpath] {
+				puts "ERROR: directory not accessible: '$dpath'"
+				set errors 1
+			}
+		} else {
+			puts "ERROR: file exists but is not a directory: '$dpath'"
+			set errors 1
+		}
+	} else {
+		puts "ERROR: DUTS directory not found: '$dpath'"
+		set errors 1
+	}
 }
 if {$errors} {
-        puts "Doesn't look like a valid DUTS installation..."
-        exit 1
+	puts "Doesn't look like a valid DUTS installation..."
+	exit 1
 }
 unset errors
 unset duts_dirs
@@ -101,13 +101,13 @@ set argc [llength $argv]
 # working directory, may be overwritten with user-supplied -d option
 set DEFAULT_DIR "$BASE_DIR/testsystems/dulg"
 if {[in_array env DUTS_DIR]} {
-        if { $env(DUTS_DIR) != "" } {
-                set working_dir $env(DUTS_DIR)
-        } else {
-                set working_dir $DEFAULT_DIR
-        }
+	if { $env(DUTS_DIR) != "" } {
+		set working_dir $env(DUTS_DIR)
+	} else {
+		set working_dir $DEFAULT_DIR
+	}
 } else {
-        set working_dir $DEFAULT_DIR
+	set working_dir $DEFAULT_DIR
 }
 
 # global list of testcases
@@ -165,50 +165,50 @@ set control_con ""
 
 # Option handling
 set options {
-        {c.arg		""	"use supplied configuration, ? lists choices"}
-        {d.arg		""	"working directory"}
-        {date.arg	""	"use supplied date"}
-        {ts.arg		""	"narrow to supplied list of test sets"}
-        {tc.arg		""	"use supplied list of test cases, ? lists choices"}
-        {var.arg	""	"override supplied variables, ? lists defined vars"}
-        {n			"dry-run"}
-        {showtc			"show details about selected testcases"}
-        {showconfig		"show details about selected configuration"}
-        {v                      "be verbose"}
+	{c.arg		""	"use supplied configuration, ? lists choices"}
+	{d.arg		""	"working directory"}
+	{date.arg	""	"use supplied date"}
+	{ts.arg		""	"narrow to supplied list of test sets"}
+	{tc.arg		""	"use supplied list of test cases, ? lists choices"}
+	{var.arg	""	"override supplied variables, ? lists defined vars"}
+	{n			"dry-run"}
+	{showtc			"show details about selected testcases"}
+	{showconfig		"show details about selected configuration"}
+	{v                      "be verbose"}
 }
 
 # Actually parse the parameters
 if {[catch {cmdline::getoptions argv $options} res]} {
-        puts "Unknown option\n"
-        usage $options
+	puts "Unknown option\n"
+	usage $options
 } else {
-        array set params $res
+	array set params $res
 }
 
 # No parameter gives help
 if {[llength $argv] == 0} {
-        puts "Need to specify a board to test\n"
-        usage $options
+	puts "Need to specify a board to test\n"
+	usage $options
 }
 
 # The dry-run and verbose options need to be parsed early as they might
 # influence processing done even through parameter parsing
 if {$params(n)} {
-        set dry_run "yes"
-        p_banner "NO-OP mode selected, no actual\
-                actions will be peformed on the target!" "*"
+	set dry_run "yes"
+	p_banner "NO-OP mode selected, no actual\
+		actions will be peformed on the target!" "*"
 }
 if {$params(v)} {
-        set verbose "yes"
-        p_verb "verbose mode ON"
+	set verbose "yes"
+	p_verb "verbose mode ON"
 }
 
 set board_name [lindex $argv 0]
 # Board name of '?' lists available boards
 if {$board_name == "?"} {
-        load_all_devices
-        list_all_devices
-        exit 0
+	load_all_devices
+	list_all_devices
+	exit 0
 }
 # load_all_devices currently needs a correct $board_name to evaluate
 # the variable settings
@@ -216,115 +216,115 @@ load_all_devices
 
 # From here on we need a valid board
 if ![valid_board_name $board_name] {
-        puts "Board '$board_name' unknown.\n"
-        exit 1
+	puts "Board '$board_name' unknown.\n"
+	exit 1
 }
 
 # Do we want a different working directory?
 if {$params(d) != ""} {
-        set working_dir $params(d)
-        if ![valid_dir $working_dir] {
-                p_err "Incorrect value for option -d" 1
-        }
+	set working_dir $params(d)
+	if ![valid_dir $working_dir] {
+		p_err "Incorrect value for option -d" 1
+	}
 
-        p_verb "alternative descriptions dir set: $working_dir"
+	p_verb "alternative descriptions dir set: $working_dir"
 }
 
 # Possibly narrow to selected test case sets
 if {$params(ts) != ""} {
-        # Load only specific test case sets
-        foreach ts [split $params(ts) ","] {
-                load_tc_file $ts
-        }
+	# Load only specific test case sets
+	foreach ts [split $params(ts) ","] {
+		load_tc_file $ts
+	}
 } else {
-        # Load all test cases we have
-        load_tcs
-        load_custom_tcs
+	# Load all test cases we have
+	load_tcs
+	load_custom_tcs
 }
 
 # Possibly further narrow to selected test cases
 if {$params(tc) == "?"} {
-        # Testcase '?' lists defined test cases
-        puts "Defined testcases:\n"
-        show_tc_list
-        exit 0
+	# Testcase '?' lists defined test cases
+	puts "Defined testcases:\n"
+	show_tc_list
+	exit 0
 } elseif {$params(tc) != ""} {
-        # Parse arguments into list of testcases
-        set l_runlist [split $params(tc) ","]
+	# Parse arguments into list of testcases
+	set l_runlist [split $params(tc) ","]
 } else {
-        # Use all available test cases
-        set l_runlist $l_testcases
+	# Use all available test cases
+	set l_runlist $l_testcases
 }
 
 # Handle variables
 if {$params(var) == "?"} {
-        # Output currently defined variables
-        show_device $board_name
-        exit 0
+	# Output currently defined variables
+	show_device $board_name
+	exit 0
 } elseif {$params(var) != ""} {
-        # Handle overrides
-        foreach assign [split $params(var) ","] {
-                foreach {var val} [split $assign "="] {
-                        global $var
-                        if ![var_exists $var] {
-                                p_err "Variable $var is not defined"
-                                exit 1
-                        }
-                        set $var $val
-                }
-        }
+	# Handle overrides
+	foreach assign [split $params(var) ","] {
+		foreach {var val} [split $assign "="] {
+			global $var
+			if ![var_exists $var] {
+				p_err "Variable $var is not defined"
+				exit 1
+			}
+			set $var $val
+		}
+	}
 }
 
 # Do we only want to list the testcases?
 if {$params(showtc)} {
-        foreach tc $l_runlist {
-                show_tc_details $tc
-                puts ""
-        }
-        exit 0
+	foreach tc $l_runlist {
+		show_tc_details $tc
+		puts ""
+	}
+	exit 0
 }
 
 # Process date option
 if {$params(date) != ""} {
-        set curdate [lindex $argv $i]
-        p_verb "Using date $curdate instead of host time"
+	set curdate [lindex $argv $i]
+	p_verb "Using date $curdate instead of host time"
 } else {
-        set curdate [clock format [clock seconds] -format "%m%d%H%M%y"]
-        p_verb "Date is $curdate"
+	set curdate [clock format [clock seconds] -format "%m%d%H%M%y"]
+	p_verb "Date is $curdate"
 }
 
 # Select different configuration
 set selected_config $CONFIG_DEFAULT_NAME
 load_configs
 if {$params(c) == "?"} {
-        puts "Defined configuration views:"
-        foreach c $l_configs {
-                puts "  $c"
-        }
-        exit 0
+	puts "Defined configuration views:"
+	foreach c $l_configs {
+		puts "  $c"
+	}
+	exit 0
 } elseif {$params(c) != ""} {
-        set selected_config $params(c)
+	set selected_config $params(c)
 }
 
 # Show details about configuration if neccessary
 if {$params(showconfig)} {
-        if ![on_list l_configs $selected_config] {
-                p_err "Config view '$selected_config' not defined?!" 1
-        }
-        puts "Details for configuration view '$selected_config'"
-        if [in_array a_configs "$selected_config,$_context_kernel"] {
-                puts "Kernel context '$_context_kernel'"
-                puts $a_configs($selected_config,$_context_kernel)
-        }
-        if [in_array a_configs "$selected_config,$_context_firmware"] {
-                puts "Firmware context '$_context_firmware'"
-                puts $a_configs($selected_config,$_context_firmware)
-        }
-        if [in_array a_configs "$selected_config,host"] {
-                puts "Host context 'host'"
-                puts $a_configs($selected_config,host)
-        }
-        exit 1
+	if ![on_list l_configs $selected_config] {
+		p_err "Config view '$selected_config' not defined?!" 1
+	}
+	puts "Details for configuration view '$selected_config'"
+	if [in_array a_configs "$selected_config,$_context_kernel"] {
+		puts "Kernel context '$_context_kernel'"
+		puts $a_configs($selected_config,$_context_kernel)
+	}
+	if [in_array a_configs "$selected_config,$_context_firmware"] {
+		puts "Firmware context '$_context_firmware'"
+		puts $a_configs($selected_config,$_context_firmware)
+	}
+	if [in_array a_configs "$selected_config,host"] {
+		puts "Host context 'host'"
+		puts $a_configs($selected_config,host)
+	}
+	exit 1
 }
 puts "Selected config: $selected_config"
 
@@ -340,5 +340,5 @@ match_max 16384
 
 puts "List of selected test cases:\n$l_runlist\n"
 if [ask_yesno "confirm to start execution? "] {
-        run_tc_list l_runlist
+	run_tc_list l_runlist
 }

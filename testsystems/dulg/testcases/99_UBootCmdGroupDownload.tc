@@ -44,4 +44,3 @@ duts_tc UBootTftpHelp {
 		"help tftp" ".*"
 	}
 }
-

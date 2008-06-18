@@ -108,4 +108,3 @@ duts_tc UBootBootdHelp {
 		"help boot" ".*"
 	}
 }
-

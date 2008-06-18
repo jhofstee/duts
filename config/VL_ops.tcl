@@ -104,7 +104,7 @@ proc _device_connect_target {} {
 				puts ""
 				p_err "target is in use: '$board_name'..." 1
 			}
-		        set timeout 10
+			set timeout 10
 			p_verb "connection OK"
 		}
 	}

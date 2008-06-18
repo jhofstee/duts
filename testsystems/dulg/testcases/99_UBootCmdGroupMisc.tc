@@ -76,4 +76,3 @@ duts_tc UBootVersion {
 		"version" "U-Boot (.+)\\.(.+)\\.(.+)"
 	}
 }
-

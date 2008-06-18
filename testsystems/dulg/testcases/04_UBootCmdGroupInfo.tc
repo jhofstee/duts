@@ -72,4 +72,3 @@ duts_tc UBootProtectHelp {
 		"help protect" ".*"
 	}
 }
-

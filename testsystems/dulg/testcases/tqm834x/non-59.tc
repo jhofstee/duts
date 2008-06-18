@@ -17,4 +17,3 @@ duts_tc UBootInstallRamdisk {
 		{imi ${ramdisk_addr}} ".*"
 	}
 }
-

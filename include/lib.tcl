@@ -106,11 +106,11 @@ proc exec2 {cmd stdout stderr {monitor 0}} {
 		}
 	}
 # Only in tcl8.5 :(
-# 	catch {close $f} err options
-# 	set details [dict get $options -errorcode]
-# 	if {[lindex $details 0] eq "CHILDSTATUS"} {
-# 		return [lindex $details 2]
-# 	}
+#       catch {close $f} err options
+#       set details [dict get $options -errorcode]
+#       if {[lindex $details 0] eq "CHILDSTATUS"} {
+#               return [lindex $details 2]
+#       }
 	if [catch {close $f} err] {
 		return 1
 	} else {
