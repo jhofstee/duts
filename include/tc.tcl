@@ -476,7 +476,7 @@ proc run_tc_list {ln} {
 	## Open a summary logfile.
 	##
 	set rfn "${board_name}_${testsystem_name}_results.log"
-	if [catch {set rf [open $rfn w+]} err] {
+	if [catch {set rf [open $rfn a]} err] {
 		p_err "problems open'ing '$rfn'"
 		puts "  $err"
 		exit1

@@ -23,6 +23,10 @@
 
 # # logging test case's flow to file
 # proc logging {onoff {lf ""}}
+# proc parse_summary {log pass fail} {
+# proc exec2 {cmd stdout stderr {monitor 0}}
+# proc append_str_file {str fname}
+# proc exec2_log {cmd stderr {logfile ""}}
 
 # # user interface
 # proc p_verb {msg {pfx "DUTS: "}}
@@ -80,6 +84,31 @@ proc logging {onoff {lf ""}} {
 	}
 }
 
+#
+# Parse a summary file into tests that passed and tests that failed
+#
+proc parse_summary {log pass fail} {
+	upvar $pass p
+	upvar $fail f
+
+	if [catch {set infile [open $log "r"]} err] {
+		return 0
+	}
+
+	set p {}
+	set f {}
+	while { [gets $infile line] >= 0 } {
+		set el [regexp -inline -lineanchor -- {^(\w+):[ \t]+(\w+)$} $line]
+		if { [lindex $el 2] == "PASS" } {
+			lappend p [lindex $el 1]
+		} else {
+			lappend f [lindex $el 1]
+		}
+	}
+	close $infile
+
+	return 1
+}
 
 ###############################################################################
 # Convenience wrapper functions for exec

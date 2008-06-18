@@ -171,6 +171,7 @@ set options {
 	{ts.arg		""	"narrow to supplied list of test sets"}
 	{tc.arg		""	"use supplied list of test cases, ? lists choices"}
 	{var.arg	""	"override supplied variables, ? lists defined vars"}
+	{continue		"continue previously interrupted run"}
 	{n			"dry-run"}
 	{showtc			"show details about selected testcases"}
 	{showconfig		"show details about selected configuration"}
@@ -254,6 +255,24 @@ if {$params(tc) == "?"} {
 } else {
 	# Use all available test cases
 	set l_runlist $l_testcases
+}
+
+# If we continue, use previous summary file to disable test cases
+if {$params(continue)} {
+	set testsystem_name [file tail $working_dir]
+	set pass {}
+	set fail {}
+
+	if [parse_summary "${board_name}_${testsystem_name}_results.log" pass fail] {
+		puts "Continuing previous run"
+		foreach tc $pass {
+			set idx [lsearch $l_runlist $tc]
+			if {$idx >= 0} {
+				puts "Skipping testcase $tc"
+				set l_runlist [lreplace $l_runlist $idx $idx]
+			}
+		}
+	}
 }
 
 # Handle variables
