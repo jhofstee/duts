@@ -111,6 +111,22 @@ proc Timeout {to} {
 	set a_testcases($cur_tc,timeout) $to
 }
 
+proc Requires {f} {
+	global cur_tc
+	global a_testcases
+
+	set a_testcases($cur_tc,requires) $f
+}
+
+proc requirements {tc} {
+	global a_testcases
+
+	if {[info exists a_testcases($tc,requires)]} {
+		return $a_testcases($tc,requires)
+	} else {
+		return {}
+	}
+}
 
 #
 # shows list of all test cases
@@ -155,6 +171,9 @@ proc show_tc_details {tc} {
 	##
 	puts "Testcase '$tc' details:"
 	puts "  Type:\t\t$a_testcases($tc,type)"
+	if {[in_array a_testcases "$tc,requires"]} {
+		puts "  Requires:\t\t$a_testcases($tc,requires)"
+	}
 	if {[in_array a_testcases "$tc,pre"]} {
 		puts "  Pre:\t\t$a_testcases($tc,pre)"
 	}

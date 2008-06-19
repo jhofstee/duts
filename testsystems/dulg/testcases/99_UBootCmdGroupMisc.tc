@@ -6,6 +6,7 @@
 
 duts_tc UBootDateHelp {
 	Type u-boot
+	Requires rtc
 	Commands {
 		"help date" ".*"
 	}
@@ -13,6 +14,7 @@ duts_tc UBootDateHelp {
 
 duts_tc UBootDate {
 	Type u-boot
+	Requires rtc
 	Commands {
 		"date" "Date:.*"
 #		"date 091223352005" ".*"

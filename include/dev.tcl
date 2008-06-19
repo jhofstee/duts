@@ -137,6 +137,26 @@ proc Vars {vars} {
 	}
 }
 
+#
+# Process Features section in duts_device description
+#
+proc Features {features} {
+	global board_name cur_device a_devices
+
+	set a_devices($cur_device,features) {}
+	foreach f $features {
+		lappend a_devices($cur_device,features) $f
+	}
+}
+
+#
+# Check current board for feature
+#
+proc has_feature {f} {
+	global a_devices board_name
+
+	return [lsearch $a_devices($board_name,features) $f]
+}
 
 #
 # Checks if attribute is defined for the current board or for the _common.
@@ -346,6 +366,9 @@ proc show_device {board_name} {
 	set p [get_device_attr "maketoolpath"]
 
 	puts "Configuration for board: $board_name"
+	puts "  features:"
+	puts $a_devices($board_name,features)
+	puts ""
 	puts "  vars set:"
 	foreach var [split $vl " "] {
 		global $var

@@ -111,6 +111,11 @@ duts_device tqm8541 {
 }
 
 duts_device tqm8548 {
+	Features {
+		 i2c
+		 rtc
+		 linux_swap
+	}
 	Vars {
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_85xx/"
 
