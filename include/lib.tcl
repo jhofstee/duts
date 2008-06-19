@@ -141,7 +141,11 @@ proc exec2 {cmd stdout stderr {monitor 0}} {
 #               return [lindex $details 2]
 #       }
 	if [catch {close $f} err] {
-		return 1
+		if {[lindex $::errorCode 0] eq "CHILDSTATUS"} {
+			return [lindex $::errorCode 2]
+		} else {
+			return 1
+		}
 	} else {
 		return 0
 	}
