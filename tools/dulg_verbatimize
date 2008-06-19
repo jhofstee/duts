@@ -73,7 +73,7 @@ done=""
 for f in ${1}*.log; do
 	n=`echo $f | sed 's/\.log$/\.txt/; s/^'$1'//; s/^_//'`
 	[ -n "$verbose" ] && echo "Processing $n"
-	( echo "<verbatim>"; sed 's/\r//g' < $f | col -b ; echo "</verbatim>" ) > ${dulgdata}/$n
+	( echo "<verbatim>"; sed ' s/\r//g; 1 {/^[ \t]*$/ d};' < $f | col -b ; echo "</verbatim>" ) > ${dulgdata}/$n
 	done="$done $n"
 done
 

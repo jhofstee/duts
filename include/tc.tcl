@@ -378,14 +378,9 @@ proc run_tc {tc} {
 
 	set rv 1
 
-	##
-	## header
-	##
 	p_banner "running test case: $tc" "#"
 
-	##
-	## context of the TC (like u-boot or linux)
-	##
+	# context of the TC (like u-boot or linux)
 	set ctx $a_testcases($tc,type)
 
 	# get _class_ of the context [implementation] required by the TC (as the
@@ -395,22 +390,16 @@ proc run_tc {tc} {
 	p_verb "current context: '$cur_context', required by the TC:\
 	'$ctx \($context\)'"
 
-	##
-	## user defined timeout
-	##
+	# user defined timeout
 	if {[in_array a_testcases "$tc,timeout"]} {
 		p_verb "setting timeout to $a_testcases($tc,timeout)"
 		set timeout $a_testcases($tc,timeout)
 	}
 
-	##
-	## pre-requisites, context changes etc.
-	##
+	# pre-requisites, context changes etc.
 	tc_prologue $tc $context
 
-	##
-	## pre-commands (are not logged)
-	##
+	# pre-commands (are not logged)
 	if {[in_array a_testcases "$tc,pre"]} {
 		p_verb "running commands from Pre section"
 		if ![run_cmds a_testcases($tc,pre) $context] {
@@ -422,28 +411,21 @@ proc run_tc {tc} {
 	}
 
 
-	##
-	## turn on logging
-	##
+	# turn on logging
 	set cur_logfile "[file dirname $logs_location]/$board_name$a_testcases($tc,logfile)"
 	logging "on" $cur_logfile
 
-	##
-	## proper TC commands
-	##
+	# Now run the real test cases
+	# First acquire a prompt so this is logged properly.
+	get_prompt
 	if {![run_cmds a_testcases($tc,commands) $context]} {
 		p_err "problems while executing test cases"
 		set rv 0
 	}
 
-	##
-	## logging off
-	##
 	logging "off"
 
-	##
-	## post-commands
-	##
+	# post-commands
 	if {[in_array a_testcases "$tc,post"]} {
 		if ![run_cmds a_testcases($tc,post) $context] {
 			p_err "problems while while executing Post section"

@@ -32,9 +32,6 @@ proc valid_kernel_file {f} {
 # this context. assume we start from 'firmware' context
 #
 proc _context_kernel_handler {} {
-
-#p_banner "Linux context handler"
-
 	return [boot_kernel_net_nfs]
 }
 
@@ -88,15 +85,9 @@ proc _context_kernel_command {cmd {rsp ".*"} {slp 0.25}} {
 
 	p_verb "CMD $cmd, RSP '$rsp', prompt $p/$p2"
 
-	#expect "*"
-	if ![_context_kernel_get_prompt] {
-		p_err "could not get kernel prompt"
-		return 0
-	}
-
 	send -s "$cmd\r"
 
-	sleep $slp
+#	sleep $slp
 	expect {
 		-re "($rsp)(.*)$p" {
 			p_verb "kernel command executed OK"

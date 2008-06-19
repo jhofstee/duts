@@ -1,7 +1,6 @@
 #
-# (C) Copyright 2006, 2007 DENX Software Engineering
-#
-# Author: Rafal Jaworowski <raj@semihalf.com>
+# (C) Copyright 2006, 2007 Rafal Jaworowski <raj@semihalf.com> for DENX Software Engineering
+# (C) Copyright 2008 Detlev Zundel <dzu@denx.de>, DENX Software Engineering
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -119,7 +118,7 @@ proc _context_firmware_get_prompt {} {
 #
 # this method implements sending command and receiving response
 #
-proc _context_firmware_command {cmd rsp {slp 0.35}} {
+proc _context_firmware_command {cmd rsp {slp 0.1}} {
 
 	global _context_firmware_prompt dry_run
 
@@ -128,14 +127,9 @@ proc _context_firmware_command {cmd rsp {slp 0.35}} {
 
 	p_verb "CMD '$cmd', RSP '$rsp'"
 
-	if ![_context_firmware_get_prompt] {
-		p_err "could not get firmware prompt"
-		return 0
-	}
-
 	send -s "$cmd\r"
 
-	sleep $slp
+#	sleep $slp
 	expect {
 		-re "Unknown\\ command.*$p" {
 			p_verb "Hmm, no command compiled in.."

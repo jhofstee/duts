@@ -1,7 +1,6 @@
 #
-# (C) Copyright 2006, 2007 DENX Software Engineering
-#
-# Author: Rafal Jaworowski <raj@semihalf.com>
+# (C) Copyright 2006, 2007 Rafal Jaworowski <raj@semihalf.com> for DENX Software Engineering
+# (C) Copyright 2008 Detlev Zundel <dzu@denx.de>, DENX Software Engineering
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -365,4 +364,16 @@ proc context_switch {ctx} {
 	## we have a new context..
 	##
 	set cur_context $dst_context
+}
+
+#
+# This is the "virtual" get_prompt function multiplexing the methods
+#
+proc get_prompt {} {
+	global cur_context
+
+	if { [catch {set res [eval "_context_${cur_context}_get_prompt"] } err] } {
+		p_verb "context $cur_context does not implement get_prompt!"
+		return 1
+	}
 }
