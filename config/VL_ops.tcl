@@ -1,7 +1,6 @@
 #
-# (C) Copyright 2006-2008 DENX Software Engineering
-#
-# Author: Rafal Jaworowski <raj@semihalf.com>
+# (C) Copyright 2006, 2007 Rafal Jaworowski <raj@semihalf.com> for DENX Software Engineering
+# (C) Copyright 2008 Detlev Zundel <dzu@denx.de>, DENX Software Engineering
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -35,37 +34,31 @@
 # method implementing powering on the $board_name device
 #
 proc _device_power_on {} {
-
-	global board_name send_slow control_con
-
+	global board_name
 	set cmd "/usr/local/bin/remote_power"
 
-#p_banner "powering ON"
-
-	if [catch {spawn -noecho $cmd $board_name "on"}] {
-		p_err "couldn't spawn '$cmd'" 1
+	if [catch {set output [exec $cmd $board_name "on" 2>@1]}] {
+		p_err "cannot execute '$cmd'"
+		return 0
 	}
-	expect {
-		timeout {
-			 p_err "timed out while trying to power on the\
-			 device?!" 1
-		}
-		"ERROR" {
-			p_err "couldn't power on the device?!" 1
-		}
-		-re ".*Power on.*$board_name: OK.*" {
-			p_verb "powered on, OK"
-		}
-	}
-#	expect eof
-	expect "*"
+	p_verb "powered on, OK"
+	return 1
 }
 
 
 #
-#
+# method implementing powering off $board_name
 #
 proc _device_power_off {} {
+	global board_name
+	set cmd "/usr/local/bin/remote_power"
+
+	if [catch {set output [exec $cmd $board_name "off" 2>@1]}] {
+		p_err "cannot execute '$cmd'"
+		return 0
+	}
+	p_verb "powered off, OK"
+	return 1
 }
 
 
@@ -132,27 +125,20 @@ proc _device_disconnect_host {} {
 # remote set up
 #
 proc is_powered_on {} {
-
-	global control_con board_name
-
+	global board_name
 	set cmd "/usr/local/bin/remote_power"
-	set rv 0
 
-	if [catch {spawn $cmd $board_name "-l"}] {
-		p_err "couldn't spawn '$cmd'" 1
+	if [catch {set output [exec $cmd $board_name "-l" 2>@1]}] {
+		p_err "cannot execute '$cmd'"
+		return 0
 	}
-
-	expect {
-		timeout {
-			p_err "timed out while checking if powered on" 1
-		}
-		"ON" {
-			set rv 1
-		}
-		"off" {
-		}
+	if {[regexp "ON$" $output]} {
+		p_verb "Device is powered on"
+		return 1
+	} else {
+		p_verb "Device has no power"
+		return 0
 	}
-	return $rv
 }
 
 
@@ -163,6 +149,7 @@ proc is_powered_on {} {
 proc _device_current_context {} {
 	global console_con _context_firmware_prompt
 	global _context_kernel_prompt _context_kernel_alt_prompt
+	global timeout
 
 	set kp1 $_context_kernel_prompt
 	if [var_exists _context_kernel_alt_prompt] {
@@ -176,11 +163,19 @@ proc _device_current_context {} {
 
 	# FIXME recovery from Linux login should really be elsewhere as is context-specific
 
+	set oldto $timeout
+	set timeout 5
+
+	# Flush any leftovers
+	expect "*"
+
 	if [is_powered_on] {
 		send -s " \r"
 		expect {
 			timeout {
-				p_err "timed out - context unknown..?!" 1
+				p_err "timed out - assuming hang, will reset.."
+				_device_power_off
+				set ctx "off"
 			}
 			$_context_firmware_prompt {
 				set ctx "firmware"
@@ -200,5 +195,6 @@ proc _device_current_context {} {
 			}
 		}
 	}
+	set timeout $oldto
 	return $ctx
 }
