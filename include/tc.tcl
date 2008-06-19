@@ -431,8 +431,8 @@ proc run_tc {tc} {
 	##
 	## proper TC commands
 	##
-	if ![run_cmds a_testcases($tc,commands) $context] {
-		p_err "problems while while executing test cases"
+	if {![run_cmds a_testcases($tc,commands) $context]} {
+		p_err "problems while executing test cases"
 		set rv 0
 	}
 

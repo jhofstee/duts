@@ -10,7 +10,7 @@ expect "*"
 ## check if we have the file to install
 ##
 if ![valid_file "/tftpboot/$board_name/uRamdisk"] {
-	p_err "problems with Ramdisk file?!"
+	p_err "cannot find /tftpboot/$board_name/uRamdisk"
 	return 0
 }
 
