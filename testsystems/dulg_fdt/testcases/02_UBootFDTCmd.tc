@@ -22,10 +22,17 @@ duts_tc UBootFDTCmdAddr {
 	Commands "!userUBootFDTCmdAddr.exp"
 }
 
+duts_tc UBootFDTCmdList {
+	Type u-boot
+	Commands {
+		"fdt list /cpus" ".*"
+	}
+}
+
 duts_tc UBootFDTCmdPrint {
 	Type u-boot
 	Commands {
-		"fdt print /" ".*"
+		"fdt print /cpus" ".*"
 	}
 }
 
