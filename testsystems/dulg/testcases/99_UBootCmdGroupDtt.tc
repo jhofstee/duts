@@ -1,0 +1,19 @@
+#
+# Test set covering the DTT functionality in U-Boot
+#
+
+duts_tc UBootCmdDttHelp {
+	Type u-boot
+	Requires dtt
+	Commands {
+		"help dtt" ".*"
+	}
+}
+
+duts_tc UBootCmdDtt {
+	Type u-boot
+	Requires dtt
+	Commands {
+		"dtt" "DTT.*"
+	}
+}

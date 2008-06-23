@@ -1,0 +1,56 @@
+# -*- Mode: tcl -*-
+# Test set covering the NAND functionality in U-Boot
+
+duts_tc UBootNandHelp {
+	Type u-boot
+	Requires nand
+	Commands {
+		"help nand" ".*"
+	}
+}
+
+duts_tc UBootNandInfo {
+	Type u-boot
+	Requires nand
+	Commands {
+		"nand info" ".*"
+	}
+}
+
+duts_tc UBootNandBad {
+	Type u-boot
+	Requires nand
+	Commands {
+		"nand bad" ".*"
+	}
+}
+
+# The following three testcase really belong together but we want to
+# intersperse documentation
+
+duts_tc UBootNandErase {
+	Type u-boot
+	Requires nand
+	Commands {
+		"nand erase 0 10000" "OK"
+	}
+}
+
+duts_tc UBootNandWrite {
+	Type u-boot
+	Requires nand
+	Commands {
+		"mw $CFG_RAM_WS_BASE 55aa55aa 4000" ".*"
+		"nand write $CFG_RAM_WS_BASE 0 10000" "65536 bytes written: OK" 
+	}
+}
+
+duts_tc UBootNandRead {
+	Type u-boot
+	Requires nand
+	Commands {
+		"nand read $CFG_RAM_WS_BASE_ALT 0 10000" "65536 bytes read: OK"      
+		"md $CFG_RAM_WS_BASE_ALT" "00: 55aa55aa"
+		"cmp $CFG_RAM_WS_BASE $CFG_RAM_WS_BASE_ALT 4000" "16384 words were the same"
+	}
+}
