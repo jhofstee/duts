@@ -1,0 +1,21 @@
+# -*- Mode: tcl -*-
+# Install OS images from U-Boot
+#
+# WARNING! Testcases contained herein attempt to manipulate board flash
+# contents. They assume the parameters in board config file
+# (testsystems/common/devices/*.tgt) like CFG_MTD_ERASE_DEVICE, addresses
+# range etc. are properly set for the given board, so beware and triple check
+# everything makes sense before running these.
+#
+
+duts_tc UBootInstallKernelTftp {
+	Type u-boot
+	Timeout 600
+	Commands "!userInstallKernelTftp.exp"
+}
+
+duts_tc UBootInstallRamdisk {
+	Type u-boot
+	Timeout 600
+	Commands "!userInstallRamdiskTftp.exp"
+}

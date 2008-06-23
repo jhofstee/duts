@@ -1,0 +1,17 @@
+# -*- Mode: tcl -*-
+# Check 'coninfo' command
+#
+
+duts_tc UBootConinfoHelp {
+	Type u-boot
+	Commands {
+		"help conin" ".*"
+	}
+}
+
+duts_tc UBootConinfo {
+	Type u-boot
+	Commands {
+		"conin" ".*"
+	}
+}

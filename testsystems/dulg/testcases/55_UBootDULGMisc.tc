@@ -1,0 +1,37 @@
+# -*- Mode: tcl -*-
+# Miscellaneous 'testcases' needed for the DULG documentation
+#
+
+duts_tc UBootSetSerial {
+	Type host
+	Commands "!userSetSerial.exp"
+}
+
+duts_tc UBootPrintenvBoardID {
+	Type u-boot
+	Commands {
+		"printenv serial# ethaddr" ".*"
+	}
+}
+
+duts_tc BoardId {
+	Type host
+	Commands "!userBoardId.exp"
+}
+
+duts_tc BDI2000Config {
+	Type host
+	Commands "!userBDI2000Config.exp"
+}
+
+# this will create an empty file and this is what is needed in most cases
+duts_tc LinuxConfig {
+	Type host
+	Commands { "" ".*" }
+}
+
+# this will create an empty file and this is what is needed in most cases
+duts_tc UBootConfig {
+	Type host
+	Commands { "" ".*" }
+}

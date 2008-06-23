@@ -1,24 +1,38 @@
-#
-#
-#
+# -*- Mode: tcl -*-
+# Basic tests of U-Boot
 #
 
-
-duts_tc UBootDateHelp {
+duts_tc UBootBoot {
 	Type u-boot
-	Requires rtc
+	Commands "!userBoot.exp"
+}
+
+duts_tc UBootHelp {
+	Type u-boot
 	Commands {
-		"help date" ".*"
+		"help" ".*"
 	}
 }
 
-duts_tc UBootDate {
+duts_tc UBootHelpHelp {
 	Type u-boot
-	Requires rtc
 	Commands {
-		"date reset" ".*"
-		"date $curdate" ".*"
-		"date" "Date:.*"
+		"help help" ".*"
+	}
+}
+
+duts_tc UBootHelpAbbrev {
+	Type u-boot
+	Commands {
+		"help fli tftp" ".*"
+	}
+}
+
+duts_tc UBootHelpLong {
+	Type u-boot
+	Commands {
+		"help tftpboot" ".*"
+		"help setenv printenv" ".*"
 	}
 }
 
@@ -36,21 +50,6 @@ duts_tc UBootEcho {
 	}
 }
 
-duts_tc UBootResetHelp {
-	Type u-boot
-	Commands {
-		"help reset" ".*"
-	}
-}
-
-duts_tc UBootReset {
-	Type u-boot
-	Commands {
-		"" ".*"
-	}
-	Info {Heh, executing reboots the board...}
-}
-
 duts_tc UBootSleepHelp {
 	Type u-boot
 	Commands {
@@ -61,7 +60,7 @@ duts_tc UBootSleepHelp {
 duts_tc UBootSleep {
 	Type u-boot
 	Commands {
-		"date ; sleep 5 ; date" ".*"
+		"sleep 5" ".*"
 	}
 }
 

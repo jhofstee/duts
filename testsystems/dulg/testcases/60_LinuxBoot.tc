@@ -1,0 +1,29 @@
+# -*- Mode: tcl -*-
+# Booting Linux over NFS and using a Ramdisk
+#
+
+duts_tc LinuxBootNetNfs {
+	Type u-boot
+	Commands "!userLinuxBootNetNfs.exp"
+}
+
+duts_tc LinuxBootNfs {
+	Type u-boot
+	Commands "!userLinuxBootNfs.exp"
+}
+
+# this will try to connect via telnet
+duts_tc LinuxTelnetNFS {
+	Type linux
+	Commands "!userLinuxTelnet.exp"
+}
+
+duts_tc LinuxBootSelf {
+	Type u-boot
+	Commands "!userLinuxBootSelf.exp"
+}
+
+duts_tc LinuxTelnetSelf {
+	Type linux
+	Commands "!userLinuxTelnet.exp"
+}

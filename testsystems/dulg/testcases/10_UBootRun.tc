@@ -1,0 +1,28 @@
+# -*- Mode: tcl -*-
+# Test 'run' command of U-Boot
+#
+
+duts_tc UBootRunHelp {
+	Type u-boot
+	Commands {
+		"help run" ".*"
+	}
+}
+
+duts_tc UBootRun {
+	Type u-boot
+	Commands {
+		{setenv test echo This is a test\;printenv ipaddr\;echo Done.} ".*"
+		"printenv test" ".*"
+		"run test" ".*"
+	}
+}
+
+duts_tc UBootRunSequence {
+	Type u-boot
+	Commands {
+		{setenv test2 echo This is another Test\;printenv hostname\;echo Done.} ".*"
+		"printenv test test2" ".*"
+		"run test test2" ".*"
+	}
+}

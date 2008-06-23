@@ -1,0 +1,15 @@
+# -*- Mode: tcl -*-
+# Check 'iminfo' command
+#
+
+duts_tc UBootIminfoHelp {
+	Type u-boot
+	Commands {
+		"help iminfo" ".*"
+	}
+}
+
+duts_tc UBootIminfo {
+	Type u-boot
+	Commands "!userIminfo.exp"
+}

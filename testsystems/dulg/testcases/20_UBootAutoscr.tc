@@ -1,8 +1,6 @@
+# -*- Mode: tcl -*-
+# Test 'autoscr' command
 #
-#
-#
-#
-
 
 duts_tc UBootAutoscrHelp {
 	Type u-boot
@@ -29,19 +27,5 @@ duts_tc UBootAutoscr {
 		"tftp $CFG_RAM_WS_BASE /tftpboot/$BOARD/example.img" ".*"
 		"imi" ".*"
 		"autoscr $CFG_RAM_WS_BASE" ".*"
-	}
-}
-
-duts_tc UBootBootmHelp {
-	Type u-boot
-	Commands {
-		"help bootm" ".*"
-	}
-}
-
-duts_tc UBootGoHelp {
-	Type u-boot
-	Commands {
-		"help go" ".*"
 	}
 }

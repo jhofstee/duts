@@ -1,0 +1,18 @@
+# -*- Mode: tcl -*-
+# Check 'flinfo' command
+#
+
+duts_tc UBootFlinfoHelp {
+	Type u-boot
+	Commands {
+		"help flinfo" ".*"
+	}
+}
+
+duts_tc UBootFlinfo {
+	Type u-boot
+	Timeout 60
+	Commands {
+		"fli" ".*"
+	}
+}

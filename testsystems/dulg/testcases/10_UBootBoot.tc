@@ -1,0 +1,18 @@
+# -*- Mode: tcl -*-
+# Test booting commands of U-Boot
+#
+
+
+duts_tc UBootBootHelp {
+	Type u-boot
+	Commands {
+		"help boot" ".*"
+	}
+}
+
+duts_tc UBootBootmHelp {
+	Type u-boot
+	Commands {
+		"help bootm" ".*"
+	}
+}

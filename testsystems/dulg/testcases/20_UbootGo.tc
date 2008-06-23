@@ -1,0 +1,11 @@
+# -*- Mode: tcl -*-
+# Test standalone applications in U-Boot
+#
+
+
+duts_tc UBootGoHelp {
+	Type u-boot
+	Commands {
+		"help go" ".*"
+	}
+}

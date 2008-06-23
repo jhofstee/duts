@@ -1,0 +1,30 @@
+# -*- Mode: tcl -*-
+# Test 'date' and thus realtime clock functionality
+# TODO: Check result of sleep test with RTC
+#
+
+duts_tc UBootDateHelp {
+	Type u-boot
+	Requires rtc
+	Commands {
+		"help date" ".*"
+	}
+}
+
+duts_tc UBootDate {
+	Type u-boot
+	Requires rtc
+	Commands {
+		"date reset" ".*"
+		"date $curdate" ".*"
+		"date" "Date:.*"
+	}
+}
+
+duts_tc UBootSleepRTC {
+	Type u-boot
+	Requires rtc
+	Commands {
+		"date ; sleep 5 ; date" ".*"
+	}
+}

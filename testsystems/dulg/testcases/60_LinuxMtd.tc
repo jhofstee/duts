@@ -1,3 +1,5 @@
+# -*- Mode: tcl -*-
+# Test Linux MTD subsystem
 #
 # WARNING! Testcases contained herein attempt to manipulate board flash
 # contents. They assume the parameters in board config file
@@ -6,16 +8,11 @@
 # everything makes sense before running these.
 #
 
-duts_tc InstallKernelTftp {
-	Type u-boot
-	Timeout 600
-	Commands "!userInstallKernelTftp.exp"
-}
-
-duts_tc UBootInstallRamdisk {
-	Type u-boot
-	Timeout 600
-	Commands "!userInstallRamdisk.exp"
+duts_tc LinuxProcMtd {
+	Type linux
+	Commands {
+		"cat /proc/mtd" ".*"
+	}
 }
 
 duts_tc LinuxMtdDump {
@@ -46,12 +43,5 @@ duts_tc LinuxMtdWrite {
 		"date > /dev/$CFG_MTD_ERASE_DEVICE" ".*"
 		"head -1 /dev/$CFG_MTD_ERASE_DEVICE" ".*"
 		"date > /dev/$CFG_MTD_ERASE_DEVICE" ".*"
-	}
-}
-
-duts_tc LinuxProcMtd {
-	Type linux
-	Commands {
-		"cat /proc/mtd" ".*"
 	}
 }

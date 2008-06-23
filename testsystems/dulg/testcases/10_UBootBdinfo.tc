@@ -1,0 +1,17 @@
+# -*- Mode: tcl -*-
+# Check 'bdinfo' command
+#
+
+duts_tc UBootBdinfoHelp {
+	Type u-boot
+	Commands {
+		"help bdinfo" ".*"
+	}
+}
+
+duts_tc UBootBdinfo {
+	Type u-boot
+	Commands {
+		"bdi" ".*"
+	}
+}

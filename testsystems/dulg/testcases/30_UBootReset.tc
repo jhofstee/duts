@@ -1,0 +1,18 @@
+# -*- Mode: tcl -*-
+# Check 'reset' command
+# TODO: Meaningful check if board really did a reset
+
+duts_tc UBootResetHelp {
+	Type u-boot
+	Commands {
+		"help reset" ".*"
+	}
+}
+
+duts_tc UBootReset {
+	Type u-boot
+	Commands {
+		"" ".*"
+	}
+	Info {Heh, executing reboots the board...}
+}

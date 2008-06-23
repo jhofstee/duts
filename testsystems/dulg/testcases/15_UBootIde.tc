@@ -1,0 +1,19 @@
+# -*- Mode: tcl -*-
+# Check IDE subsystem
+#
+
+duts_tc UBootIdeHelp {
+	Type u-boot
+	Requires ide
+	Commands {
+		"help ide" ".*"
+	}
+}
+
+duts_tc UBootDiskbootHelp {
+	Type u-boot
+	Requires ide
+	Commands {
+		"help disk" ".*"
+	}
+}
