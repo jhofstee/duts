@@ -11,5 +11,6 @@ duts_device _common {
 
 	Vars {
 		CFG_RAM_WS_BASE	100000
+		CFG_RAM_WS_BASE_ALT 200000
 	}
 }
