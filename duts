@@ -159,6 +159,9 @@ set logs_location $LOG_DIR
 
 set dry_run "no"
 
+# List of variables accessible to test cases
+set test_vars curdate
+
 # spawn id identifiers for console and control connections
 set console_con ""
 set control_con ""
@@ -318,7 +321,7 @@ if {$params(date) != ""} {
 	set curdate [lindex $argv $i]
 	p_verb "Using date $curdate instead of host time"
 } else {
-	set curdate [clock format [clock seconds] -format "%m%d%H%M%y"]
+	set curdate [clock format [clock seconds] -format "%m%d%H%M%Y"]
 	p_verb "Date is $curdate"
 }
 

@@ -16,9 +16,9 @@ duts_tc UBootDate {
 	Type u-boot
 	Requires rtc
 	Commands {
+		"date reset" ".*"
+		"date $curdate" ".*"
 		"date" "Date:.*"
-#		"date 091223352005" ".*"
-#		"date reset" ".*"
 	}
 }
 

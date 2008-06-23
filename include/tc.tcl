@@ -193,6 +193,7 @@ proc show_tc_details {tc} {
 proc run_cmds {cmds ctx} {
 
 	global dry_run board_name a_devices DEVICE_COMMON_NAME
+	global test_vars
 	set result 1
 	upvar $cmds c
 
@@ -209,7 +210,7 @@ proc run_cmds {cmds ctx} {
 		set board_varlist ""
 	}
 
-	set l_vars [concat $common_varlist $board_varlist]
+	set l_vars [concat $common_varlist $board_varlist $test_vars]
 
 	foreach v $l_vars {
 #		p_verb "global'ling $v"
