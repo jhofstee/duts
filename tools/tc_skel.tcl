@@ -1,4 +1,4 @@
-#!/usr/local/bin/tclsh8.4
+#!/usr/bin/tclsh
 #
 # (C) Copyright 2006, 2007 DENX Software Engineering
 #
