@@ -146,40 +146,10 @@ proc git_valid_dst {dst} {
 }
 
 #
-# checks if supplied param valid for git object ID, returns 0/1
+# create a new branch off an existing branch
 #
-proc git_valid_params {params} {
-	# git-cat-file -t 887e2ec9ecf49366a60a49b32b73825804909865
-	# commit
-	if {(([string length $params] == 40) && (![regexp {^[0-9a-fA-F]+$} $params]))} {
-		p_err "supplied value doesn't look like a git object ID:\
-		'$params'"
-		return 0
-	}
-
-	set c "git-cat-file -t $params"
-	if [catch  {eval exec $c 2>@1} res] {
-		p_err $res
-		return 0
-	} else {
-		if {$res != "commit"} {
-			p_err "supplied ID is not 'commit' type: '$res'"
-			set rv 0
-		} else {
-			p_verb "git ID ok: '$params'"
-		}
-	}
-
-	return 1
-}
-
-
-#
-# checks out a tree to object ID in $params, creates a new branch for this
-# purpose
-#
-proc git_create_branch {branch} {
-	set c "git-checkout -f -b $branch"
+proc git_create_branch {branchpoint newbranch} {
+	set c "git-checkout -f -b $newbranch $branchpoint"
 	p_banner "$c" *
 	if ![exec2_log "$c 2>&1" res] {
 		p_err "$res"
@@ -207,9 +177,11 @@ proc git_clone {src dst} {
 # handler function to perform git operations to get local repo of
 # the sources
 #
-proc do_git {src dst params} {
-	if ![git_valid_src $src] {
-		exit1
+proc do_git {src dst rev} {
+	if ![string match "git://*" $src] {
+		if ![git_valid_src $src] {
+			exit1
+		}
 	}
 	p_verb "Working with source repo: '$src'"
 
@@ -218,13 +190,7 @@ proc do_git {src dst params} {
 	}
 	p_verb "Working with destination repo: '$dst'"
 
-	set opwd [pwd]
-	cd $src
-	if ![git_valid_params $params] {
-		exit1
-	}
-	p_verb "Using supplied param: '$params'"
-	cd $opwd
+	p_verb "Using supplied revision: '$rev'"
 
 	##
 	## validations passed, let's do something real
@@ -236,15 +202,16 @@ proc do_git {src dst params} {
 	}
 
 	cd $dst
-	if ![git_create_branch "DUTS-Internal"] {
+	p_banner "Checking out revision '$rev' to new branch 'DUTS-Internal'"
+	if ![git_create_branch $rev "DUTS-Internal"] {
 		p_warn "repo '$src' cloned successfully to\
-		'$dst' but subsequent git branch operation(s)\
-		failed. Therefore the repo may be in inconsistent\
+		'$dst' but cloning '$branch' into new branch failed.\
+		Therefore the repo may be in inconsistent\
 		state, please check and manage this manually."
 		exit1
 	}
 
-	p_banner "Finished git operation, thanks you for your patience." "#"
+	p_banner "Finished git operation, thank you for your patience." "#"
 }
 
 proc do_cvs {} {
@@ -279,7 +246,7 @@ set verbose "no"
 # Option handling
 set options {
 	{d.arg		""	"destination directory"}
-	{r.arg		"HEAD"	"revision to check out"}
+	{r.arg		"origin/master"	"revision to check out"}
 	{s.arg		""	"source directory"}
 	{t.arg		"git"	"scm to use"}
 	{v              	"be verbose"}
