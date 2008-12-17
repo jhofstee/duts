@@ -123,7 +123,7 @@ proc bld_post {} {
 	if {$img_dst == ""} {
 		p_verb "no destination location specified, nothing to do.."
 	} else {
-		send_user -- "Copying image to '$img_dst'\n"
+		p_banner "Copying image to '$img_dst'\n"
 		if ![host_copy $img_file $img_dst] {
 			return 0
 		}
