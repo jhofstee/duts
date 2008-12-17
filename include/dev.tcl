@@ -145,6 +145,7 @@ proc Features {features} {
 
 	set a_devices($cur_device,features) {}
 	foreach f $features {
+		p_verb "adding feature '$f' for device $cur_device"
 		lappend a_devices($cur_device,features) $f
 	}
 }
@@ -154,8 +155,14 @@ proc Features {features} {
 #
 proc has_feature {f} {
 	global a_devices board_name
+	set nms [array names a_devices]
 
-	return [lsearch $a_devices($board_name,features) $f]
+	if {[in_array $nms ($board_name,features)] != -1} {
+		return [lsearch $a_devices($board_name,features) $f]
+	} else {
+		p_verb "No feature field in a_devices array!"
+		return -1
+	}
 }
 
 #
