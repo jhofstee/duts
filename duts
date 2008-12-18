@@ -264,8 +264,15 @@ if {$params(tc) == "?"} {
 for {set i 0} {$i < [llength $l_runlist]} {incr i} {
 	set tc [lindex $l_runlist $i]
 	set req [requirements $tc]
+	set cfl [conflictset $tc]
+
 	if {$req != {} && [has_feature $req] < 0} {
 		puts "Skipping testcase $tc because of unfulfilled requirement '$req'"
+		set l_runlist [lreplace $l_runlist $i $i]
+		incr i -1
+	}
+	if {$cfl != {} && [has_feature $cfl] >= 0} {
+		puts "Skipping testcase $tc because of conflict with '$cfl'"
 		set l_runlist [lreplace $l_runlist $i $i]
 		incr i -1
 	}

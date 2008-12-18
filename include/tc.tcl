@@ -128,6 +128,23 @@ proc requirements {tc} {
 	}
 }
 
+proc Conflicts {f} {
+	global cur_tc
+	global a_testcases
+
+	set a_testcases($cur_tc,conflicts) $f
+}
+
+proc conflictset {tc} {
+	global a_testcases
+
+	if {[info exists a_testcases($tc,conflicts)]} {
+		return $a_testcases($tc,conflicts)
+	} else {
+		return {}
+	}
+}
+
 #
 # shows list of all test cases
 #
