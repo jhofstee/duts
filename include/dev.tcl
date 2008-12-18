@@ -155,12 +155,11 @@ proc Features {features} {
 #
 proc has_feature {f} {
 	global a_devices board_name
-	set nms [array names a_devices]
 
-	if {[in_array $nms ($board_name,features)] != -1} {
+	if [in_array a_devices "$board_name,features"] {
 		return [lsearch $a_devices($board_name,features) $f]
 	} else {
-		p_verb "No feature field in a_devices array!"
+		p_verb "Warning, board '$board_name' defines no features"
 		return -1
 	}
 }
