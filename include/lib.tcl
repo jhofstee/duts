@@ -141,8 +141,21 @@ proc exec2 {cmd stdout stderr {monitor 0}} {
 #               return [lindex $details 2]
 #       }
 	if [catch {close $f} err] {
+		if { $monitor } {
+			puts "$err"
+		}
 		if {[lindex $::errorCode 0] eq "CHILDSTATUS"} {
+			# Note the pretty stupid tcl implementation
+			# here - if the command wrote to stderr, this
+			# will be in $err, otherwise tcl puts "child
+			# process exited abnormally" there.  Short of
+			# comparing to this string (which I depsise)
+			# we have no way to tell these cases apart.
 			return [lindex $::errorCode 2]
+		} elseif {[lindex $::errorCode 0] eq "NONE"} {
+			# stderr is not empty but the command returned
+			# 0, so we do the same
+			return 0
 		} else {
 			return 1
 		}
@@ -177,6 +190,9 @@ proc exec2_log {cmd stderr {logfile ""}} {
 
 	if { $logfile != "" } {
 		append_str_file $out $logfile
+		if { $err != "" } {
+			append_str_file $err $logfile
+		}
 	}
 	return [expr $res == 0 ]
 }
