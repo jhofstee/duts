@@ -26,10 +26,18 @@ duts_tc LinuxMtdErase {
 	Type linux
 	# some larger flash partitions can take long to erase..
 	Timeout 600
+	Pre {
+		"mount -t tmpfs nodev /tmp" ".*"
+	}
 	Commands {
 		"flash_eraseall /dev/$CFG_MTD_ERASE_DEVICE" ".*"
-		"date > /dev/$CFG_MTD_ERASE_DEVICE" ".*"
+		"date > /tmp/tempfile" ".*"
+		"dd if=/dev/zero of=/tmp/tempfile bs=1 count=4096 seek=50" ".*"
+		"dd if=/tmp/tempfile of=/dev/$CFG_MTD_ERASE_DEVICE bs=4096 count=1" ".*"
 		"head -1 /dev/$CFG_MTD_ERASE_DEVICE" ".*"
+	}
+	Post {
+		"umount /tmp" ".*"
 	}
 }
 
@@ -37,11 +45,17 @@ duts_tc LinuxMtdWrite {
 	Type linux
 	Timeout 600
 	Pre {
+		"mount -t tmpfs nodev /tmp" ".*"
 		"flash_eraseall /dev/$CFG_MTD_ERASE_DEVICE" ".*"
 	}
 	Commands {
-		"date > /dev/$CFG_MTD_ERASE_DEVICE" ".*"
+		"date > /tmp/tempfile" ".*"
+		"dd if=/dev/zero of=/tmp/tempfile bs=1 count=4096 seek=50" ".*"
+		"dd if=/tmp/tempfile of=/dev/$CFG_MTD_ERASE_DEVICE bs=4096 count=1" ".*"
 		"head -1 /dev/$CFG_MTD_ERASE_DEVICE" ".*"
-		"date > /dev/$CFG_MTD_ERASE_DEVICE" ".*"
+		"dd if=/tmp/tempfile of=/dev/$CFG_MTD_ERASE_DEVICE bs=4096 count=1" ".*"
+	}
+	Post {
+		"umount /tmp" ".*"
 	}
 }
