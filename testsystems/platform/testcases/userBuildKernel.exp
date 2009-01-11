@@ -137,7 +137,7 @@ proc build {} {
 	if [file exists $dst] {
 		p_warn "destination kernel image already exists and will be\
 		overwritten: '$dst'"
-		set tool_arg "$tool_arg -o"
+		set tool_arg "-o $tool_arg"
 	}
 
 	p_verb "executing: '$tool_cmd $tool_arg'"
