@@ -48,7 +48,7 @@ proc valid_board_name {{bn ""}} {
 #
 # fn: filename with respect to the DUTS working/testcases dir
 #
-proc run_external_script {fn} {
+proc run_external_script {fn {vars ""} } {
 	global working_dir dry_run TC_DESCR_DIR
 
 	set f [string trimleft $fn "!"]
@@ -64,6 +64,10 @@ proc run_external_script {fn} {
 	if  {$dry_run == "yes"} {
 		p_warn "dry run activated, skipping execution of '$f'"
 	} else {
+		foreach v $vars {
+			p_verb "global'ling $v"
+			global $v
+		}
 		set err ""
 		set ret 0
 		if [catch {set ret [source $f]} err] {

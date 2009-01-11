@@ -249,7 +249,7 @@ proc run_cmds {cmds ctx} {
 		# script to execute
 		set res 1
 		if [regexp {^\!.*} $c] {
-			set res [run_external_script $c]
+			set res [run_external_script $c $l_vars]
 			# we allow only one special (external) TC
 		#	return
 
