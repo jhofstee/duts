@@ -1,6 +1,7 @@
 #
+# (C) Copyright 2008, 2009 Detlev Zundel <dzu@denx.de>, DENX Software Engineering
+# (C) Copyright 2009 Vitaly Bordug <vitb@kernel.crashing.org>
 # (C) Copyright 2006, 2007 Rafal Jaworowski <raj@semihalf.com> for DENX Software Engineering
-# (C) Copyright 2008 Detlev Zundel <dzu@denx.de>, DENX Software Engineering
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -17,6 +18,24 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston,
 # MA 02111-1307 USA
 #
+
+
+###############################################################################
+#
+# Machinery to define constants (nearly functional)
+# (original by Neil Madden on wiki.tcl.tk)
+#
+###############################################################################
+
+proc def {name = args} {
+	interp alias {} $name {} const [expr $args]
+}
+proc const a { return $a }
+
+def TYPE_EXPECT 	= 0
+def TYPE_CODE		= 1
+def EXIT_FAIL		= 0
+def EXIT_SUCCESS	= 1
 
 ###############################################################################
 #
@@ -41,7 +60,7 @@ proc duts_tc {name args} {
 
 	# check if we have mandatory sections
 	if {![in_array a_testcases "$name,commands"]} {
-		p_err "section 'Commands' NOT defined for '$name' TC?!" 1
+		p_err "Neither 'Commands' nor 'Code' block is defined for '$name' TC?!" 1
 	}
 
 	# save the filename the TC lives in
@@ -60,26 +79,36 @@ proc Type {type} {
 	set a_testcases($cur_tc,type) $type
 }
 
-proc Commands {commands} {
 
+# The commands field in a_testcases is a list, where each element
+# itself is list of 2 elements: 'id' and 'code'. id is either
+# [TYPE_EXPECT] or [TYPE_CODE].  'code' is interpreted accordingly.
+proc Commands {commands} {
 	global cur_tc
 	global a_testcases
 
-	set a_testcases($cur_tc,commands) $commands
+	lappend a_testcases($cur_tc,commands) [list [TYPE_EXPECT] $commands]
 }
 
-proc Pre {commands} {
-
+proc Code {code} {
 	global cur_tc
 	global a_testcases
-	set a_testcases($cur_tc,pre) $commands
 
+	lappend a_testcases($cur_tc,commands) [list [TYPE_CODE] $code]
+}
+
+
+proc Pre {commands} {
+	global cur_tc
+	global a_testcases
+
+	set a_testcases($cur_tc,pre) $commands
 }
 
 proc Post {commands} {
-
 	global cur_tc
 	global a_testcases
+
 	set a_testcases($cur_tc,post) $commands
 }
 
@@ -166,6 +195,24 @@ proc show_tc_list {} {
 	puts -nonewline "\n"
 }
 
+proc show_commands_details {cmd_list} {
+	puts "Commands details:"
+	foreach elem $cmd_list {
+		set type [lindex $elem 0]
+		set cmd [lindex $elem 1]
+
+		if {$type == [TYPE_EXPECT]} {
+			puts "  Commands:"
+			puts "\t\t$cmd"
+		} elseif {$type == [TYPE_CODE]} {
+			puts "  Code:"
+			puts "\t\t$cmd"
+		} else {
+			exit1 "Internal error - unknown type value in Command list"
+		}
+	}
+}
+
 #
 # shows details of a testcase
 #
@@ -194,7 +241,11 @@ proc show_tc_details {tc} {
 	if {[in_array a_testcases "$tc,pre"]} {
 		puts "  Pre:\t\t$a_testcases($tc,pre)"
 	}
-	puts "  Commands:\t$a_testcases($tc,commands)"
+
+	if {[in_array a_testcases "$tc,commands"]} {
+		show_commands_details $a_testcases($tc,commands)
+	}
+
 	if {[in_array a_testcases "$tc,post"]} {
 		puts "  Post:\t\t$a_testcases($tc,post)"
 	}
@@ -455,9 +506,27 @@ proc run_tc {tc} {
 	# Now run the real test cases
 	# First acquire a prompt so this is logged properly.
 	get_prompt
-	if {![run_cmds a_testcases($tc,commands) $context]} {
-		p_err "problems while executing test cases"
-		set rv 0
+	foreach elem $a_testcases($tc,commands) {
+		set cmd [lindex $elem 1]
+		set type [lindex $elem 0]
+		p_verb "Executing command block $cmd of type $type"
+
+		if {$type == [TYPE_EXPECT]} {
+			if ![run_cmds cmd $context ] {
+				set rv 0
+			}
+		} elseif {$type == [TYPE_CODE]} {
+			eval $cmd
+			if ![info exists res] {
+				p_warn "Code section in test case did not set 'res' variable"
+			} else {
+				set rv $res
+			}
+		}
+		if {$rv == [EXIT_FAIL]} {
+			p_err "problems while executing test cases"
+			break
+		}
 	}
 
 	logging "off"
