@@ -7,6 +7,16 @@ duts_tc LinuxBootNetNfs {
 	Commands "!userLinuxBootNetNfs.exp"
 }
 
+duts_tc LinuxBootSelf {
+	Type u-boot
+	Commands "!userLinuxBootSelf.exp"
+}
+
+duts_tc LinuxTelnetSelf {
+	Type linux
+	Commands "!userLinuxTelnet.exp"
+}
+
 duts_tc LinuxBootNfs {
 	Type u-boot
 	Commands "!userLinuxBootNfs.exp"
@@ -14,16 +24,6 @@ duts_tc LinuxBootNfs {
 
 # this will try to connect via telnet
 duts_tc LinuxTelnetNFS {
-	Type linux
-	Commands "!userLinuxTelnet.exp"
-}
-
-duts_tc LinuxBootSelf {
-	Type u-boot
-	Commands "!userLinuxBootSelf.exp"
-}
-
-duts_tc LinuxTelnetSelf {
 	Type linux
 	Commands "!userLinuxTelnet.exp"
 }
