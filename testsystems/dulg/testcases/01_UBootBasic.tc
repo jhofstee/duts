@@ -74,6 +74,6 @@ duts_tc UBootVersionHelp {
 duts_tc UBootVersion {
 	Type u-boot
 	Commands {
-		"version" "U-Boot (.+)\\.(.+)\\.(.+)"
+		"version" "U-Boot (.+)\\.(.+)"
 	}
 }
