@@ -28,9 +28,19 @@ if ![_context_kernel_get_prompt] {
 	return 0
 }
 
+# Determine ip address of target
+if { [catch {set ip [dnslookup $board_name]} err] } {
+	p_err "$err"
+	return 0
+}
+
+_context_kernel_command "ifconfig" "$ip"
+
 set timeout 5
-_context_kernel_command {sed -e 's/\(disable.*\)yes/\1no/g' /etc/xinetd.d/telnet > /etc/xinetd.d/telnet_}
-_context_kernel_command "mv /etc/xinetd.d/telnet_ /etc/xinetd.d/telnet"
+_context_kernel_command {mount nodev /tmp -t tmpfs}
+_context_kernel_command {sed -e 's/\(disable.*\)yes/\1no/g' /etc/xinetd.d/telnet > /tmp/telnet_}
+_context_kernel_command "mv /tmp/telnet_ /etc/xinetd.d/telnet"
+_context_kernel_command {umount /tmp}
 _context_kernel_command "killall -HUP xinetd"
 
 sleep 5

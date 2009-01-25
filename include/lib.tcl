@@ -65,6 +65,8 @@
 # proc opt_val_empty {o_val {pfx "-"}}
 # proc opt_process {o_txt o_val {check_list "0"}}
 
+# # misc
+# proc dnslookup {host}
 
 ###############################################################################
 # logging test case's flow to file
@@ -708,3 +710,15 @@ proc process_close {sid} {
 	close -i $sid
 	wait -i $sid
 }
+
+###############################################################################
+# misc
+###############################################################################
+
+proc dnslookup {host} {
+	if [exec2 "host $host" out err] {
+                error "Could not resolve '$host' to an IP address. ($err)"
+	}
+	return [lindex [split $out] end]
+}
+
