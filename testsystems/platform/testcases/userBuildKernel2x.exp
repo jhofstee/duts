@@ -1,235 +1,28 @@
 #
-# Build linux kernel
+# Build 2.x kernel
 #
-
-proc valid_tool {t} {
-
-	set rv 1
-	if [file exists $t] {
-		if {([file readable $t]) && ([file executable $t])} {
-			p_verb "tool '$t' OK"
-		} else {
-			p_err "tool '$t' not accessible"
-			set rv 0
-		}
-	} else {
-		p_err "tool '$t' not found"
-		set rv 0
-	}
-
-	return $rv
-}
-
-proc check_tools {l} {
-
-	upvar $l tools
-	upvar tools_dir tools_dir
-
-	set rv 1
-	foreach t $tools {
-		if ![valid_tool "$tools_dir/$t"] {
-			set rv 0
-		}
-	}
-	return $rv
-}
-
-#
-# checks linux version tree: takes a peek in the main Makefile for version
-# strings; returns patchlevel (4, 6), or 0 if unknown
-#
-proc get_linux_ver {} {
-
-	upvar img_src img_src
-
-	##
-	## identify VERSION
-	##
-	set cmd "grep"
-	set cmd_arg "-r \"^VERSION = \" $img_src/Makefile"
-
-	set o ""
-	if [catch {set o [eval exec $cmd $cmd_arg]}] {
-		p_err "problem with executing: '$cmd $cmd_arg'"
-		return 0
-	}
-
-	if ![regexp {^VERSION = ([0-9])} $o all ver] {
-		p_err "'VERSION =' didn't found"
-		return 0
-	}
-
-	if {$ver != 2} {
-		p_verb "Unknown Linux version: $ver"
-		return 0
-	}
-
-	##
-	## identify PATCHLEVEL
-	##
-	set cmd_arg "-r \"PATCHLEVEL = \" $img_src/Makefile"
-	set o ""
-	if [catch {set o [eval exec $cmd $cmd_arg]}] {
-		p_err "problem with executing: '$cmd $cmd_arg'"
-		return 0
-	}
-
-	if ![regexp {^PATCHLEVEL = ([0-9])} $o all pl] {
-		p_err "'PATCHLEVEL =' didn't found"
-		return 0
-	}
-
-	if {($pl != 4) && ($pl != 6)} {
-		p_verb "Unknown Linux patchlevel: $pl"
-		return 0
-	}
-
-	return $pl
-}
-
-
-#
-# -n <board_name>
-# -s <path to the src tree>
-# -d /tftpboot/<board_name>
-# -m  <build_tools>
-# -a  <build_arch>
-# -c  <build_cross>
-# -obj <build_directory> - optional
-#
-# -o
-# linux-26
-#
-proc build {} {
-
-	global a_devices board_name _context_kernel_image
-	upvar tools_dir tools_dir
-	upvar tool_build tool_build
-	upvar build_type build_type
-	upvar obj_dir obj_dir
-	upvar img_src src
-
-	set dst $_context_kernel_image
-	set dst_dir [file dirname $dst]
-	if ![valid_dir $dst_dir 1] {
-		p_err "destination dir not accessible: '$dst_dir''"
-		return 0
-	}
-
-	##
-	## get make target name for our board
-	##
-	set target [get_device_attr "maketarget"]
-
-	##
-	## get ARCH, CROSS_COMPILE values
-	##
-	set arch [get_device_attr "makearch"]
-	set cross [get_device_attr "makecompile"]
-
-	##
-	## get toolchain path
-	##
-	set toolchain [get_device_attr "maketoolpath"]
-
-	##
-	## run build_image to build the image
-	##
-	set tool_cmd "$tools_dir/$tool_build"
-	set tool_arg "-s $src -d $dst -n $target -m $toolchain\
-	-a $arch -c $cross $build_type"
-	if {[var_exists obj_dir] && ($obj_dir != "")} {
-		set tool_arg "$tool_arg -obj $obj_dir"
-	}
-
-	if [file exists $dst] {
-		p_warn "destination kernel image already exists and will be\
-		overwritten: '$dst'"
-		set tool_arg "$tool_arg -o"
-	}
-
-	p_verb "executing: '$tool_cmd $tool_arg'"
-
-	p_banner "Building kernel image, please wait - this may take a\
-	while..." *
-
-	if ![exec2_log "$tool_cmd $tool_arg" err] {
-		puts "$err"
-		return 0
-	}
-
-	p_banner "Finished building kernel image" *
-
-	return 1
-}
-
-
-##
-##
-## Start of execution
-##
-##
 
 global BASE_DIR
 
-set tools_dir "$BASE_DIR/tools"
-set tool_build "build_image"
-
-
-##
-## check if build helper tools are accessible
-##
-set tools [list $tool_build]
-if ![check_tools tools] {
-	p_err "build tools not accessible"
-	return 0
-}
-p_verb "build tools in place, proceeding"
-
-
-##
-## set source and object directory, the latter optionally
-##
-set img_src [get_device_attr "makesrckernelpath"]
-set img_src [absolutize_path $img_src]
-
-if ![valid_dir $img_src] {
-	p_err "Problems accessing src dir?!"
+#here we're extracting repo name - to use as a base dir to checkout stuff
+if ![regexp {([^:]+)://([^:/]+)/(.*)}  $LINUX_GIT_REPO match protocol serv repo] {
+	p_err "Incorrect git repo: $LINUX_GIT_REPO!"
 	return 0
 }
 
-
-if [is_device_attr "makeobjpath"] {
-	set obj_dir [get_device_attr "makeobjpath"]
-	set obj_dir [absolutize_path $obj_dir]
-}
-
+set duts_ext "_DUTS"
+set repo_src $LINUX_GIT_REPO
+set repo_dst "./${repo}${duts_ext}"
 
 ##
-## get Linux version
+## include generic kernel build script
 ##
-set pl [get_linux_ver]
-if !$pl {
-	p_err "Unknown Linux version"
+global working_dir TC_DESCR_DIR
+set generic_build_kernel "$working_dir/$TC_DESCR_DIR/userBuildKernel.exp"
+
+if ![valid_file $generic_build_kernel] {
+	p_err "dependecy not found: 'generic_build_kernel'"
 	return 0
 }
-
-
-##
-## Set build type and timeout according to Linux version
-##
-if {$pl == 4} {
-	set build_type "linux-24"
-} elseif {$pl == 6} {
-	set build_type "linux-26"
-} else {
-	p_err "Unsupported Linux version"
-	return 0
-}
-
-
-##
-## build kernel
-##
-set rv [build $timeout_build]
+set rv [source $generic_build_kernel]
 return $rv

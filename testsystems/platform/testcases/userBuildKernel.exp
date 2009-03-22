@@ -39,6 +39,60 @@ proc check_tools {l} {
 }
 
 #
+# checks linux version tree: takes a peek in the main Makefile for version
+# strings; returns patchlevel (4, 6), or 0 if unknown
+#
+proc get_linux_ver {src} {
+
+	set img_src [absolutize_path $src]
+
+	##
+	## identify VERSION
+	##
+	set cmd "grep"
+	set cmd_arg "-r \"^VERSION = \" $img_src/Makefile"
+
+	set o ""
+	if [catch {set o [eval exec $cmd $cmd_arg]}] {
+		p_err "problem with executing: '$cmd $cmd_arg'"
+		return 0
+	}
+
+	if ![regexp {^VERSION = ([0-9])} $o all ver] {
+		p_err "'VERSION =' didn't found"
+		return 0
+	}
+
+	if {$ver != 2} {
+		p_verb "Unknown Linux version: $ver"
+		return 0
+	}
+
+	##
+	## identify PATCHLEVEL
+	##
+	set cmd_arg "-r \"PATCHLEVEL = \" $img_src/Makefile"
+	set o ""
+	if [catch {set o [eval exec $cmd $cmd_arg]}] {
+		p_err "problem with executing: '$cmd $cmd_arg'"
+		return 0
+	}
+
+	if ![regexp {^PATCHLEVEL = ([0-9])} $o all pl] {
+		p_err "'PATCHLEVEL =' didn't found"
+		return 0
+	}
+
+	if {($pl != 4) && ($pl != 6)} {
+		p_verb "Unknown Linux patchlevel: $pl"
+		return 0
+	}
+
+	set res "linux-2$pl"
+
+	return $res
+}
+#
 # tools/get_src
 # -s /home/git/<...>
 # -d ./
@@ -49,13 +103,22 @@ proc checkout {} {
 	upvar repo_src src
 	upvar tools_dir tools_dir
 	upvar tool_co tool_co
-	global LINUX_GIT_BRANCH BASE_DIR
+	global LINUX_GIT_BRANCH BASE_DIR LINUX_GIT_REPO
 
 	if [valid_dir $dst] {
 		# TODO - validate it is actually a kernel tree - like we do in
 		# check_linux_ver{} (tools/bld_linux.exp) - maybe put it in
 		# some common file
 
+		set cmd "grep"
+		set cmd_arg "$LINUX_GIT_REPO $dst/.git/config"
+
+		set o ""
+		if [catch {set o [eval exec $cmd $cmd_arg]}] {
+			puts "$dst exists but is not from $LINUX_GIT_REPO!"
+			puts "you will need to remove $dst to proceed"
+			return 0
+		} else {
 		# seems the specified repo directory is already checked
 		# out so don't bother with executing get_src
 		p_banner "GIT tree exists, switching to branch $LINUX_GIT_BRANCH..."
@@ -72,6 +135,7 @@ proc checkout {} {
 		p_warn "using already checked out source tree: '$dst'"
 		cd ".."
 		return 1
+		}
 	}
 
 	##
@@ -111,7 +175,6 @@ proc build {} {
 	global a_devices board_name _context_kernel_image
 	upvar tools_dir tools_dir
 	upvar tool_build tool_build
-	upvar build_type build_type
 	global BUILD_TARGET BUILD_ARCH BUILD_CROSS BUILD_TOOLPATH BUILD_TARGET_PREFIX
 
 	# note the repo location we checked out to in a previous (checkout)
@@ -125,6 +188,7 @@ proc build {} {
 		return 0
 	}
 
+	set build_type [get_linux_ver $src]
 	## run build_image to build the image
 	##
 	set tool_cmd "$tools_dir/$tool_build"
