@@ -8,10 +8,10 @@ if ![_context_firmware_get_prompt] {
 	return 0
 }
 
-send -s "nm.b 100000\r"
+send -s "nm.b $CFG_RAM_WS_BASE\r"
 expect "?"
 
-foreach v {48 65 6c 6c 6f} {
+foreach v {0x48 0x65 0x6c 0x6c 0x6f} {
 	send -s "$v\r"
 	sleep 0.25
 	expect "?"
@@ -27,6 +27,6 @@ expect {
 }
 unset v
 
-set rv [_context_firmware_command "md 100000 8" ".*"]
+set rv [_context_firmware_command "md $CFG_RAM_WS_BASE 8" ".*"]
 
 return $rv

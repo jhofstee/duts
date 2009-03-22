@@ -1,7 +1,7 @@
 #
 # mtest may take ages so we test for a specific pattern
 #
-global _context_firmware_prompt TIMEOUT
+global _context_firmware_prompt TIMEOUT CFG_RAM_WS_BASE
 
 if ![_context_firmware_get_prompt] {
 	p_err "could not get firmware prompt"
@@ -10,7 +10,9 @@ if ![_context_firmware_get_prompt] {
 
 set timeout 600
 
-send -s "mtest 100000 200000\r"
+set RAM_TEST_END [expr $CFG_RAM_WS_BASE + 0x100000 ]
+
+send -s "mtest $CFG_RAM_WS_BASE $RAM_TEST_END\r"
 expect "0000000F"
 send -s "\003"
 expect {

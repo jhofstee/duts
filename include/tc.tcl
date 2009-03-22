@@ -321,7 +321,8 @@ proc run_cmds {cmds ctx} {
 
 		#
 		# we need to force vars substitution (subst) as there can be
-		# $ vars defined and used for commands
+		# $ vars defined and used for commands.  Note that this also
+		# allows commands to be embedded.
 		#
 		if [string match "*$\{*" $cmd] {
 			p_verb "U-Boot vars found, skip forced substitution"

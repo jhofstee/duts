@@ -15,9 +15,9 @@ duts_tc UBootBase {
 	Type u-boot
 	Commands {
 		"base" ".*"
-		"md 0 c" ".*"
-		"base 100000" ".*"
-		"md 0 c" ".*"
+		"md 0 0xc" ".*"
+		"base $CFG_RAM_WS_BASE" ".*"
+		"md 0 0xc" ".*"
 	}
 	Post {
 		"base 0" ".*"
@@ -27,15 +27,15 @@ duts_tc UBootBase {
 duts_tc UBootCrc {
 	Type u-boot
 	Commands {
-		"crc 100004 3FC" ".*"
+		{ [format "crc 0x%x 0x3FC" [expr $CFG_RAM_WS_BASE + 4]] } ".*"
 	}
 }
 
 duts_tc UBootCrcStore {
 	Type u-boot
 	Commands {
-		"crc 100004 3FC 100000" ".*"
-		"md 100000 4" ".*"
+		{ [format "crc 0x%x 0x3FC 0x%x" [ expr $CFG_RAM_WS_BASE + 4] $CFG_RAM_WS_BASE] }  ".*"
+		"md $CFG_RAM_WS_BASE 4" ".*"
 	}
 }
 
@@ -49,18 +49,18 @@ duts_tc UBootCmpHelp {
 duts_tc UBootCmp {
 	Type u-boot
 	Commands {
-		"cmp 100000 200000 400" ".*"
-		"md 100000 C" ".*"
-		"md 200000 C" ".*"
+		"cmp $CFG_RAM_WS_BASE $CFG_RAM_WS_BASE_ALT 0x400" ".*"
+		"md $CFG_RAM_WS_BASE 0xc" ".*"
+		"md $CFG_RAM_WS_BASE_ALT 0xc" ".*"
 	}
 }
 
 duts_tc UBootCmpExt {
 	Type u-boot
 	Commands {
-		"cmp.l 100000 200000 400" ".*"
-		"cmp.w 100000 200000 800" ".*"
-		"cmp.b 100000 200000 1000" ".*"
+		"cmp.l $CFG_RAM_WS_BASE $CFG_RAM_WS_BASE_ALT 0x400" ".*"
+		"cmp.w $CFG_RAM_WS_BASE $CFG_RAM_WS_BASE_ALT 0x800" ".*"
+		"cmp.b $CFG_RAM_WS_BASE $CFG_RAM_WS_BASE_ALT 0x1000" ".*"
 	}
 }
 
@@ -74,16 +74,16 @@ duts_tc UBootCpHelp {
 duts_tc UBootCp {
 	Type u-boot
 	Commands {
-		"cp 200000 100000 10000" ".*"
+		"cp $CFG_RAM_WS_BASE $CFG_RAM_WS_BASE_ALT 0x10000" ".*"
 	}
 }
 
 duts_tc UBootCpExt {
 	Type u-boot
 	Commands {
-		"cp.l 200000 100000 10000" ".*"
-		"cp.w 200000 100000 20000" ".*"
-		"cp.b 200000 100000 40000" ".*"
+		"cp.l $CFG_RAM_WS_BASE_ALT $CFG_RAM_WS_BASE 0x10000" ".*"
+		"cp.w $CFG_RAM_WS_BASE_ALT $CFG_RAM_WS_BASE 0x20000" ".*"
+		"cp.b $CFG_RAM_WS_BASE_ALT $CFG_RAM_WS_BASE 0x40000" ".*"
 	}
 }
 
@@ -97,7 +97,7 @@ duts_tc UBootMdHelp {
 duts_tc UBootMd {
 	Type u-boot
 	Commands {
-		"md 100000" ".*"
+		"md $CFG_RAM_WS_BASE" ".*"
 		"\r" ".*"
 	}
 }
@@ -105,17 +105,17 @@ duts_tc UBootMd {
 duts_tc UBootMdExt {
 	Type u-boot
 	Commands {
-		"md.w 100000" ".*"
-		"md.b 100000" ".*"
+		"md.w $CFG_RAM_WS_BASE" ".*"
+		"md.b $CFG_RAM_WS_BASE" ".*"
 	}
 }
 
 duts_tc UBootMdLength {
 	Type u-boot
 	Commands {
-		"md.b 100000 20" ".*"
-		"md.w 100000" ".*"
-		"md 100000" ".*"
+		"md.b $CFG_RAM_WS_BASE 0x20" ".*"
+		"md.w $CFG_RAM_WS_BASE" ".*"
+		"md $CFG_RAM_WS_BASE" ".*"
 	}
 }
 
@@ -171,21 +171,21 @@ duts_tc UBootMwHelp {
 duts_tc UBootMw {
 	Type u-boot
 	Commands {
-		"md 100000 10" ".*"
-		"mw 100000 aabbccdd" ".*"
-		"md 100000 10" ".*"
-		"mw 100000 0 6" ".*"
-		"md 100000 10" ".*"
+		"md $CFG_RAM_WS_BASE 0x10" ".*"
+		"mw $CFG_RAM_WS_BASE 0xaabbccdd" ".*"
+		"md $CFG_RAM_WS_BASE 0x10" ".*"
+		"mw $CFG_RAM_WS_BASE 0 6" ".*"
+		"md $CFG_RAM_WS_BASE 0x10" ".*"
 	}
 }
 
 duts_tc UBootMwExt {
 	Type u-boot
 	Commands {
-		"mw.w 100004 1155 6" ".*"
-		"md 100000 10" ".*"
-		"mw.b 100007 ff 7" ".*"
-		"md 100000 10" ".*"
+		{ [format "mw.w 0x%x 0x1155 6" [ expr $CFG_RAM_WS_BASE + 4]] } ".*"
+		"md $CFG_RAM_WS_BASE 0x10" ".*"
+		{ [format "mw.b 0x%x 0xff 7" [ expr $CFG_RAM_WS_BASE + 7]] } ".*"
+		"md $CFG_RAM_WS_BASE 0x10" ".*"
 	}
 }
 

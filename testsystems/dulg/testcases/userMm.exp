@@ -10,10 +10,10 @@ if ![_context_firmware_get_prompt] {
 	return 0
 }
 
-send -s "mm 100000\r"
+send -s "mm $CFG_RAM_WS_BASE\r"
 expect "?"
 
-foreach v {0 aabbccdd 01234567} {
+foreach v {0 0xaabbccdd 0x01234567} {
 	send -s "$v\r"
 	sleep 0.25
 	expect "?"
@@ -29,6 +29,6 @@ expect {
 }
 unset v
 
-set rv [_context_firmware_command "md 100000 10" ".*"]
+set rv [_context_firmware_command "md $CFG_RAM_WS_BASE 0x10" ".*"]
 
 return $rv

@@ -67,7 +67,7 @@ duts_tc UBootFDTCmdRemove {
 duts_tc UBootFDTCmdMove {
 	Type u-boot
 	Commands {
-		"fdt move ${fdt_addr_r} 200000" ".*"
+		"fdt move ${fdt_addr_r} $CFG_RAM_WS_BASE" ".*"
 		"fdt list /" ".*"
 		"fdt mknod / foobar" ".*"
 		"fdt list /" ".*"

@@ -71,7 +71,7 @@ duts_tc UBootEraseSectors {
 
 duts_tc UBootEraseBank {
 	Type u-boot
-	Timeout 600
+	Timeout 1200
 	Pre {
 		"prot on $CFG_FLASH_PROT1_START $CFG_FLASH_PROT1_END" ".*"
 	}

@@ -110,7 +110,7 @@ proc build {} {
 	upvar tool_build tool_build
 	upvar build_type build_type
 
-	global BUILD_TARGET BUILD_ARCH BUILD_CROSS BUILD_TOOLPATH
+	global BUILD_TARGET BUILD_ARCH BUILD_CROSS BUILD_TOOLPATH BUILD_UBOOT_TARGET
 
 	# note the repo location we checked out to in a previous (checkout)
 	# stage is now our kernel source directory!
@@ -127,8 +127,13 @@ proc build {} {
 	## run build_image to build the image
 	##
 	set tool_cmd "$tools_dir/$tool_build"
-	set tool_arg "-s $src -d $dst -n $BUILD_TARGET \
-	-a $BUILD_ARCH -c $BUILD_CROSS $build_type"
+	if [ info exists BUILD_UBOOT_TARGET ] {
+		set tool_arg "-s $src -d $dst -n $BUILD_UBOOT_TARGET -m $BUILD_TOOLPATH\
+		-a $BUILD_ARCH -c $BUILD_CROSS $build_type"
+	} else {
+		set tool_arg "-s $src -d $dst -n $BUILD_TARGET -m $BUILD_TOOLPATH\
+		-a $BUILD_ARCH -c $BUILD_CROSS $build_type"
+	}
 
 	if [file exists $dst] {
 		p_warn "destination u-boot image already exists and will be\
