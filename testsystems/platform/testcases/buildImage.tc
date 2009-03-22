@@ -8,6 +8,25 @@ duts_tc LinuxBuild {
 	Commands "!userBuildLinux.exp"
 }
 
+duts_tc KernelFdtDump {
+	Type host
+	Code {
+		global BASE_DIR board_name
+		set kernel_dir "$BASE_DIR/linux-26_DUTS"
+		if [ file exists $kernel_dir ] {
+			if ![exec2_log "cat $kernel_dir/arch/powerpc/boot/dts/$board_name.dts" err] {
+				puts "$err"
+				set res 0
+			} else {
+				set res 1
+			}
+		} else {
+			puts "Kernel tree $kernel_dir missing - run one of KernelBuild tests first!"
+			set res 0
+		}
+	}
+}
+
 duts_tc UBootBuild {
 	Type host
 	Commands "!userBuildUBoot.exp"
