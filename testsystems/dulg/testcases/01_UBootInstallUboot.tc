@@ -1,0 +1,31 @@
+# -*- Mode: tcl -*-
+# Install OS images from U-Boot
+#
+# WARNING! Testcases contained herein attempt to manipulate board flash
+# contents. They assume the parameters in board config file
+# (testsystems/common/devices/*.tgt) like CFG_MTD_ERASE_DEVICE, addresses
+# range etc. are properly set for the given board, so beware and triple check
+# everything makes sense before running these.
+#
+
+
+duts_tc UBootInstallUboot {
+	Type u-boot
+	Timeout 300
+	Commands {
+		"sete uboot_file $board_name/u-boot.bin-duts" ".*"
+		"run update_uboot" "Copy to Flash... done.*"
+	}
+	Code {
+		send -s "reset\r"
+		expect {
+			-re ".*Hit any key .*" {
+				send -s "\r"
+				_context_firmware_command "version\r" "U-Boot.*"
+				set res 1
+			}
+			timeout {set res 0}
+		}
+	}
+}
+
