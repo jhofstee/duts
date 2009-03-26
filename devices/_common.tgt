@@ -3,14 +3,18 @@
 # between all boards
 #
 duts_device _common {
-
-	MakeToolPath		"/opt/eldk-4.2/usr/bin/"
-	MakeSrcKernelPath	"/git/linux-2.6-denx"
-	# MakeObjPath is relative to the directory where duts is executed
-	MakeObjPath		"obj"
-
 	Vars {
+		BUILD_SRC_KERNEL_PATH "/git/linux-2.6-denx"
+		BUILD_OBJPATH	"obj"
+		BUILD_TOOLPATH 	"/opt/eldk-4.2/usr/bin/"
+
 		CFG_RAM_WS_BASE	100000
 		CFG_RAM_WS_BASE_ALT 200000
+
+		UBOOT_GIT_BRANCH	"origin/master"
+		UBOOT_GIT_REPO		"git://git.denx.de/u-boot.git"
+
+		LINUX_GIT_BRANCH	"origin/master"
+		LINUX_GIT_REPO		"git://git.denx.de/linux-2.6-denx.git"
 	}
 }

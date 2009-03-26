@@ -129,7 +129,7 @@ proc login_kernel {user {pass ""} {spid ""}} {
 proc boot_kernel_net_nfs {} {
 
 	global _context_kernel_image TIMEOUT console_con
-	global CFG_FDT_FILE CFG_ROOTPATH
+	global CFG_FDT_FILE CFG_ROOTPATH BUILD_ARCH
 
 	set spawn_id $console_con
 	expect "*"
@@ -168,8 +168,7 @@ proc boot_kernel_net_nfs {} {
 	## note that we can still continue without fdt_file if
 	## we test a bootwrapped kernel.
 	##
-
-	if {[get_device_attr "makearch"] == "powerpc"} {
+	if {$BUILD_ARCH == "powerpc"} {
 		if ![var_exists CFG_FDT_FILE] {
 			if [var_exists CFG_FDT_START] {
 				p_err "Defined fdt start, but not CFG_FDT_NAME, config inconsistent..." 1

@@ -3,24 +3,24 @@
 #
 
 duts_device mpc8349emds {
-	MakeTarget	"mpc834x_sys"
-	MakeArch	"ppc"
-	MakeCompile	"ppc_6xx-"
-
 	Vars {
 		CFG_KERNEL_START	80060000
 		CFG_KERNEL_END		8015ffff
 		CFG_RAMDISK_START	80160000
+
+		BUILD_TARGET		"mpc834x_sys"
+		BUILD_ARCH		"ppc"
+		BUILD_CROSS		"ppc_6xx-"
 	}
 }
 
 duts_device lite5200b {
-	MakeTarget	"lite5200b"
-	MakeArch	"ppc"
-	MakeCompile	"ppc_6xx-"
-
 	Vars {
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_6xx/"
 		CFG_MTD_ERASE_DEVICE	"mtd4"
+
+		BUILD_TARGET		"lite5200b"
+		BUILD_ARCH		"ppc"
+		BUILD_CROSS		"ppc_6xx-"
 	}
 }

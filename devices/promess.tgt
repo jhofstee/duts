@@ -17,12 +17,13 @@
 # 0xFFF70000 - 0xFFFFFFFF user data
 #
 duts_device motionpro {
-	MakeTarget	"motionpro"
-	MakeArch	"powerpc"
-	MakeCompile	"ppc_6xx-"
-	MakeToolPath	"/opt/eldk-4.2/usr/bin/"
 
 	Vars {
+		BUILD_TARGET	"motionpro"
+		BUILD_ARCH	"powerpc"
+		BUILD_CROSS	"ppc_6xx-"
+		BUILD_TOOLPATH	"/opt/eldk-4.2/usr/bin/"
+
 		CFG_RAM_WS_BASE 	200000
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_6xx/"
 		CFG_FDT_FILE		"/tftpboot/motionpro/motionpro.dtb"

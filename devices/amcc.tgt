@@ -28,10 +28,11 @@ duts_device bamboo {
 		CFG_FLASH_ERASE_SECT "1:0-1"
 		CFG_FLASH_ERASE_BANK "1"
 		CFG_FLASH_TST_SECT "1:0"
+
+		BUILD_TARGET "bamboo"
+		BUILD_ARCH "ppc"
+		BUILD_CROSS "ppc_4xxFP-"
 	}
-	MakeTarget	"bamboo"
-	MakeArch	"ppc"
-	MakeCompile	"ppc_4xxFP-"
 }
 
 duts_device bubinga {
@@ -50,10 +51,11 @@ duts_device bubinga {
 		CFG_FLASH_ERASE_SECT "1:0-1"
 		CFG_FLASH_ERASE_BANK "1"
 		CFG_FLASH_TST_SECT "1:0"
+
+		BUILD_TARGET	"bubinga"
+		BUILD_ARCH	"ppc"
+		BUILD_CROSS	"ppc_4xx-"
 	}
-	MakeTarget	"bubinga"
-	MakeArch	"ppc"
-	MakeCompile	"ppc_4xx-"
 }
 
 
@@ -96,10 +98,11 @@ duts_device katmai {
 		CFG_KERNEL_END 		ff17ffff
 		CFG_RAMDISK_START	ff180000
 		CFG_RAMDISK_END		ff37ffff
+
+		BUILD_TARGET	"katmai"
+		BUILD_ARCH	"ppc"
+		BUILD_CROSS	"ppc_4xx-"
 	}
-	MakeTarget	"katmai"
-	MakeArch	"ppc"
-	MakeCompile	"ppc_4xx-"
 }
 
 #
@@ -151,10 +154,11 @@ duts_device luan {
 		CFG_KERNEL_END 		ffd4ffff
 		CFG_RAMDISK_START	ffd50000
 		CFG_RAMDISK_END		ffebffff
+
+		BUILD_TARGET	"luan"
+		BUILD_ARCH	"ppc"
+		BUILD_CROSS	"ppc_4xx-"
 	}
-	MakeTarget	"luan"
-	MakeArch	"ppc"
-	MakeCompile	"ppc_4xx-"
 }
 
 duts_device lwmon5 {
@@ -179,10 +183,11 @@ duts_device lwmon5 {
 		CFG_FLASH_ERASE_SECT "1:0-1"
 		CFG_FLASH_ERASE_BANK "1"
 		CFG_FLASH_TST_SECT "1:0"
+
+		BUILD_TARGET	"lwmon5"
+		BUILD_ARCH	"ppc"
+		BUILD_CROSS	"ppc_4xxFP-"
 	}
-	MakeTarget	"lwmon5"
-	MakeArch	"ppc"
-	MakeCompile	"ppc_4xxFP-"
 }
 
 duts_device ebony {
@@ -209,10 +214,11 @@ duts_device ebony {
 		CFG_KERNEL_END ff8fffff
 		CFG_RAMDISK_START ffa00000
 		CFG_RAMDISK_END ffbfffff
+
+		BUILD_TARGET	"ebony"
+		BUILD_ARCH	"ppc"
+		BUILD_CROSS	"ppc_4xx-"
 	}
-	MakeTarget	"ebony"
-	MakeArch	"ppc"
-	MakeCompile	"ppc_4xx-"
 }
 
 duts_device ocotea {
@@ -239,10 +245,11 @@ duts_device ocotea {
 		CFG_KERNEL_END ff8fffff
 		CFG_RAMDISK_START ffa00000
 		CFG_RAMDISK_END ffbfffff
+
+		BUILD_TARGET	"ocotea"
+		BUILD_ARCH	"ppc"
+		BUILD_CROSS	"ppc_4xx-"
 	}
-	MakeTarget	"ocotea"
-	MakeArch	"ppc"
-	MakeCompile	"ppc_4xx-"
 }
 
 #
@@ -285,10 +292,11 @@ duts_device rainier {
 		CFG_KERNEL_END 		FC17FFFF
 		CFG_RAMDISK_START	FC180000
 		CFG_RAMDISK_END		FC37FFFF
+
+		BUILD_TARGET	"rainier"
+		BUILD_ARCH	"ppc"
+		BUILD_CROSS	"ppc_4xx-"
 	}
-	MakeTarget	"rainier"
-	MakeArch	"ppc"
-	MakeCompile	"ppc_4xx-"
 }
 
 #
@@ -319,7 +327,7 @@ duts_device kilauea {
 		CFG_FLASH_ERASE_END	FF95FFFF
 
 		CFG_FDT_FILE		"/tftpboot/kilauea/kilauea.dtb"
-                CFG_FDT_ADDR_R          00B00000
+		CFG_FDT_ADDR_R		00B00000
 
 		CFG_FLASH_TST_SIZE	40000
 
@@ -333,15 +341,17 @@ duts_device kilauea {
 		CFG_KERNEL_START	FC000000
 		CFG_KERNEL_END 		FC17FFFF
 
-                CFG_FDT_START           FC1E0000
-                CFG_FDT_END             FC1FFFFF
+		CFG_FDT_START		FC1E0000
+		CFG_FDT_END		FC1FFFFF
 
 		CFG_RAMDISK_START	FC200000
 		CFG_RAMDISK_END		FC37FFFF
+
+		BUILD_TARGET		"kilauea"
+		BUILD_TARGET_PREFIX	"44x"
+		BUILD_ARCH		"powerpc"
+		BUILD_CROSS		"ppc_4xx-"
 	}
-	MakeTarget	"kilauea"
-	MakeArch	"powerpc"
-	MakeCompile	"ppc_4xx-"
 }
 
 duts_device haleakala {
@@ -369,15 +379,17 @@ duts_device haleakala {
 		CFG_KERNEL_START	FC000000
 		CFG_KERNEL_END 		FC17FFFF
 
-                CFG_FDT_START           FC1E0000
-                CFG_FDT_END             FC1FFFFF
+		CFG_FDT_START		FC1E0000
+		CFG_FDT_END		FC1FFFFF
 
 		CFG_RAMDISK_START	FC200000
 		CFG_RAMDISK_END		FC3FFFFF
+
+		BUILD_TARGET	"haleakala"
+		BUILD_TARGET_PREFIX	"44x"
+		BUILD_ARCH	"powerpc"
+		BUILD_CROSS	"ppc_4xx-"
 	}
-	MakeTarget	"haleakala"
-	MakeArch	"powerpc"
-	MakeCompile	"ppc_4xx-"
 }
 
 duts_device canyonlands {
@@ -405,15 +417,17 @@ duts_device canyonlands {
 		CFG_KERNEL_START	FC000000
 		CFG_KERNEL_END 		FC17FFFF
 
-                CFG_FDT_START           FC1E0000
-                CFG_FDT_END             FC1FFFFF
+		CFG_FDT_START		FC1E0000
+		CFG_FDT_END		FC1FFFFF
 
 		CFG_RAMDISK_START	FC200000
 		CFG_RAMDISK_END		FC3FFFFF
+
+		BUILD_TARGET		"canyonlands"
+		BUILD_TARGET_PREFIX	"44x"
+		BUILD_ARCH		"powerpc"
+		BUILD_CROSS		"ppc_4xx-"
 	}
-	MakeTarget	"canyonlands"
-	MakeArch	"powerpc"
-	MakeCompile	"ppc_4xx-"
 }
 
 duts_device glacier {
@@ -427,7 +441,7 @@ duts_device glacier {
 		CFG_FLASH_ERASE_END	FF95FFFF
 
 		CFG_FDT_FILE		"/tftpboot/glacier/glacier.dtb"
-                CFG_FDT_ADDR_R          00b00000
+		CFG_FDT_ADDR_R		00b00000
 
 		CFG_FLASH_TST_SIZE	40000
 
@@ -441,15 +455,17 @@ duts_device glacier {
 		CFG_KERNEL_START	FC000000
 		CFG_KERNEL_END 		FC17FFFF
 
-                CFG_FDT_START           FC1E0000
-                CFG_FDT_END             FC1FFFFF
+		CFG_FDT_START		FC1E0000
+		CFG_FDT_END		FC1FFFFF
 
 		CFG_RAMDISK_START	FC200000
 		CFG_RAMDISK_END		FC3FFFFF
+
+		BUILD_TARGET		"glacier"
+		BUILD_TARGET_PREFIX	"44x"
+		BUILD_ARCH		"powerpc"
+		BUILD_CROSS		"ppc_4xx-"
 	}
-	MakeTarget	"glacier"
-	MakeArch	"powerpc"
-	MakeCompile	"ppc_4xx-"
 }
 
 #
@@ -492,10 +508,12 @@ duts_device sequoia {
 		CFG_KERNEL_END 		FC17FFFF
 		CFG_RAMDISK_START	FC180000
 		CFG_RAMDISK_END		FC37FFFF
+
+		BUILD_TARGET		"sequoia"
+		BUILD_TARGET_PREFIX	"44x"
+		BUILD_ARCH		"powerpc"
+		BUILD_CROSS		"ppc_4xxFP-"
 	}
-	MakeTarget	"sequoia"
-	MakeArch	"powerpc"
-	MakeCompile	"ppc_4xxFP-"
 }
 
 duts_device sycamore {
@@ -520,10 +538,11 @@ duts_device sycamore {
 		CFG_KERNEL_END ff8fffff
 		CFG_RAMDISK_START ffa00000
 		CFG_RAMDISK_END ffbfffff
+
+		BUILD_TARGET	"sycamore"
+		BUILD_ARCH	"ppc"
+		BUILD_CROSS	"ppc_4xx-"
 	}
-	MakeTarget	"sycamore"
-	MakeArch	"ppc"
-	MakeCompile	"ppc_4xx-"
 }
 
 #
@@ -569,10 +588,11 @@ duts_device taishan {
 		CFG_KERNEL_END 		FC17FFFF
 		CFG_RAMDISK_START	FC180000
 		CFG_RAMDISK_END		FC37FFFF
+
+		BUILD_TARGET	"taishan"
+		BUILD_ARCH	"ppc"
+		BUILD_CROSS	"ppc_4xx-"
 	}
-	MakeTarget	"taishan"
-	MakeArch	"ppc"
-	MakeCompile	"ppc_4xx-"
 }
 
 duts_device walnut {
@@ -592,10 +612,11 @@ duts_device walnut {
 		CFG_FLASH_ERASE_SECT "1:0-1"
 		CFG_FLASH_ERASE_BANK "1"
 		CFG_FLASH_TST_SECT "1:0"
+
+		BUILD_TARGET	"walnut"
+		BUILD_ARCH	"ppc"
+		BUILD_CROSS	"ppc_4xx-"
 	}
-	MakeTarget	"walnut"
-	MakeArch	"ppc"
-	MakeCompile	"ppc_4xx-"
 }
 
 duts_device yellowstone {
@@ -623,10 +644,11 @@ duts_device yellowstone {
 		CFG_KERNEL_END fc1fffff
 		CFG_RAMDISK_START fc200000
 		CFG_RAMDISK_END fc3fffff
+
+		BUILD_TARGET	"yellowstone"
+		BUILD_ARCH	"ppc"
+		BUILD_CROSS	"ppc_4xx-"
 	}
-	MakeTarget	"yellowstone"
-	MakeArch	"ppc"
-	MakeCompile	"ppc_4xx-"
 }
 
 duts_device yosemite {
@@ -654,10 +676,11 @@ duts_device yosemite {
 		CFG_KERNEL_END fc1fffff
 		CFG_RAMDISK_START fc200000
 		CFG_RAMDISK_END fc3fffff
+
+		BUILD_TARGET	"yosemite"
+		BUILD_ARCH	"ppc"
+		BUILD_CROSS	"ppc_4xxFP-"
 	}
-	MakeTarget	"yosemite"
-	MakeArch	"ppc"
-	MakeCompile	"ppc_4xxFP-"
 }
 
 #
@@ -710,8 +733,9 @@ duts_device yucca {
 		CFG_KERNEL_END 	 	E7D3FFFF
 		CFG_RAMDISK_START	E7D40000
 		CFG_RAMDISK_END		E7ECFFFF
+
+		BUILD_TARGET	"yucca"
+		BUILD_ARCH	"ppc"
+		BUILD_CROSS	"ppc_4xx-"
 	}
-	MakeTarget	"yucca"
-	MakeArch	"ppc"
-	MakeCompile	"ppc_4xx-"
 }

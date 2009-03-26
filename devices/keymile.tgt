@@ -7,11 +7,6 @@
 # 0xF0A00000 - 0xF027FFFF kernel (15 sectors)
 #
 duts_device mgsuvd {
-	MakeTarget	"mgsuvd"
-	MakeArch	"powerpc"
-	MakeCompile	"ppc_8xx-"
-	MakeToolPath	"/opt/eldk-4.2/usr/bin/"
-
 	Vars {
 		CFG_RAM_WS_BASE 	200000
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_8xx/"
@@ -42,6 +37,11 @@ duts_device mgsuvd {
 		CFG_FLASH_ERASE_SECT	"1:126-127"
 		CFG_FLASH_ERASE_BANK	"1"
 		CFG_FLASH_TST_SECT	"1:127"
+
+		BUILD_TARGET	"mgsuvd"
+		BUILD_ARCH	"powerpc"
+		BUILD_CROSS	"ppc_8xx-"
+		BUILD_TOOLPATH	"/opt/eldk-4.2/usr/bin/"
 	}
 }
 
@@ -59,11 +59,6 @@ duts_device mgsuvd {
 # 0x50000000 - 0x508FFFFF ramdisk (75 sectors)
 #
 duts_device mgcoge {
-	MakeTarget	"mgcoge"
-	MakeArch	"powerpc"
-	MakeCompile	"ppc_82xx-"
-	MakeToolPath	"/opt/eldk-4.2/usr/bin/"
-
 	Vars {
 		CFG_RAM_WS_BASE 	200000
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_82xx/"
@@ -94,5 +89,10 @@ duts_device mgcoge {
 		CFG_FLASH_ERASE_SECT	"2:257-259"
 		CFG_FLASH_ERASE_BANK	"2"
 		CFG_FLASH_TST_SECT	"2:259"
+
+		BUILD_TARGET	"mgcoge"
+		BUILD_ARCH	"powerpc"
+		BUILD_CROSS	"ppc_82xx-"
+		BUILD_TOOLPATH	"/opt/eldk-4.2/usr/bin/"
 	}
 }

@@ -1,10 +1,10 @@
 duts_device host {
-	MakeTarget	""
-	MakeArch	"i386"
-	MakeCompile	""
-	MakeToolPath "/usr/bin/"
-
 	Vars {
 		CFG_ROOTPATH "/opt/eldk"
+
+		BUILD_TARGET	""
+		BUILD_ARCH	"i386"
+		BUILD_CROSS	""
+		BUILD_TOOLPATH	"/usr/bin"
 	}
 }

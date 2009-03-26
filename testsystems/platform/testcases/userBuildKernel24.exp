@@ -7,12 +7,12 @@
 ##
 global BASE_DIR
 
-set duts_ext "_DUTS"
-set linux "linuxppc_2_4_devel"
-set repo_src "/home/git/$linux"
-set repo_dst "./${linux}${duts_ext}"
-
 set build_type "linux-24"
+
+set duts_ext "_DUTS"
+set repo_src $LINUX_GIT_REPO
+set repo_dst "./${build_type}${duts_ext}"
+
 
 ##
 ## include generic kernel build script

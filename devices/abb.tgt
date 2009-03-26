@@ -36,8 +36,14 @@ duts_device socrates {
 		CFG_FDT_START		FE1E0000
 		CFG_FDT_END		FE1FFFFF
 		CFG_FDT_ADDR_R		400000
+
+		BUILD_TARGET		"socrates"
+		BUILD_TARGET_PREFIX	"85xx"
+		BUILD_ARCH		"powerpc"
+		BUILD_CROSS		"ppc_85xxDP-"
+
+		UBOOT_GIT_BRANCH	"origin/socrates-v1.3.4"
+		UBOOT_GIT_REPO		"git://git.denx.de/u-boot-testing.git"
+		LINUX_GIT_BRANCH	"origin/socrates-2.6.26.y"
 	}
-	MakeTarget	"socrates"
-	MakeArch	"ppc"
-	MakeCompile	"ppc_85xxDP-"
 }

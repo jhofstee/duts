@@ -56,39 +56,6 @@ proc duts_device {name args} {
 }
 
 #
-# processes MakeTarget/Arch/Compile etc. section in duts_device description
-#
-proc make {type p} {
-	global cur_device a_devices
-
-	set a_devices($cur_device,make$type) $p
-}
-
-proc MakeTarget {p} {
-	make "target" $p
-}
-
-proc MakeArch {p} {
-	make "arch" $p
-}
-
-proc MakeCompile {p} {
-	make "compile" $p
-}
-
-proc MakeToolPath {p} {
-	make "toolpath" $p
-}
-
-proc MakeSrcKernelPath {p} {
-	make "srckernelpath" $p
-}
-
-proc MakeObjPath {p} {
-	make "objpath" $p
-}
-
-#
 # processes Vars section in duts_device description
 #
 proc Vars {vars} {
@@ -259,21 +226,6 @@ proc valid_devices {} {
 		}
 	}
 
-	##
-	## verify make params are present
-	##
-	set makeparams {MakeTarget MakeArch MakeCompile MakeToolPath}
-	foreach mp $makeparams {
-		set mpp [string tolower $mp]
-		if ![in_array a_devices "$board_name,$mpp" ] {
-			if ![is_device_common_defined $mpp ] {
-				p_verb "make param '$mp' not found?!"
-			} else {
-				p_verb "common make param '$mp'"
-			}
-		}
-	}
-
 	return $rv
 }
 
@@ -366,10 +318,6 @@ proc show_device {board_name} {
 	global a_devices
 
 	set vl [get_device_attr "varlist"]
-	set t [get_device_attr "maketarget"]
-	set a [get_device_attr "makearch"]
-	set c [get_device_attr "makecompile"]
-	set p [get_device_attr "maketoolpath"]
 
 	puts "Configuration for board: $board_name"
 	puts "  features:"
@@ -380,12 +328,4 @@ proc show_device {board_name} {
 		global $var
 		eval puts "\"$var = $$var\""
 	}
-	puts ""
-	puts "  make params:\n    target\t'$t'\n    arch\t'$a'"
-	puts "    ccompile\t'$c'\n    toolpath\t'$p'"
-	if [is_device_attr "makeobjpath"] {
-		set obj_dir [get_device_attr "makeobjpath"]
-		puts "    obj_dir\t'$obj_dir'"
-	}
-	puts ""
 }

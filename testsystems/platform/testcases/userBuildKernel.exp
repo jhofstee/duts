@@ -49,6 +49,7 @@ proc checkout {} {
 	upvar repo_src src
 	upvar tools_dir tools_dir
 	upvar tool_co tool_co
+	global LINUX_GIT_BRANCH BASE_DIR
 
 	if [valid_dir $dst] {
 		# TODO - validate it is actually a kernel tree - like we do in
@@ -57,7 +58,19 @@ proc checkout {} {
 
 		# seems the specified repo directory is already checked
 		# out so don't bother with executing get_src
+		p_banner "GIT tree exists, switching to branch $LINUX_GIT_BRANCH..."
+
+		cd $dst
+
+		set tool_cmd "git-checkout "
+		set tool_arg "-f $LINUX_GIT_BRANCH"
+		if ![exec2_log "$tool_cmd $tool_arg" err] {
+			puts "$err"
+			return 0
+		}
+
 		p_warn "using already checked out source tree: '$dst'"
+		cd ".."
 		return 1
 	}
 
@@ -65,7 +78,7 @@ proc checkout {} {
 	## run get_src to check out the kernel tree
 	##
 	set tool_cmd "$tools_dir/$tool_co"
-	set tool_arg "-s $src -d $dst"
+	set tool_arg "-r $LINUX_GIT_BRANCH -s $src -d $dst"
 	p_verb "executing: '$tool_cmd $tool_arg'"
 
 	p_banner "Checking out kernel source tree, please wait - this may take\
@@ -99,6 +112,7 @@ proc build {} {
 	upvar tools_dir tools_dir
 	upvar tool_build tool_build
 	upvar build_type build_type
+	global BUILD_TARGET BUILD_ARCH BUILD_CROSS BUILD_TOOLPATH BUILD_TARGET_PREFIX
 
 	# note the repo location we checked out to in a previous (checkout)
 	# stage is now our kernel source directory!
@@ -111,29 +125,16 @@ proc build {} {
 		return 0
 	}
 
-	##
-	## get make target name for our board
-	##
-	set target [get_device_attr "maketarget"]
-
-	##
-	## get ARCH, CROSS_COMPILE values
-	##
-	set arch [get_device_attr "makearch"]
-	set cross [get_device_attr "makecompile"]
-
-	##
-	## get toolchain path
-	##
-	set toolchain [get_device_attr "maketoolpath"]
-
-	##
 	## run build_image to build the image
 	##
 	set tool_cmd "$tools_dir/$tool_build"
-	set tool_arg "-s $src -d $dst -n $target -m $toolchain\
-	-a $arch -c $cross $build_type"
-
+	if [ info exists BUILD_TARGET_PREFIX ] {
+		set tool_arg "-s $src -d $dst -n $BUILD_TARGET_PREFIX/$BUILD_TARGET -m $BUILD_TOOLPATH\
+	-a $BUILD_ARCH -c $BUILD_CROSS $build_type"
+	} else {
+		set tool_arg "-s $src -d $dst -n $BUILD_TARGET -m $BUILD_TOOLPATH\
+		-a $BUILD_ARCH -c $BUILD_CROSS $build_type"
+	}
 	if [file exists $dst] {
 		p_warn "destination kernel image already exists and will be\
 		overwritten: '$dst'"
