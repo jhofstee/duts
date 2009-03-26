@@ -59,7 +59,7 @@ proc bld_config {} {
 		p_err "$res"
 		return 0
 	} else {
-		p_verb "make ${img_name}_defconfig OK"
+		p_verb "make ${img_name}_config OK"
 	}
 
 	##
@@ -85,7 +85,7 @@ proc bld_config {} {
 		p_err "$res"
 		return 0
 	} else {
-		p_verb "make ${img_name}_defconfig OK"
+		p_verb "make dep OK"
 	}
 
 	return 1
@@ -103,7 +103,7 @@ proc bld_image {} {
 		p_err "$res"
 		return 0
 	} else {
-		p_verb "make ${img_name}_defconfig OK"
+		p_verb "make uImage OK"
 	}
 
 	return 1
