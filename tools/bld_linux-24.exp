@@ -62,8 +62,6 @@ proc bld_config {} {
 		p_verb "make ${img_name}_defconfig OK"
 	}
 
-	return 1
-
 	##
 	## make oldconfig
 	##
@@ -74,7 +72,7 @@ proc bld_config {} {
 		p_err "$res"
 		return 0
 	} else {
-		p_verb "make ${img_name}_defconfig OK"
+		p_verb "make ${img_name}_oldconfig OK"
 	}
 
 	##
