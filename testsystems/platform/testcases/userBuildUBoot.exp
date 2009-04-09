@@ -127,7 +127,7 @@ proc build {} {
 	## run build_image to build the image
 	##
 	set tool_cmd "$tools_dir/$tool_build"
-	set tool_arg "-s $src -d $dst -n $BUILD_TARGET -m $BUILD_TOOLPATH\
+	set tool_arg "-s $src -d $dst -n $BUILD_TARGET \
 	-a $BUILD_ARCH -c $BUILD_CROSS $build_type"
 
 	if [file exists $dst] {

@@ -1,8 +1,9 @@
 #!/bin/env tclsh
 #                                -*- Mode: tcl -*-
 #
+# (C) Copyright 2008, 2009 Detlev Zundel <dzu@denx.de>, DENX Software Engineering
+#
 # (C) Copyright 2006, 2007 Rafal Jaworowski <raj@semihalf.com> for DENX Software Engineering
-# (C) Copyright 2008 Detlev Zundel <dzu@denx.de>, DENX Software Engineering
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -291,7 +292,7 @@ proc build_main {} {
 #
 # implementation of these methods is in individual files:
 #
-# bld_<img_type>.exp - e.g. bld_linux-26.exp, bld_linux-24.exp, bld_uboot.exp
+# bld_<img_type>.exp - e.g. bld_linux.exp, bld_uboot.exp
 #
 proc read_build_methods {t} {
         global base_dir
@@ -335,7 +336,6 @@ set options {
         {a.arg		""	"override ARCH setting"}
         {c.arg		""	"override CROSS_COMPILE setting"}
         {d.arg		""	"destination path name"}
-        {m.arg		""	"path to build tools"}
         {n.arg		""	"name of configuration to use"}
         {obj.arg	""	"pathname for build directory (linux-26 and u-boot)"}
         {s.arg		""	"src tree location"}
@@ -354,7 +354,7 @@ if {[catch {cmdline::getoptions argv $options} res]} {
 
 # No parameter gives help
 if {[llength $argv] == 0} {
-        puts "Need to specify a build-type (linux-24, linux-26 pr u-boot)\n"
+        puts "Need to specify a build-type (linux or u-boot)\n"
         usage $options
 }
 
@@ -375,7 +375,6 @@ set img_name $params(n)
 set img_src $params(s)
 set img_dst $params(d)
 set obj_dir $params(obj)
-set build_tools $params(m)
 set build_arch $params(a)
 set build_cross $params(c)
 set img_type [lindex $argv 0]

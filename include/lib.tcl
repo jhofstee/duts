@@ -1,7 +1,9 @@
 #
-# (C) Copyright 2006-2008 DENX Software Engineering
+# (C) Copyright 2008-2009 DENX Software Engineering
+#     Detlev Zundel, <dzu@denx.de>
 #
-# Author: Rafal Jaworowski <raj@semihalf.com>
+# (C) Copyright 2006, 2007 Rafal Jaworowski <raj@semihalf.com> for
+#     DENX Software Engineering
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -51,8 +53,6 @@
 # # operations on host environment
 # proc valid_host_tool {t}
 # proc check_host_tools {tools_list}
-# proc is_similar_path {p}
-# proc set_host_tool_path {p}
 # proc absolutize_path {path}
 # proc host_bash_shell {{prompt ""} {opt ""}}
 
@@ -545,75 +545,6 @@ proc check_host_tools {tools_list} {
 }
 
 #
-# table of strings in the path identifying build tools similar to what we want
-# to set
-#
-set alike {"eldk" "crosstool" "tool"}
-
-#
-# if a piece from $alike is found in $p returns 1, otherwise 0
-#
-proc is_similar_path {p} {
-	global alike
-
-	set found 0
-	foreach a $alike {
-		if [string match *$a* $p] {
-			set found 1
-		}
-	}
-	return $found
-}
-
-#
-# validates path p and adds it to current PATH; if similar path already exists
-# it is replaced with p
-#
-proc set_host_tool_path {p} {
-
-	global env
-
-	if ![valid_dir $p] {
-		return 0
-	}
-
-	##
-	## get current PATH and break it into pieces
-	##
-	set path $env(PATH)
-	set pl [split $path ":"]
-	set pl_new {}
-
-	##
-	## look for path to similar tools already present in the PATH, if we
-	## found such replace them with ours
-	##
-	set len [llength $pl]
-	for {set i 0} {$i < $len} {incr i} {
-		set el [lindex $pl $i]
-		if [is_similar_path $el] {
-			# there's already a path to build tools - change it to
-			# our newly desired path
-			set pl_new [lreplace $pl $i $i $p]
-			break
-		}
-	}
-	if [llength $pl_new] {
-		set path_new [join $pl_new ":"]
-	} else {
-		# if there is no updated path list it means there was no other
-		# build tools path found in the current PATH so we need to add
-		# ours
-		lappend pl $p
-		set path_new [join $pl ":"]
-	}
-	# now we can set the [new] PATH
-	set env(PATH) $path_new
-
-	return 1
-}
-
-#
 # Return absolute version of non-empty, non-absolute path.
 # Assume it is relative to the pwd.
 #
@@ -722,3 +653,65 @@ proc dnslookup {host} {
 	return [lindex [split $out] end]
 }
 
+#
+# checks linux version tree: takes a peek in the main Makefile for
+# version strings; returns 0xvvppss (vv = version, pp = minor, ss =
+# sublevel).  0 if unknown
+#
+proc get_linux_ver {src} {
+
+	set img_src [absolutize_path $src]
+
+	##
+	## identify VERSION
+	##
+	set cmd "grep"
+	set cmd_arg "-r \"^VERSION = \" $img_src/Makefile"
+
+	set o ""
+	if [catch {set o [eval exec $cmd $cmd_arg]}] {
+		p_err "problem with executing: '$cmd $cmd_arg'"
+		return 0
+	}
+
+	if ![regexp {^VERSION = ([0-9])} $o all ver] {
+		p_err "'VERSION =' not found in Makefile"
+		return 0
+	}
+
+	##
+	## identify PATCHLEVEL
+	##
+	set cmd_arg "-r \"PATCHLEVEL = \" $img_src/Makefile"
+	set o ""
+	if [catch {set o [eval exec $cmd $cmd_arg]}] {
+		p_err "problem with executing: '$cmd $cmd_arg'"
+		return 0
+	}
+
+	if ![regexp {^PATCHLEVEL = ([0-9])} $o all pl] {
+		p_err "'PATCHLEVEL =' not found in Makefile"
+		return 0
+	}
+
+	##
+	## identify sublevel
+	##
+	set cmd_arg "-r \"SUBLEVEL = \" $img_src/Makefile"
+	set o ""
+	if [catch {set o [eval exec $cmd $cmd_arg]}] {
+		p_err "problem with executing: '$cmd $cmd_arg'"
+		return 0
+	}
+
+	if ![regexp {^SUBLEVEL = ([0-9]+)} $o all sl] {
+		p_err "'SUBLEVEL =' not found in Makefile"
+		return 0
+	}
+	p_verb "ver $ver pl $pl sl $sl"
+
+	set res [expr ($ver << 16) | ($pl << 8) | $sl]
+	p_verb "packed $res"
+
+	return $res
+}

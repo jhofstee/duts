@@ -18,50 +18,38 @@
 # MA 02111-1307 USA
 #
 
-#
-# this file contains common routines used by both Linux build ops
-#
+set linux_ver ""
+set build_name ""
 
-#
-# checks linux version tree: takes a peek in the main Makefile for version
-# strings; returns 0/1 if doesn't/match
-#
-# v: version
-# p: patchlevel
-#
-proc check_linux_ver {v p} {
-
-	global img_src
-
-	set cmd "grep"
-	set cmd_arg "-r \"VERSION = $v\" $img_src/Makefile"
-
-	if [catch {set o [eval exec $cmd $cmd_arg]}] {
-		p_verb "version does not match"
-		return 0
+proc is_linux_24 { foo } {
+	if { [expr ($foo & 0xffff00)] == 0x20400 } {
+		return 1;
+	} else {
+		return 0;
 	}
-
-	set cmd_arg "-r \"PATCHLEVEL = $p\" $img_src/Makefile"
-	if [catch {set o [eval exec $cmd $cmd_arg]}] {
-		p_verb "patchlevel does not match"
-		return 0
-	}
-
-	p_verb "Linux tree version '$v.$p' OK"
-
-	return 1
 }
 
 #
+#
 # checks linux config file based on the config name core stored in $img_name,
-# returns 0/1 if not/found according file
+# returns 0/1 if not/found according file. Requires linux_ver to be defined
 #
 proc check_linux_config {} {
 
-	global img_src img_name build_arch
+	global img_src img_name build_arch linux_ver build_name
 
 	set c $img_name
+	set build_name $img_name
+
+# simple check. Vague kernel versions will bail out before this.
+	if { [is_linux_24 $linux_ver] } {
+		append build_name "_config"
+	} else {
+		append build_name "_defconfig"
+	}
+#config filenames are invariant
 	append c "_defconfig"
+
 	set cf "$img_src/arch/$build_arch/configs/$c"
 	if {([file exists $cf]) && ([file readable $cf])} {
 		p_verb "found config file '$cf'"
@@ -97,13 +85,14 @@ proc check_linux_config {} {
 # v: version
 # p: patchlevel
 #
-proc valid_linux_env {v p} {
+proc valid_linux_env {} {
 
 	global img_name img_src img_dst
 	global obj_dir
 	global build_tools build_arch build_cross
 	global overwrite no_clean
 	global env
+	global linux_ver
 
 	## 1. check tools
 
@@ -113,30 +102,8 @@ proc valid_linux_env {v p} {
 	set env(ARCH) $build_arch
 	set env(CROSS_COMPILE) $build_cross
 
-	##
-	## set PATH so the desired toolchain is available
-	##
-	if ![set_host_tool_path $build_tools] {
-		p_err "path to the build tools not accessible: '$p'?!"
-		return 0
-	}
-
-	##
-	## check tools availability:
-	##  - a selected tool from cross build suite, let's have a look at
-	##    gcc and ld
-	##
-	set cmd_gcc $build_cross
-	append cmd_gcc "gcc"
-	set cmd_ld $build_cross
-	append cmd_ld "ld"
-
-	set tools [list $cmd_gcc $cmd_ld]
-	if ![check_host_tools tools] {
-		return 0
-	}
-	p_verb "all tools in place, proceeding"
-
+	set linux_ver [get_linux_ver $img_src]
+	p_banner "Detected Linux version [format "0x%02x" $linux_ver]" #
 
 	## 2. check obj dir - valid only for linux 2.6
 
@@ -147,7 +114,7 @@ proc valid_linux_env {v p} {
 	##
 
 	if {[var_exists obj_dir] && ($obj_dir != "")} {
-		if {($v == "2") && ($p == "6")} {
+		if { [expr ( $linux_ver & 0xffff00) ] == 0x20600 } {
 			# strip trailing slash
 			set obj_dir [string trimright $obj_dir "/"]
 			if ![valid_dir $obj_dir 1] {
@@ -161,53 +128,7 @@ proc valid_linux_env {v p} {
 		} else {
 			p_err "attempted to use obj dir feature for a non 2.6\
 				kernel"
-			return 0;
 		}
-	}
-
-
-	## 3. check src dir
-
-	##
-	## validate source dir
-	##
-	##  - exists, writable?
-	##  - looks like a kernel tree?
-	##
-
-	# strip trailing slash
-	set img_src [string trimright $img_src "/"]
-
-	# img_src needs to be writable only when obj_dir isn't used
-	if {[var_exists obj_dir] && ($obj_dir != "")} {
-		set src_dir_ok [valid_dir $img_src]
-	} else {
-		set src_dir_ok [valid_dir $img_src 1]
-	}
-	if {!$src_dir_ok} {
-		p_err "Problems accessing source dir?! Check your -s value."
-		return 0
-	}
-
-	if ![check_linux_ver $v $p] {
-		p_err "Doesn't look like Linux $v.$p source tree: '$img_src'?!\
-		Check your -t value."
-		return 0
-	}
-	p_verb "working with source dir: '$img_src'"
-
-
-	## 4. check dst
-
-	##
-	## validate  destination location
-	## - if dir: exists, writable?
-	## - if endfile: already exists?
-	##
-	set o [expr {($overwrite == "yes") ? 1 : 0}]
-	set img_dst [string trimright $img_dst "/"]
-	if ![check_dst $img_dst $o] {
-		return 0
 	}
 
 	## 5. check kernel config file
@@ -258,5 +179,93 @@ proc make_mrproper {} {
 		p_verb "make mrproper OK"
 	}
 
+	return 1
+}
+
+proc bld_valid_env {} {
+
+	return [valid_linux_env]
+}
+
+proc bld_pre {} {
+
+	p_banner "make mrproper" #
+	return [make_mrproper]
+}
+
+proc bld_config {} {
+
+	global img_name linux_ver build_name
+	lappend cmd_list "make $build_name"
+	if [is_linux_24 $linux_ver] {
+		lappend cmd_list "make oldconfig"
+	}
+	foreach val $cmd_list {
+		p_banner $val #
+
+		if ![exec2_log $val res] {
+			p_err "$res"
+			return 0
+		} else {
+			p_verb "$val OK"
+		}
+	}
+	return 1
+}
+
+proc bld_image {} {
+
+	global img_name linux_ver
+
+	if [is_linux_24 $linux_ver] {
+		lappend cmd_list "make dep"
+	}
+
+	lappend cmd_list "make uImage"
+
+	foreach val $cmd_list {
+		p_banner $val #
+
+		if ![exec2_log $val res] {
+			p_err "$res"
+			return 0
+		} else {
+			p_verb "$val executed OK"
+		}
+	}
+	return 1
+}
+
+proc bld_post {} {
+
+	global build_arch img_dst img_src obj_dir
+
+	##
+	## copy image to the desired location
+	##
+	p_banner "copy image to destination" *
+
+
+	if {$build_arch == "ppc"} {
+		set img_file "arch/ppc/boot/images/uImage"
+	} else {
+		set img_file "arch/$build_arch/boot/uImage"
+	}
+
+	if {[var_exists obj_dir] && ($obj_dir != "")} {
+		set img_file "$obj_dir/$img_file"
+	} else {
+		set img_file "$img_src/$img_file"
+	}
+
+	if {$img_dst == ""} {
+		p_verb "no destination location specified, nothing to do.."
+	} else {
+		p_banner "Copying image to '$img_dst'\n" *
+		if ![host_copy $img_file $img_dst] {
+			return 0
+		}
+		p_verb "copied '$img_file' to '$img_dst'"
+	}
 	return 1
 }

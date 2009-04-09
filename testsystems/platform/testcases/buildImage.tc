@@ -3,19 +3,9 @@
 #
 #
 
-duts_tc Kernel24Build {
+duts_tc LinuxBuild {
 	Type host
-	Commands "!userBuildKernel24.exp"
-}
-
-duts_tc Kernel26Build {
-	Type host
-	Commands "!userBuildKernel26.exp"
-}
-
-duts_tc KernelBuild {
-	Type host
-	Commands "!userBuildKernel2x.exp"
+	Commands "!userBuildLinux.exp"
 }
 
 duts_tc UBootBuild {

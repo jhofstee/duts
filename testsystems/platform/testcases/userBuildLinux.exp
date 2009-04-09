@@ -1,7 +1,20 @@
 #
-# Build linux kernel
+# Build 2.x kernel
 #
 
+global BASE_DIR
+
+#here we're extracting repo name - to use as a base dir to checkout stuff
+if ![regexp {([^:]+)://(.+)/(.+)}  $LINUX_GIT_REPO match protocol serv repo] {
+	p_err "Incorrect git repo: $LINUX_GIT_REPO!"
+	return 0
+}
+
+set duts_ext "_DUTS"
+set repo_src $LINUX_GIT_REPO
+set repo_dst "./${repo}${duts_ext}"
+
+###############################
 set tools_dir "$BASE_DIR/tools"
 set tool_co "get_src"
 set tool_build "build_image"
@@ -38,60 +51,6 @@ proc check_tools {l} {
 	return $rv
 }
 
-#
-# checks linux version tree: takes a peek in the main Makefile for version
-# strings; returns patchlevel (4, 6), or 0 if unknown
-#
-proc get_linux_ver {src} {
-
-	set img_src [absolutize_path $src]
-
-	##
-	## identify VERSION
-	##
-	set cmd "grep"
-	set cmd_arg "-r \"^VERSION = \" $img_src/Makefile"
-
-	set o ""
-	if [catch {set o [eval exec $cmd $cmd_arg]}] {
-		p_err "problem with executing: '$cmd $cmd_arg'"
-		return 0
-	}
-
-	if ![regexp {^VERSION = ([0-9])} $o all ver] {
-		p_err "'VERSION =' didn't found"
-		return 0
-	}
-
-	if {$ver != 2} {
-		p_verb "Unknown Linux version: $ver"
-		return 0
-	}
-
-	##
-	## identify PATCHLEVEL
-	##
-	set cmd_arg "-r \"PATCHLEVEL = \" $img_src/Makefile"
-	set o ""
-	if [catch {set o [eval exec $cmd $cmd_arg]}] {
-		p_err "problem with executing: '$cmd $cmd_arg'"
-		return 0
-	}
-
-	if ![regexp {^PATCHLEVEL = ([0-9])} $o all pl] {
-		p_err "'PATCHLEVEL =' didn't found"
-		return 0
-	}
-
-	if {($pl != 4) && ($pl != 6)} {
-		p_verb "Unknown Linux patchlevel: $pl"
-		return 0
-	}
-
-	set res "linux-2$pl"
-
-	return $res
-}
 #
 # tools/get_src
 # -s /home/git/<...>
@@ -188,15 +147,34 @@ proc build {} {
 		return 0
 	}
 
-	set build_type [get_linux_ver $src]
+	#set ver [get_linux_ver $src]
+	#p_verb "Current Linux version: $ver"
+
+	#if { [expr ($ver & 0xffff00)] == 0x20400 } {
+	#	set build_type "linux-24"
+	#}
+
+	#if { [expr ($ver & 0xffff00)] == 0x20600 } {
+#		set build_type "linux-26"
+#	}
+
+	set build_type "linux"
+
+#	if ![ info exists build_type ] {
+#		p_err "bogus Linux version in $src" 1
+#		return 0
+#	}
+
+	p_verb "build type $build_type"
+
 	## run build_image to build the image
 	##
 	set tool_cmd "$tools_dir/$tool_build"
 	if [ info exists BUILD_TARGET_PREFIX ] {
-		set tool_arg "-s $src -d $dst -n $BUILD_TARGET_PREFIX/$BUILD_TARGET -m $BUILD_TOOLPATH\
+		set tool_arg "-s $src -d $dst -n $BUILD_TARGET_PREFIX/$BUILD_TARGET \
 	-a $BUILD_ARCH -c $BUILD_CROSS $build_type"
 	} else {
-		set tool_arg "-s $src -d $dst -n $BUILD_TARGET -m $BUILD_TOOLPATH\
+		set tool_arg "-s $src -d $dst -n $BUILD_TARGET \
 		-a $BUILD_ARCH -c $BUILD_CROSS $build_type"
 	}
 	if [file exists $dst] {
