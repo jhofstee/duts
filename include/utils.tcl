@@ -1,7 +1,6 @@
 #
-# (C) Copyright 2006-2008 DENX Software Engineering
-#
-# Author: Rafal Jaworowski <raj@semihalf.com>
+# (C) Copyright 2008, 2009 Detlev Zundel <dzu@denx.de>, DENX Software Engineering
+# (C) Copyright 2006, 2007 Rafal Jaworowski <raj@semihalf.com> for DENX Software Engineering
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -49,10 +48,10 @@ proc valid_board_name {{bn ""}} {
 # fn: filename with respect to the DUTS working/testcases dir
 #
 proc run_external_script {fn {vars ""} } {
-	global working_dir dry_run TC_DESCR_DIR
+	global testsystem dry_run TC_DESCR_DIR
 
 	set f [string trimleft $fn "!"]
-	set f "$working_dir/$TC_DESCR_DIR/$f"
+	set f "$testsystem/$TC_DESCR_DIR/$f"
 	set rv 1
 
 	if ![valid_file $f] {

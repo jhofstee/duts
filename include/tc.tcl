@@ -555,10 +555,10 @@ proc run_tc {tc} {
 #
 proc run_tc_list {ln} {
 
-	global board_name working_dir
+	global board_name testsystem
 
 	upvar $ln l
-	set testsystem_name [file tail $working_dir]
+	set testsystem_name [file tail $testsystem]
 
 	##
 	## Open a summary logfile.
@@ -630,7 +630,7 @@ proc check_tc_list {list} {
 #
 proc load_tc_file {f} {
 
-	global tc_filename working_dir TC_DESCR_DIR
+	global tc_filename testsystem TC_DESCR_DIR
 
 	if ![valid_file $f] {
 		#
@@ -638,7 +638,7 @@ proc load_tc_file {f} {
 		# it in the 'testcases' subdir, in case it was not the full
 		# path.
 		#
-		set d "$working_dir/$TC_DESCR_DIR"
+		set d "$testsystem/$TC_DESCR_DIR"
 		if ![valid_dir $d] {
 			p_err "Invalid testcases dir: $d" 1
 		}
@@ -690,9 +690,9 @@ proc load_all_tc_files {d {e ""}} {
 #
 proc load_tcs {} {
 
-	global working_dir l_testcases TC_DESCR_DIR
+	global testsystem l_testcases TC_DESCR_DIR
 
-	set d "$working_dir/$TC_DESCR_DIR"
+	set d "$testsystem/$TC_DESCR_DIR"
 
 	if ![valid_dir $d] {
 		p_err "Invalid testcases dir: $d" 1
@@ -701,7 +701,7 @@ proc load_tcs {} {
 	##
 	## load common TCs from all files with TC descriptions
 	##
-	puts "Testcases directory: $working_dir"
+	puts "Testcases directory: $testsystem"
 	load_all_tc_files $d
 
 	set n [llength $l_testcases]
@@ -717,14 +717,14 @@ proc load_tcs {} {
 #
 proc load_custom_tcs {{b ""}} {
 
-	global board_name working_dir l_testcases TC_DESCR_DIR
+	global board_name testsystem l_testcases TC_DESCR_DIR
 
 	set b [ expr {($b == "") ? $board_name : $b}]
 
 	##
 	## load board specific TCs, if exitst
 	##
-	set d "$working_dir/$TC_DESCR_DIR/$b"
+	set d "$testsystem/$TC_DESCR_DIR/$b"
 	if ![valid_dir $d] {
 		p_verb "no target specific TCs for $b"
 	} else {

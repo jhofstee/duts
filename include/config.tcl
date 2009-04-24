@@ -1,6 +1,6 @@
 #
+# (C) Copyright 2008, 2009 Detlev Zundel <dzu@denx.de>, DENX Software Engineering
 # (C) Copyright 2006, 2007 Rafal Jaworowski <raj@semihalf.com> for DENX Software Engineering
-# (C) Copyright 2008 Detlev Zundel <dzu@denx.de>, DENX Software Engineering
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -185,7 +185,7 @@ proc cfg_context_host {name c} {
 # low-level devices handling operations
 #
 # p: path to the tcl script with implementation of required methods, note the
-# path is relative to $working_dir
+# path is relative to $testsystem
 #
 proc cfg_device_ops {p} {
 	global cur_device a_devices device_errors BASE_DIR

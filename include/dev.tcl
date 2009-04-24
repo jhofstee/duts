@@ -1,6 +1,6 @@
 #
+# (C) Copyright 2008, 2009 Detlev Zundel <dzu@denx.de>, DENX Software Engineering
 # (C) Copyright 2006, 2007 Rafal Jaworowski <raj@semihalf.com> for DENX Software Engineering
-# (C) Copyright 2008 Detlev Zundel <dzu@denx.de>, DENX Software Engineering
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -236,7 +236,7 @@ proc valid_devices {} {
 #
 proc load_all_devices {{e ""}} {
 
-	global working_dir board_name l_boards
+	global testsystem board_name l_boards
 	global DEVICE_DESCR_DIR DEVICE_DESCR_EXT DEVICE_COMMON_FILE
 	global BASE_DIR
 

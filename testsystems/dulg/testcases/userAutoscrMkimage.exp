@@ -2,10 +2,10 @@
 # create example Autoscr image (and put it in /tftpboot dir)
 #
 
-global working_dir board_name TC_DESCR_DIR BASE_DIR
+global testsystem board_name TC_DESCR_DIR BASE_DIR
 
 set cmd "$BASE_DIR/tools/UBootAutoscrMkimage.sh"
-set arg1 "$working_dir/$TC_DESCR_DIR/example.script"
+set arg1 "$testsystem/$TC_DESCR_DIR/example.script"
 set arg2 "/tftpboot/$board_name/example.img"
 
 ##
