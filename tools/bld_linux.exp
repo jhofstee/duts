@@ -1,6 +1,6 @@
 #
+# (C) Copyright 2008, 2009 by Detlev Zundel <dzu@denx.de>, DENX Software Engineering
 # (C) Copyright 2006, 2007 by Rafal Jaworowski <raj@semihalf.com> for DENX Software Engineering
-# (C) Copyright 2008 by Detlev Zundel <dzu@denx.de>, DENX Software Engineering
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -64,26 +64,14 @@ proc check_linux_config {} {
 #
 # validates environment for kernel build:
 #
-# 1. check tools
-#   - path makes sense, gcc, ld etc. exist?
+# 1. check environment variables
+#   - make sure ARCH and CROSS_COMPILE are set
 #
 # 2. check obj dir - valid only for linux 2.6
 #  - variable set
 #  - directory exists, writable?
 #
-# 3. check src dir
-#   - exists, writable?
-#   - looks like a kernel tree?
-#
-# 4. check dst
-#   - if dir: exists, writable?
-#   - if endfile: already exists?
-#
-# 5. check kernel config file
-#   - exists _defconfig
-#
-# v: version
-# p: patchlevel
+# 3. check kernel config file
 #
 proc valid_linux_env {} {
 
@@ -94,13 +82,13 @@ proc valid_linux_env {} {
 	global env
 	global linux_ver
 
-	## 1. check tools
+	## 1. check environment variables
 
 	##
 	## set env vars: ARCH, CROSS_COMPILE
 	##
-	set env(ARCH) $build_arch
-	set env(CROSS_COMPILE) $build_cross
+	setenv_if_unset ARCH $build_arch
+	setenv_if_unset CROSS_COMPILE $build_cross
 
 	set linux_ver [get_linux_ver $img_src]
 	p_banner "Detected Linux version [format "0x%02x" $linux_ver]" #
@@ -131,41 +119,22 @@ proc valid_linux_env {} {
 		}
 	}
 
-	## 5. check kernel config file
+	## 3. check kernel config file
 	##
 	## - exists <name>_config, <name>_defconfig
 
-	#
 	# if user-provided kernel config name was '.+config' we only save the
 	# core of the name for further processing when it will be personalized
 	# with _config or _defconfig suffix depending on context. This is
 	# mainly due to different handling of config name in Linux 2.4
 	# (make <name>_config) vs. 2.6 (make <name>_defconfig)
 	# e.g. for TQM834x_defconfig save only the 'TQM834x' part
-	#
-	regexp {(.+)(_.*config)} $img_name in1 in2 in3]
-	if [info exists in1] {
-		set img_name $in2
-	}
+	set img_name [regsub "_(def)?config" $img_name ""]
 
 	if ![check_linux_config] {
 		return 0
 	}
 	p_verb "using '$img_name' kernel config"
-
-	##
-	## verify if we can skip configuration steps
-	##
-	if {$no_clean == "yes"} {
-		if [file exists $img_src/.config] {
-			p_verb "performing 'no-clean' build, config steps will\
-			be skipped"
-		} else {
-			p_verb "'no-clean' build specified but no .config\
-			file found so doing full build anyway..."
-			set no_clean "no"
-		}
-	}
 
 	return 1
 }

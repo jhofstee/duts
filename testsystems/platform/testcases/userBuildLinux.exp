@@ -3,6 +3,9 @@
 #
 
 global BASE_DIR
+global LINUX_GIT_REPO LINUX_GIT_BRANCH
+global BUILD_TARGET_PREFIX BUILD_TARGET BUILD_ARCH BUILD_CROSS
+global _context_kernel_image
 
 #here we're extracting repo name - to use as a base dir to checkout stuff
 if ![regexp {([^:]+)://(.+)/(.+)}  $LINUX_GIT_REPO match protocol serv repo] {
@@ -11,73 +14,29 @@ if ![regexp {([^:]+)://(.+)/(.+)}  $LINUX_GIT_REPO match protocol serv repo] {
 }
 
 set duts_ext "_DUTS"
-set repo_src $LINUX_GIT_REPO
-set repo_dst "./${repo}${duts_ext}"
+set src $LINUX_GIT_REPO
+set dst "./${repo}${duts_ext}"
 
 ###############################
 set tools_dir "$BASE_DIR/tools"
-set tool_co "get_src"
-set tool_build "build_image"
 
-proc valid_tool {t} {
+##
+## get sources
+##
+if [valid_dir $dst] {
+	# TODO - validate it is actually a kernel tree - like we do in
+	# check_linux_ver{} (tools/bld_linux.exp) - maybe put it in
+	# some common file
 
-	set rv 1
-	if [file exists $t] {
-		if {([file readable $t]) && ([file executable $t])} {
-			p_verb "tool '$t' OK"
-		} else {
-			p_err "tool '$t' not accessible"
-			set rv 0
-		}
+	set cmd "grep"
+	set cmd_arg "$LINUX_GIT_REPO $dst/.git/config"
+
+	set o ""
+	if [catch {set o [eval exec $cmd $cmd_arg]}] {
+		puts "$dst exists but is not from $LINUX_GIT_REPO!"
+		puts "you will need to remove $dst to proceed"
+		return 0
 	} else {
-		p_err "tool '$t' not found"
-		set rv 0
-	}
-
-	return $rv
-}
-
-proc check_tools {l} {
-
-	upvar $l tools
-	upvar tools_dir tools_dir
-
-	set rv 1
-	foreach t $tools {
-		if ![valid_tool "$tools_dir/$t"] {
-			set rv 0
-		}
-	}
-	return $rv
-}
-
-#
-# tools/get_src
-# -s /home/git/<...>
-# -d ./
-#
-proc checkout {} {
-
-	upvar repo_dst dst
-	upvar repo_src src
-	upvar tools_dir tools_dir
-	upvar tool_co tool_co
-	global LINUX_GIT_BRANCH BASE_DIR LINUX_GIT_REPO
-
-	if [valid_dir $dst] {
-		# TODO - validate it is actually a kernel tree - like we do in
-		# check_linux_ver{} (tools/bld_linux.exp) - maybe put it in
-		# some common file
-
-		set cmd "grep"
-		set cmd_arg "$LINUX_GIT_REPO $dst/.git/config"
-
-		set o ""
-		if [catch {set o [eval exec $cmd $cmd_arg]}] {
-			puts "$dst exists but is not from $LINUX_GIT_REPO!"
-			puts "you will need to remove $dst to proceed"
-			return 0
-		} else {
 		# seems the specified repo directory is already checked
 		# out so don't bother with executing get_src
 		p_banner "GIT tree exists, switching to branch $LINUX_GIT_BRANCH..."
@@ -93,129 +52,81 @@ proc checkout {} {
 
 		p_warn "using already checked out source tree: '$dst'"
 		cd ".."
-		return 1
-		}
 	}
-
+} else {
 	##
 	## run get_src to check out the kernel tree
 	##
-	set tool_cmd "$tools_dir/$tool_co"
+	# tools/get_src -r <rev> -s <src> -d <dst>
+	set tool_cmd "$tools_dir/get_src"
 	set tool_arg "-r $LINUX_GIT_BRANCH -s $src -d $dst"
 	p_verb "executing: '$tool_cmd $tool_arg'"
 
-	p_banner "Checking out kernel source tree, please wait - this may take\
-	a while..." *
+	p_banner "Checking out kernel source tree, please wait - this may take a while..." *
 	if ![exec2_log "$tool_cmd $tool_arg" err] {
 		puts "$err"
 		return 0
 	}
-#	send_user $o
 
 	p_banner "Kernel tree checked out" *
-	return 1
 }
 
 
-#
-# -n <board_name>
-# -s <path to the repo tha was just checked out>
-# -d /tftpboot/<board_name>
-# -m  <build_tools>
-# -a  <build_arch>
-# -c  <build_cross>
-#
-# -b
-# -o
-# linux-26
-#
-proc build {} {
-
-	global a_devices board_name _context_kernel_image
-	upvar tools_dir tools_dir
-	upvar tool_build tool_build
-	global BUILD_TARGET BUILD_ARCH BUILD_CROSS BUILD_TOOLPATH BUILD_TARGET_PREFIX
-
-	# note the repo location we checked out to in a previous (checkout)
-	# stage is now our kernel source directory!
-	upvar repo_dst src
-
-	set dst $_context_kernel_image
-	set dst_dir [file dirname $dst]
-	if ![valid_dir $dst_dir 1] {
-		p_err "destination dir not accessible: '$dst_dir''"
-		return 0
-	}
-
-	#set ver [get_linux_ver $src]
-	#p_verb "Current Linux version: $ver"
-
-	#if { [expr ($ver & 0xffff00)] == 0x20400 } {
-	#	set build_type "linux-24"
-	#}
-
-	#if { [expr ($ver & 0xffff00)] == 0x20600 } {
-#		set build_type "linux-26"
-#	}
-
-	set build_type "linux"
-
-#	if ![ info exists build_type ] {
-#		p_err "bogus Linux version in $src" 1
-#		return 0
-#	}
-
-	p_verb "build type $build_type"
-
-	## run build_image to build the image
-	##
-	set tool_cmd "$tools_dir/$tool_build"
-	if [ info exists BUILD_TARGET_PREFIX ] {
-		set tool_arg "-s $src -d $dst -n $BUILD_TARGET_PREFIX/$BUILD_TARGET \
-	-a $BUILD_ARCH -c $BUILD_CROSS $build_type"
-	} else {
-		set tool_arg "-s $src -d $dst -n $BUILD_TARGET \
-		-a $BUILD_ARCH -c $BUILD_CROSS $build_type"
-	}
-	if [file exists $dst] {
-		p_warn "destination kernel image already exists and will be\
-		overwritten: '$dst'"
-		set tool_arg "-o $tool_arg"
-	}
-
-	p_verb "executing: '$tool_cmd $tool_arg'"
-
-	p_banner "Building kernel image, please wait - this may take a\
-	while..." *
-
-	if ![exec2_log "$tool_cmd $tool_arg" err] {
-		puts "$err"
-		return 0
-	}
-
-	p_banner "Finished building kernel image" *
-
-	return 1
-}
-
 ##
-## check if build helper tools are accessible
+## Build the image
 ##
-set tools [list $tool_co $tool_build]
-if ![check_tools tools] {
-	p_err "build tools not accessible"
+# Note that the $dst from previous stage now is our $src ;)
+set src $dst
+set dst $_context_kernel_image
+set dst_dir [file dirname $dst]
+if ![valid_dir $dst_dir 1] {
+	p_err "destination dir not accessible: '$dst_dir''"
 	return 0
 }
-p_verb "build tools in place, proceeding"
 
+#set ver [get_linux_ver $src]
+#p_verb "Current Linux version: $ver"
+
+#if { [expr ($ver & 0xffff00)] == 0x20400 } {
+#	set build_type "linux-24"
+#}
+
+#if { [expr ($ver & 0xffff00)] == 0x20600 } {
+#	set build_type "linux-26"
+#}
+
+set build_type "linux"
+
+p_verb "build type $build_type"
+
+## run build_image to build the image
+#
+# -n <board_name> -s <srcdir> -d /tftpboot/<board_name>
+# -m <build_tools> -a <build_arch> -c <build_cross>
+# -b -o linux-26
+#
 ##
-## get sources
-##
-if ![checkout] {
-	exit1
+set tool_cmd "$tools_dir/build_image"
+if [ info exists BUILD_TARGET_PREFIX ] {
+	set tool_arg "-s $src -d $dst -n $BUILD_TARGET_PREFIX/$BUILD_TARGET \
+	-a $BUILD_ARCH -c $BUILD_CROSS $build_type"
+} else {
+	set tool_arg "-s $src -d $dst -n $BUILD_TARGET \
+		-a $BUILD_ARCH -c $BUILD_CROSS $build_type"
+}
+if [file exists $dst] {
+	p_warn "destination kernel image already exists and will be\
+		overwritten: '$dst'"
+	set tool_arg "-o $tool_arg"
 }
 
-##
-## build kernel
-##
-build
+p_verb "executing: '$tool_cmd $tool_arg'"
+
+p_banner "Building kernel image, please wait - this may take a while..." *
+
+if ![exec2_log "$tool_cmd $tool_arg" err] {
+	puts "$err"
+	return 0
+}
+
+p_banner "Finished building kernel image" *

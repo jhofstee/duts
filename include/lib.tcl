@@ -51,6 +51,7 @@
 # proc valid_file {f {check_write "0"}}
 
 # # operations on host environment
+# proc setenv_if_unset {name val}
 # proc valid_host_tool {t}
 # proc check_host_tools {tools_list}
 # proc absolutize_path {path}
@@ -493,6 +494,22 @@ proc valid_file {f {check_write "0"}} {
 ###############################################################################
 # operations on host environment
 ###############################################################################
+
+#
+# Set an environment variable if unset
+#
+# FIXME: Once this is called from the main DUTS (and not a sub-process),
+# use p_verb.
+proc setenv_if_unset {name val} {
+	global env
+
+	if [info exists env($name)] {
+		puts "DUTS: Not changing environment variable $name=$env($name)"
+	} else {
+		set env($name) $val
+		puts "DUTS: Setting environment variable $name=$val"
+	}
+}
 
 #
 # locates tool command on the host
