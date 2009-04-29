@@ -7,11 +7,11 @@ duts_tc UBootCpFlash {
 	Type u-boot
 	Timeout 300
 	Pre {
-		"prot off 81e00000 81e1ffff" ".*"
-		"era 81e00000 81e1ffff" ".*"
+		"prot off 0x81e00000 0x81e1ffff" ".*"
+		"era 0x81e00000 0x81e1ffff" ".*"
 	}
 	Commands {
-		"cp.b 100000 81e00000 10000" ".*"
+		"cp.b 0x100000 0x81e00000 0x10000" ".*"
 	}
 }
 
@@ -19,10 +19,10 @@ duts_tc UBootCpFlashErrors {
 	Type u-boot
 	Timeout 300
 	Pre {
-		"prot on 81e00000 81e1ffff" ".*"
+		"prot on 0x81e00000 0x81e1ffff" ".*"
 	}
 	Commands {
-		"cp.b 100000 81e00000 10000" ".*"
+		"cp.b 0x100000 0x81e00000 0x10000" ".*"
 	}
 }
 
@@ -30,10 +30,10 @@ duts_tc UBootEraseStartEnd {
 	Type u-boot
 	Timeout 300
 	Pre {
-		"prot off 81e00000 81e1ffff" ".*"
+		"prot off 0x81e00000 0x81e1ffff" ".*"
 	}
 	Commands {
-		"era 81e00000 81e1ffff" ".*"
+		"era 0x81e00000 0x81e1ffff" ".*"
 	}
 }
 
@@ -41,7 +41,7 @@ duts_tc UBootEraseSectors {
 	Type u-boot
 	Timeout 300
 	Pre {
-		"prot off 81e00000 81e3ffff" ".*"
+		"prot off 0x81e00000 0x81e3ffff" ".*"
 	}
 	Commands {
 		"era 1:240-241" ".*"
@@ -52,7 +52,7 @@ duts_tc UBootEraseBank {
 	Type u-boot
 	Timeout 300
 	Pre {
-		"prot on 80000000 8005ffff" ".*"
+		"prot on 0x80000000 0x8005ffff" ".*"
 	}
 	Commands {
 		"era bank 1" ".*"
@@ -63,7 +63,7 @@ duts_tc UBootEraseAll {
 	Type u-boot
 	Timeout 300
 	Pre {
-		"prot on 80000000 8005ffff" ".*"
+		"prot on 0x80000000 0x8005ffff" ".*"
 	}
 	Commands {
 		"era all" ".*"
@@ -74,13 +74,13 @@ duts_tc UBootProtect {
 	Type u-boot
 	Timeout 300
 	Pre {
-		"prot off 81e00000 81e1ffff" ".*"
+		"prot off 0x81e00000 0x81e1ffff" ".*"
 	}
 	Commands {
 		"fli" ".*"
-		"prot on 81e00000 81e1ffff" ".*"
+		"prot on 0x81e00000 0x81e1ffff" ".*"
 		"fli" ".*"
-		"era 81e00000 81e1ffff" ".*"
+		"era 0x81e00000 0x81e1ffff" ".*"
 		"prot off 1:240" ".*"
 		"fli" ".*"
 		"era 1:240" ".*"

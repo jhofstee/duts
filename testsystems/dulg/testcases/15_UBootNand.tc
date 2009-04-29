@@ -32,7 +32,7 @@ duts_tc UBootNandErase {
 	Type u-boot
 	Requires nand
 	Commands {
-		"nand erase 0 10000" "OK"
+		"nand erase 0 0x10000" "OK"
 	}
 }
 
@@ -40,8 +40,8 @@ duts_tc UBootNandWrite {
 	Type u-boot
 	Requires nand
 	Commands {
-		"mw $CFG_RAM_WS_BASE 55aa55aa 4000" ".*"
-		"nand write $CFG_RAM_WS_BASE 0 10000" "65536 bytes written: OK" 
+		"mw $CFG_RAM_WS_BASE 0x55aa55aa 0x4000" ".*"
+		"nand write $CFG_RAM_WS_BASE 0 0x10000" "65536 bytes written: OK"
 	}
 }
 
@@ -49,8 +49,8 @@ duts_tc UBootNandRead {
 	Type u-boot
 	Requires nand
 	Commands {
-		"nand read $CFG_RAM_WS_BASE_ALT 0 10000" "65536 bytes read: OK"      
+		"nand read $CFG_RAM_WS_BASE_ALT 0 0x10000" "65536 bytes read: OK"
 		"md $CFG_RAM_WS_BASE_ALT" "00: 55aa55aa"
-		"cmp $CFG_RAM_WS_BASE $CFG_RAM_WS_BASE_ALT 4000" "16384 words were the same"
+		"cmp $CFG_RAM_WS_BASE $CFG_RAM_WS_BASE_ALT 0x4000" "16384 words were the same"
 	}
 }
