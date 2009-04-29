@@ -12,7 +12,7 @@ set timeout 600
 
 set RAM_TEST_END [expr $CFG_RAM_WS_BASE + 0x100000 ]
 
-send -s "mtest $CFG_RAM_WS_BASE $RAM_TEST_END\r"
+send -s [format "mtest $CFG_RAM_WS_BASE 0x%x\r" $RAM_TEST_END]
 expect "0000000F"
 send -s "\003"
 expect {
