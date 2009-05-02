@@ -130,3 +130,5 @@ if ![exec2_log "$tool_cmd $tool_arg" err] {
 }
 
 p_banner "Finished building kernel image" *
+return 1
+
