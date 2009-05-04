@@ -6,22 +6,22 @@ global env
 
 proc _walk dir {
 
-    set files [list]
-    foreach f [glob -nocomplain [file join $dir *]] {
-	set type [file type $f]
-	switch $type {
-	    directory {
-		set files [concat $files [_walk $f]]
-	    }
-	    file {
-		lappend files $f
-	    }
-	    default {
-		# Goofy file types -- just ignore them
-	    }
+	set files [list]
+	foreach f [glob -nocomplain [file join $dir *]] {
+		set type [file type $f]
+		switch $type {
+			directory {
+				set files [concat $files [_walk $f]]
+			}
+			file {
+				lappend files $f
+			}
+			default {
+				# Goofy file types -- just ignore them
+			}
+		}
 	}
-    }
-    return $files
+	return $files
 }
 
 proc valid_tool {t} {
@@ -82,16 +82,16 @@ proc rpath_check {p} {
 				set temp $expect_out(1,string)
 				p_verb "temp match: $temp"
 				if ![expr [string equal "/usr/lib" $temp] || \
-				  [string equal "/usr/lib64" $temp] || \
-				  [string equal "/lib" $temp] || \
-				  [string equal "/lib64" $temp] || \
-				  [string equal "/etc/appWeb/bin" $temp] || \
-				  [string equal "/usr/local/xenomai/lib" $temp] || \
-				  [string equal "\$ORIGIN" $temp]] {
-					puts "---------------------------------"
-					puts "$file contains wrong RPATH: $temp"
-					set res 0
-				}
+					 [string equal "/usr/lib64" $temp] || \
+					 [string equal "/lib" $temp] || \
+					 [string equal "/lib64" $temp] || \
+					 [string equal "/etc/appWeb/bin" $temp] || \
+					 [string equal "/usr/local/xenomai/lib" $temp] || \
+					 [string equal "\$ORIGIN" $temp]] {
+						 puts "---------------------------------"
+						 puts "$file contains wrong RPATH: $temp"
+						 set res 0
+					 }
 				close
 				wait
 			} eof wait

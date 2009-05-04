@@ -21,13 +21,12 @@ The DUTS framework RPATH_Check test description file is located at
 testsystems/platform/testcases/host/rpath_check.tc
 
 The test should be run with the following command line:
-	# ROOTPATH=<eldk-target-path-to-check> ./duts -d testsystems/platform t \
-      host -t RPATH_Check
-where ROOTPATH is the path where the files should be checked; the "-d
+	# ROOTPATH=<eldk-target-path-to-check> ./duts -td testsystems/platform \
+      -tc RPATH_Check host
+where ROOTPATH is the path where the files should be checked; the "-td
 testsystems/platform" switch enables test cases located in the
-testsystems/platform directory; the "t host" switch chooses "host"
-target device and the "-t RPATH_Check" switch launches the RPATH_Check
-test case.
+testsystems/platform directory; and the "-tc RPATH_Check" switch
+launches the RPATH_Check test case the for the "host" target device.
 
 If the ROOTPATH is not defined, the CFG_ROOTPATH variable defined in the
 devices/host.tgt file is used ("/opt/eldk").
