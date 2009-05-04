@@ -11,7 +11,11 @@ proc _walk dir {
 		set type [file type $f]
 		switch $type {
 			directory {
-				set files [concat $files [_walk $f]]
+				if {[file readable $f]} {
+					set files [concat $files [_walk $f]]
+				} else {
+					p_warn "Directory $f not readable - skipping"
+				}
 			}
 			file {
 				lappend files $f
