@@ -4,15 +4,14 @@
 global CFG_ROOTPATH
 global env
 
-proc _walk dir {
-
+proc _walk {dir cmd} {
 	set files [list]
 	foreach f [glob -nocomplain [file join $dir *]] {
 		set type [file type $f]
 		switch $type {
 			directory {
 				if {[file readable $f]} {
-					set files [concat $files [_walk $f]]
+					_walk $f $cmd
 				} else {
 					p_warn "Directory $f not readable - skipping"
 				}
@@ -25,19 +24,16 @@ proc _walk dir {
 			}
 		}
 	}
-	return $files
+	eval $cmd files
 }
 
-proc rpath_check {p} {
-	global tool
+proc rpath_check_files {fl} {
+	global cnt
+	upvar $fl files
 	p_verb "rpath_check func"
-	set files [_walk $p]
-	set cnt 0
-	set res 1
 	log_user 0
 	exp_internal 0
 	foreach file $files {
-		incr cnt
 		if [string match ".*a" [file extension $file]] {
 			p_verb "$file  == .a(.la)"
 			continue
@@ -67,24 +63,19 @@ proc rpath_check {p} {
 			-re {Library rpath: \[([^\]]*)} {
 				set temp $expect_out(1,string)
 				p_verb "temp match: $temp"
-				if ![expr [string equal "/usr/lib" $temp] || \
-					 [string equal "/usr/lib64" $temp] || \
-					 [string equal "/lib" $temp] || \
-					 [string equal "/lib64" $temp] || \
-					 [string equal "/etc/appWeb/bin" $temp] || \
-					 [string equal "/usr/local/xenomai/lib" $temp] || \
-					 [string equal "\$ORIGIN" $temp]] {
-						 puts "---------------------------------"
-						 puts "$file contains wrong RPATH: $temp"
-						 set res 0
-					 }
+				if {![regexp [format "%s%s%s%s" \
+						  "^(/usr/lib|/usr/lib64|/lib|/lib64" \
+						  "|/etc/appWeb/bin" \
+						  "|/usr/local/xenomai/lib" \
+						  "|\\\$ORIGIN)$"] $temp]} {
+					incr cnt
+					p_warn "$file contains wrong RPATH: $temp"
+				}
 				close
 				wait
 			} eof wait
 		}
 	}
-	puts "Number of files $cnt"
-	return $res
 }
 
 if [in_array env ROOTPATH]  {
@@ -98,9 +89,6 @@ if [in_array env ROOTPATH]  {
 	return 0
 }
 
-p_verb "checkpath = $check_path"
-if ![valid_dir $check_path 0] {
-	return 0
-}
-
-rpath_check $check_path
+set cnt 0
+_walk $check_path rpath_check_files
+return [expr $cnt != 0]
