@@ -28,24 +28,6 @@ proc _walk dir {
 	return $files
 }
 
-proc valid_tool {t} {
-
-	set rv 1
-	if [file exists $t] {
-		if {([file readable $t]) && ([file executable $t])} {
-			p_verb "tool '$t' OK"
-		} else {
-			p_err "tool '$t' not accessible"
-			set rv 0
-		}
-	} else {
-		p_err "tool '$t' not found"
-		set rv 0
-	}
-
-	return $rv
-}
-
 proc rpath_check {p} {
 	global tool
 	p_verb "rpath_check func"
@@ -103,13 +85,6 @@ proc rpath_check {p} {
 	}
 	puts "Number of files $cnt"
 	return $res
-}
-
-set tool "/usr/bin/readelf"
-
-if ![valid_tool $tool] {
-	puts "$tool doesn't exists"
-	return 0
 }
 
 if [in_array env ROOTPATH]  {
