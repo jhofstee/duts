@@ -27,6 +27,7 @@ duts_tc UBootProtectHelp {
 duts_tc UBootCpFlash {
 	Type u-boot
 	Timeout 300
+	Cost 60
 	Pre {
 		"prot off $CFG_FLASH_TST_START $CFG_FLASH_TST_END" ".*"
 		"era $CFG_FLASH_TST_START $CFG_FLASH_TST_END" ".*"
@@ -39,6 +40,7 @@ duts_tc UBootCpFlash {
 duts_tc UBootCpFlashErrors {
 	Type u-boot
 	Timeout 300
+	Cost 60
 	Pre {
 		"prot on $CFG_FLASH_TST_START $CFG_FLASH_TST_END" ".*"
 	}
@@ -50,6 +52,7 @@ duts_tc UBootCpFlashErrors {
 duts_tc UBootEraseStartEnd {
 	Type u-boot
 	Timeout 600
+	Cost 60
 	Pre {
 		"prot off $CFG_FLASH_ERASE_START $CFG_FLASH_ERASE_END" ".*"
 	}
@@ -61,6 +64,7 @@ duts_tc UBootEraseStartEnd {
 duts_tc UBootEraseSectors {
 	Type u-boot
 	Timeout 600
+	Cost 60
 	Pre {
 		"prot off $CFG_FLASH_TST_START $CFG_FLASH_TST_END" ".*"
 	}
@@ -72,6 +76,7 @@ duts_tc UBootEraseSectors {
 duts_tc UBootEraseBank {
 	Type u-boot
 	Timeout 1200
+	Cost 60
 	Pre {
 		"prot on $CFG_FLASH_PROT1_START $CFG_FLASH_PROT1_END" ".*"
 	}
@@ -83,6 +88,7 @@ duts_tc UBootEraseBank {
 duts_tc UBootEraseAll {
 	Type u-boot
 	Timeout 1200
+	Cost 60
 	Pre {
 		"prot on $CFG_FLASH_PROT1_START $CFG_FLASH_PROT1_END" ".*"
 	}
@@ -94,6 +100,7 @@ duts_tc UBootEraseAll {
 duts_tc UBootProtect {
 	Type u-boot
 	Timeout 600
+	Cost 60
 	Pre {
 		"prot off $CFG_FLASH_TST_START $CFG_FLASH_TST_END" ".*"
 	}
