@@ -169,6 +169,8 @@ set control_con ""
 # Option handling
 set options {
 	{c.arg		""	"use supplied configuration, ? lists choices"}
+	{maxcost.arg	""	"exclude tests more expensive than argument"}
+	{mincost.arg	""	"exclude tests less expensive than argument"}
 	{td.arg		""	"testsystem directory (defaults to dulg)"}
 	{date.arg	""	"use supplied date"}
 	{ts.arg		""	"narrow to supplied list of test sets"}
@@ -277,6 +279,29 @@ for {set i 0} {$i < [llength $l_runlist]} {incr i} {
 		incr i -1
 	}
 }
+
+#Remove testcases based on cost
+if {$params(maxcost) != ""} {
+	for {set i 0} {$i < [llength $l_runlist]} {incr i} {
+		set tc [lindex $l_runlist $i]
+		if {$a_testcases($tc,cost) > $params(maxcost)} {
+			puts "Skipping testcase $tc as its cost is too high"
+			set l_runlist [lreplace $l_runlist $i $i]
+			incr i -1
+		}
+	}
+}
+if {$params(mincost) != ""} {
+	for {set i 0} {$i < [llength $l_runlist]} {incr i} {
+		set tc [lindex $l_runlist $i]
+		if {$a_testcases($tc,cost) < $params(mincost)} {
+			puts "Skipping testcase $tc as its cost is too low"
+			set l_runlist [lreplace $l_runlist $i $i]
+			incr i -1
+		}
+	}
+}
+
 
 # If we continue, use previous summary file to disable test cases
 if {$params(continue)} {

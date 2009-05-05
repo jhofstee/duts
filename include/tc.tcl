@@ -56,6 +56,10 @@ proc duts_tc {name args} {
 
 	lappend l_testcases $name
 
+	# setup defaults
+	set a_testcases($cur_tc,logfile) "$name.log"
+	set a_testcases($cur_tc,cost) 1
+
 	uplevel 1 [lindex $args end]
 
 	# check if we have mandatory sections
@@ -65,11 +69,6 @@ proc duts_tc {name args} {
 
 	# save the filename the TC lives in
 	set a_testcases($cur_tc,filename) $tc_filename
-
-	# setup defaults
-	if {![in_array a_testcases "$name,logfile"]} {
-		set a_testcases($cur_tc,logfile) "$name.log"
-	}
 }
 
 proc Type {type} {
@@ -174,6 +173,13 @@ proc conflictset {tc} {
 	}
 }
 
+proc Cost {v} {
+	global cur_tc
+	global a_testcases
+
+	set a_testcases($cur_tc,cost) $v
+}
+
 #
 # shows list of all test cases
 #
@@ -240,6 +246,10 @@ proc show_tc_details {tc} {
 	}
 	if {[in_array a_testcases "$tc,pre"]} {
 		puts "  Pre:\t\t$a_testcases($tc,pre)"
+	}
+
+	if {$a_testcases($tc,cost) != 1} {
+		puts "  Cost:\t\t$a_testcases($tc,cost)"
 	}
 
 	if {[in_array a_testcases "$tc,commands"]} {
