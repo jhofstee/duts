@@ -22,27 +22,6 @@
 # implementation of bld_ methods for building U-Boot image
 #
 
-#
-# checks U-Boot tree: takes a peek in the main Makefile for familiar strings
-# returns 0/1 if doesn't/match
-#
-proc check_uboot_tree {} {
-
-	global img_src
-
-	set cmd "grep"
-	set cmd_arg "-r \"U_BOOT_VERSION =\" $img_src/Makefile"
-
-	if [catch {set o [eval exec $cmd $cmd_arg]}] {
-		p_verb "U_BOOT_VERSION string not found"
-		return 0
-	} else {
-		p_verb "U-Boot source tree recognized, OK"
-	}
-
-	return 1
-}
-
 proc make_mrproper {} {
 
 	if ![exec2_log "make mrproper" res] {
@@ -58,23 +37,13 @@ proc make_mrproper {} {
 #
 # validates environment for U-Boot build:
 #
-# 1. check tools
-#   - path makes sense, gcc, ld etc. exist?
+# 1. check environment variables
 #
-# 3. check obj dir
+# 2. check obj dir
 #   - variable set
 #   - exists, writable?
 #
-# 3. check src dir
-#   - exists, writable?
-#   - looks like a U-Boot tree?
-#
-# 4. check dst
-#   - if dir: exists, writable?
-#   - if endfile: already exists?
-#
-# 5. check config file
-#   - exists include/config.h
+# 3. check config file
 #
 proc bld_valid_env {} {
 
@@ -84,38 +53,13 @@ proc bld_valid_env {} {
 	global overwrite no_clean
 	global env
 
-	## 1. check tools
+	## 1. check environment variables
 
 	##
 	## set env vars: ARCH, CROSS_COMPILE
 	##
 	setenv_if_unset ARCH $build_arch
 	setenv_if_unset CROSS_COMPILE $build_cross
-
-	##
-	## set PATH so the desired toolchain is available
-	##
-	if ![set_host_tool_path $build_tools] {
-		p_err "path to the build tools not accessible: '$p'?!"
-		return 0
-	}
-
-	##
-	## check tools availability:
-	##  - a selected tool from cross build suite, let's have a look at
-	##    gcc and ld
-	##
-	set cmd_gcc $build_cross
-	append cmd_gcc "gcc"
-	set cmd_ld $build_cross
-	append cmd_ld "ld"
-
-	set tools [list $cmd_gcc $cmd_ld]
-	if ![check_host_tools tools] {
-		return 0
-	}
-	p_verb "all tools in place, proceeding"
-
 
 	## 2. check obj dir
 
@@ -139,69 +83,11 @@ proc bld_valid_env {} {
 	}
 
 
-	## 3. check src dir
-
+	## 3. check U-Boot config file
 	##
-	## validate source dir
-	##
-	##  - exists, writable?
-	##  - looks like a U-Boot tree?
-	##
-
-	# strip trailing slash
-	set img_src [string trimright $img_src "/"]
-
-	# img_src needs to be writable only when obj_dir isn't used
-	if {[var_exists obj_dir] && ($obj_dir != "")} {
-		set src_dir_ok [valid_dir $img_src]
-	} else {
-		set src_dir_ok [valid_dir $img_src 1]
-	}
-	if {!$src_dir_ok} {
-		p_err "Problems accessing source dir?!"
-		return 0
-	}
-
-	if ![check_uboot_tree] {
-		p_err "Doesn't look like U-Boot source tree: '$img_src'?!\
-		Check your -s value."
-		return 0
-	}
-	p_verb "working with source dir: '$img_src'"
-
-
-	## 4. check dst
-
-	##
-	## validate  destination location
-	## - if dir: exists, writable?
-	## - if endfile: already exists?
-	##
-	set o [expr {($overwrite == "yes") ? 1 : 0}]
-	set img_dst [string trimright $img_dst "/"]
-	if ![check_dst $img_dst $o "u-boot.bin"] {
-		return 0
-	}
-
-	## 5. check U-Boot config file
-	##
-	## - exists include/configs/<name>.h
-
 	# extract only the core config name if supplied in <name>_config
 	# fashion
-	regexp {(.+)(_.*config)} $img_name in1 in2 in3]
-	if [info exists in1] {
-		set img_name $in2
-	}
-	set c $img_name
-	append c ".h"
-	set cf "$img_src/include/configs/$c"
-	if {([file exists $cf]) && ([file readable $cf])} {
-		p_verb "found config file '$cf'"
-	} else {
-		p_err "no U-Boot config file: '$cf'?! Check your -n value."
-		return 0
-	}
+	set img_name [regsub "_.*config$" $img_name ""]
 	p_verb "using U-Boot config: '$img_name'"
 
 	##

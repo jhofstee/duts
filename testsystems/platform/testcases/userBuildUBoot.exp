@@ -3,177 +3,103 @@
 #
 
 global BASE_DIR
+global UBOOT_GIT_REPO UBOOT_GIT_BRANCH
+global BUILD_TARGET BUILD_ARCH BUILD_CROSS
+global _context_firmware_image
+
+#here we're extracting repo name - to use as a base dir to checkout stuff
+if ![regexp {([^:]+)://(.+)/(.+)}  $UBOOT_GIT_REPO match protocol serv repo] {
+	p_err "Incorrect git repo: $UBOOT_GIT_REPO!"
+	return 0
+}
 
 set duts_ext "_DUTS"
-set uboot "u-boot"
-set repo_src $UBOOT_GIT_REPO
-set repo_dst "./${uboot}${duts_ext}"
+set src $UBOOT_GIT_REPO
+set dst "./${repo}${duts_ext}"
 
-set build_type "uboot"
-
-set timeout_build 1000
-
+###############################
 set tools_dir "$BASE_DIR/tools"
-set tool_co "get_src"
-set tool_build "build_image"
 
-proc valid_tool {t} {
+##
+## get sources
+##
+if [valid_dir $dst] {
+	# seems the specified repo directory is already checked
+	# out so don't bother with executing get_src
+	p_banner "GIT tree exists, switching to branch $UBOOT_GIT_BRANCH..."
 
-	set rv 1
-	if [file exists $t] {
-		if {([file readable $t]) && ([file executable $t])} {
-			p_verb "tool '$t' OK"
-		} else {
-			p_err "tool '$t' not accessible"
-			set rv 0
-		}
-	} else {
-		p_err "tool '$t' not found"
-		set rv 0
+	cd $dst
+
+	set tool_cmd "git-checkout "
+	set tool_arg "-f $UBOOT_GIT_BRANCH"
+	if ![exec2_log "$tool_cmd $tool_arg" err] {
+		puts "$err"
+		return 0
 	}
 
-	return $rv
-}
-
-proc check_tools {l} {
-
-	upvar $l tools
-	upvar tools_dir tools_dir
-
-	set rv 1
-	foreach t $tools {
-		if ![valid_tool "$tools_dir/$t"] {
-			set rv 0
-		}
-	}
-	return $rv
-}
-
-#
-# tools/get_src
-# -s /home/git/<...>
-# -d ./
-#
-proc checkout {} {
-
-	upvar repo_dst dst
-	upvar repo_src src
-	upvar tools_dir tools_dir
-	upvar tool_co tool_co
-	global UBOOT_GIT_BRANCH
-
-	if [valid_dir $dst] {
-		# TODO - validate it is actually a kernel tree - like we do in
-		# check_linux_ver{} (tools/bld_linux.exp) - maybe put it in
-		# some common file
-
-		# seems the specified repo directory is already checked
-		# out so don't bother with executing get_src
-		p_warn "using already checked out source tree: '$dst'"
-		return 1
-	}
-
+	p_warn "using already checked out source tree: '$dst'"
+	cd ".."
+} else {
 	##
 	## run get_src to check out the kernel tree
 	##
-	set tool_cmd "$tools_dir/$tool_co"
+	# tools/get_src -r <rev> -s <src> -d <dst>
+	set tool_cmd "$tools_dir/get_src"
 	set tool_arg "-r $UBOOT_GIT_BRANCH -s $src -d $dst"
 	p_verb "executing: '$tool_cmd $tool_arg'"
 
-	p_banner "Checking out U-Boot source tree, please wait - this may take\
-	a while..." *
+	p_banner "Checking out U-Boot source tree, please wait - this may take a while..." *
 	if ![exec2_log "$tool_cmd $tool_arg" res] {
 		puts "$res"
 		return 0
 	}
 
 	p_banner "U-Boot tree checked out" *
-	return 1
 }
 
 
-#
-# -n <board_name>
-# -s <path to the repo tha was just checked out>
-# -d /tftpboot/<board_name>
-# -m  <build_tools>
-# -a  <build_arch>
-# -c  <build_cross>
-#
-# -o (overwrite dst file if already present)
-# uboot
-#
-proc build {} {
-
-	global a_devices board_name _context_firmware_image
-	upvar tools_dir tools_dir
-	upvar tool_build tool_build
-	upvar build_type build_type
-
-	global BUILD_TARGET BUILD_ARCH BUILD_CROSS BUILD_TOOLPATH BUILD_UBOOT_TARGET
-
-	# note the repo location we checked out to in a previous (checkout)
-	# stage is now our kernel source directory!
-	upvar repo_dst src
-
-	set dst $_context_firmware_image
-	set dst_dir [file dirname $dst]
-	if ![valid_dir $dst_dir 1] {
-		p_err "destination dir not accessible: '$dst_dir''"
-		return 0
-	}
-
-	##
-	## run build_image to build the image
-	##
-	set tool_cmd "$tools_dir/$tool_build"
-	if [ info exists BUILD_UBOOT_TARGET ] {
-		set tool_arg "-s $src -d $dst -n $BUILD_UBOOT_TARGET -m $BUILD_TOOLPATH\
-		-a $BUILD_ARCH -c $BUILD_CROSS $build_type"
-	} else {
-		set tool_arg "-s $src -d $dst -n $BUILD_TARGET -m $BUILD_TOOLPATH\
-		-a $BUILD_ARCH -c $BUILD_CROSS $build_type"
-	}
-
-	if [file exists $dst] {
-		p_warn "destination u-boot image already exists and will be\
-		overwritten: '$dst'"
-		set tool_arg "-o $tool_arg"
-	}
-
-	p_verb "executing: '$tool_cmd $tool_arg'"
-
-	p_banner "Building U-Boot, please wait - this may take a\
-	while..." *
-
-	if ![exec2_log "$tool_cmd $tool_arg" res] {
-		p_err $res
-		return 0
-	}
-
-	p_banner "Finished building U-Boot" *
-
-	return 1
-}
-
 ##
-## check if build helper tools are accessible
+## build U-Boot
 ##
-set tools [list $tool_co $tool_build]
-if ![check_tools tools] {
-	p_err "build tools not accessible"
+global BUILD_TARGET BUILD_ARCH BUILD_CROSS BUILD_TOOLPATH BUILD_UBOOT_TARGET
+set src $dst
+set dst $_context_firmware_image
+set dst_dir [file dirname $dst]
+if ![valid_dir $dst_dir 1] {
+	p_err "destination dir not accessible: '$dst_dir''"
 	return 0
 }
-p_verb "build tools in place, proceeding"
 
 ##
-## get sources
+## run build_image to build the image
 ##
-if ![checkout] {
-	exit1
+# -n <board_name> -s <srcdir> -d /tftpboot/<board_name>
+# -m <build_tools> -a <build_arch> -c <build_cross>
+# -b -o uboot
+set tool_cmd "$tools_dir/build_image"
+if [ info exists BUILD_UBOOT_TARGET ] {
+	set tool_arg "-s $src -d $dst -n $BUILD_UBOOT_TARGET \
+		-a $BUILD_ARCH -c $BUILD_CROSS uboot"
+} else {
+	set tool_arg "-s $src -d $dst -n $BUILD_TARGET \
+		-a $BUILD_ARCH -c $BUILD_CROSS uboot"
 }
 
-##
-## build kernel
-##
-build
+if [file exists $dst] {
+	p_warn "destination u-boot image already exists and will be\
+		overwritten: '$dst'"
+	set tool_arg "-o $tool_arg"
+}
+
+p_verb "executing: '$tool_cmd $tool_arg'"
+
+p_banner "Building U-Boot, please wait - this may take a while..." *
+
+if ![exec2_log "$tool_cmd $tool_arg" res] {
+	p_err $res
+	return 0
+}
+
+p_banner "Finished building U-Boot" *
+return 1
+
