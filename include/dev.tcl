@@ -320,8 +320,10 @@ proc show_device {board_name} {
 	set vl [get_device_attr "varlist"]
 
 	puts "Configuration for board: $board_name"
-	puts "  features:"
-	puts $a_devices($board_name,features)
+	if [in_array a_devices "$board_name,features"] {
+		puts "  features:"
+		puts $a_devices($board_name,features)
+	}
 	puts ""
 	puts "  vars set:"
 	foreach var [split $vl " "] {
