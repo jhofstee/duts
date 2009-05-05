@@ -52,8 +52,6 @@
 
 # # operations on host environment
 # proc setenv_if_unset {name val}
-# proc valid_host_tool {t}
-# proc check_host_tools {tools_list}
 # proc absolutize_path {path}
 # proc host_bash_shell {{prompt ""} {opt ""}}
 
@@ -512,56 +510,6 @@ proc setenv_if_unset {name val} {
 }
 
 #
-# locates tool command on the host
-#
-# t - tool name e.g. bash, cg-clone
-#
-proc valid_host_tool {t} {
-	set which_cmd "/usr/bin/which"
-	set which_opt "--tty-only --show-dot --show-tilde"
-	set rv 1
-
-	if [file exists $which_cmd] {
-		if {([file readable $which_cmd]) &&
-		    ([file executable $which_cmd])} {
-
-			if [catch {set o [eval exec $which_cmd $which_opt $t]}] {
-				p_verb "tool '$t' not found"
-				set rv 0
-			} else {
-				p_verb "tool '$t' OK, '$o'"
-			}
-		} else {
-			p_err "'which' tool not accessible?!"
-			set rv 0
-		}
-	} else {
-		p_err "'which' tool not found..?!"
-		set rv 0
-	}
-	return $rv
-}
-
-#
-# checks if tools from list are available, returns logical 1/0 accordingly
-#
-# tools_list: NAME of the list with tools to find
-#
-proc check_host_tools {tools_list} {
-
-	upvar $tools_list tools
-
-	set rv 1
-	foreach t $tools {
-		if ![valid_host_tool $t] {
-			p_err "command '$t' not available on host"
-			set rv 0
-		}
-	}
-	return $rv
-}
-
-#
 # Return absolute version of non-empty, non-absolute path.
 # Assume it is relative to the pwd.
 #
@@ -585,9 +533,6 @@ proc host_bash_shell {{prompt ""} {opt ""}} {
 	set def_p "\\$\\ "
 
 	set c "bash"
-	if ![valid_host_tool $c] {
-		exit1
-	}
 	set o [expr {($opt == "") ? $def_opt : "$opt $def_opt"}]
 	set p [expr {($prompt == "") ? $def_p : "$prompt"}]
 
