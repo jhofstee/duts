@@ -25,7 +25,7 @@
 # by any number of .tgt files in 'devices' sub-directory.
 #
 
-duts_device _common {
+duts_device sample {
 	######################################################################
 	# section Internals, mandatory (must be defined in either _common or
 	#				board-dedicated duts_device structure)
@@ -43,6 +43,13 @@ duts_device _common {
 	# testsystems/common/devices/VL_devices.tcl file
 	######################################################################
 	Internals "devices/VL_devices.tcl"
+
+	######################################################################
+	# section Features, optional
+	#
+	# contains a list of features implemented by the board.
+	######################################################################
+	Features {}
 
 	######################################################################
 	# section Vars, optional
@@ -73,29 +80,33 @@ duts_device _common {
 	# UBootInstallRamdisk for example (testsystems/dulg/testcases/02_non-59.tc)
 	######################################################################
 	Vars {
-		CFG_RAM_WS_BASE		100000
+		CFG_RAM_WS_BASE		0x100000
 		CFG_MTD_ERASE_DEVICE	"mtd6"
 	}
 }
 
 duts_device bamboo {
+	Features {
+		 i2c
+		 linux_swap
+	}
 	Vars {
-		CFG_KERNEL_START	ffc00000
-		CFG_KERNEL_END		ffd7ffff
-		CFG_RAMDISK_START	ffd80000
-		CFG_RAMDISK_END		fff4ffff
+		CFG_KERNEL_START	0xffc00000
+		CFG_KERNEL_END		0xffd7ffff
+		CFG_RAMDISK_START	0xffd80000
+		CFG_RAMDISK_END		0xfff4ffff
 
-		CFG_FLASH_TST_START	87f00000
-		CFG_FLASH_TST_END	87f7ffff
-		CFG_FLASH_ERASE_START	87f00000
-		CFG_FLASH_ERASE_END	87f2ffff
-		CFG_FLASH_TST_SIZE	10000
+		CFG_FLASH_TST_START	0x87f00000
+		CFG_FLASH_TST_END	0x87f7ffff
+		CFG_FLASH_ERASE_START	0x87f00000
+		CFG_FLASH_ERASE_END	0x87f2ffff
+		CFG_FLASH_TST_SIZE	0x10000
 
-		CFG_FLASH_PROT1_START	87f60000
-		CFG_FLASH_PROT1_END	87f7ffff
+		CFG_FLASH_PROT1_START	0x87f60000
+		CFG_FLASH_PROT1_END	0x87f7ffff
 
-		CFG_FLASH_PROT2_START	fff80000
-		CFG_FLASH_PROT2_END	ffffffff
+		CFG_FLASH_PROT2_START	0xfff80000
+		CFG_FLASH_PROT2_END	0xffffffff
 
 		CFG_FLASH_ERASE_SECT	"1:0-1"
 		CFG_FLASH_ERASE_BANK	"1"

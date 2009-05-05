@@ -32,14 +32,6 @@ duts_tc UBootBase {
 	Type u-boot
 
 	######################################################################
-	# section Logfile, optional
-	#
-	# sets the name of a log file with TC results after execution, if
-	# ommited the report file is named after the TC name and .log appended
-	######################################################################
-	Logfile example.log
-
-	######################################################################
 	# section Commands, mandatory
 	#
 	# describes flow of commands to be executed in the test case and the
@@ -51,7 +43,7 @@ duts_tc UBootBase {
 	# must be enclosed with {} braces. An individual line of this form has
 	# the following structure of two fields:
 	#
-	# <command(s) to execute> <expected result>
+	# <string to send to target> <expected result>
 	#
 	# Notes:
 	#   - it is always safer to put double quotes around the fields (for
@@ -59,7 +51,11 @@ duts_tc UBootBase {
 	#
 	#   - <expected result> field can be a regexp
 	#
-	# Example: Commands { "setenv foo bar;printenv foo" "foo" pass }
+	#   - Complete command substitution is also possible on the
+	#     fields when using [] blocks
+	#
+	# Examples: Commands { "setenv foo bar;printenv foo" "foo" }
+	#           Commands { {[format "sleep %d" [expr 5 + 5]]} ".*" }
 	#
 	# 2. special handling - has only one line (braces not required) which
 	# points to external file to execute, has the following format:
@@ -80,9 +76,24 @@ duts_tc UBootBase {
 	######################################################################
 	Commands {
 		"base" "Base Address: .*"
-		"md 0 c" ".*"
-		"base 40000000" "Base Address: 0x40000000"
-		"md 0 c" ".*"
+		"md 0 0xc" ".*"
+		"base 0x40000000" "Base Address: 0x40000000"
+		"md 0 0xc" ".*"
+	}
+
+	######################################################################
+	# section Code, mandatory (can be mixed with Commands)
+	#
+	# describes flow of commands to be executed in the test case and the
+	# expected output the framework validates.
+	#
+	# one can directly embed tcl code in this section.  The value
+	# of the variable $res at the end of the statement decides
+	# whether the block passed (!= 0) or failed (=0)
+	######################################################################
+	Code {
+		puts "This is TCL code"
+		set res 1
 	}
 
 	######################################################################
@@ -116,6 +127,32 @@ duts_tc UBootBase {
 	}
 
 	######################################################################
+	# section Requires, optional
+	#
+	# if the test depends upon a special feature of a board, this
+	# can be specified in this section.  Test cases will not be run
+	# on boards without the feature.
+	######################################################################
+	Requires i2c
+
+	######################################################################
+	# section Requires, optional
+	#
+	# if the test depends upon a special feature of a board, this
+	# can be specified in this section.  Test cases will not be run
+	# on boards without the feature.
+	######################################################################
+	Conflicts ide
+
+	######################################################################
+	# section Logfile, optional
+	#
+	# sets the name of a log file with TC results after execution, if
+	# ommited the report file is named after the TC name and .log appended
+	######################################################################
+	Logfile example.log
+
+	######################################################################
 	# section Timeout, optional
 	#
 	# sets timeout period for response to a command when executing
@@ -126,6 +163,17 @@ duts_tc UBootBase {
 	#
 	######################################################################
 	Timeout 300
+
+	######################################################################
+	# section Cost, optional
+	#
+	# sets "cost" of test.  This can be used to exclude test which
+	# are "expensive" in a certain way, e.g. take long or use other
+	# valuable ressources.
+	# The default cost of a test is 1.
+	#
+	######################################################################
+	Cost 60
 
 	######################################################################
 	# section Result, optional
@@ -161,7 +209,8 @@ duts_tc UBootBase {
 duts_tc UBootCrcStore {
 	Type u-boot
 	Commands {
-		"crc 100004 3FC 100000" "CRC32 for .*"
+		"md $CFG_RAM_WS_BASE 4" ".*"
+		{ [format "crc 0x%x 0x3FC 0x%x" [ expr $CFG_RAM_WS_BASE + 4] $CFG_RAM_WS_BASE] }  ".*"
 		"md 100000 4" "00100000: .*"
 	}
 
