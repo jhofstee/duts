@@ -30,52 +30,35 @@ proc _walk {dir cmd} {
 proc rpath_check_files {fl} {
 	global cnt
 	upvar $fl files
-	p_verb "rpath_check func"
 	log_user 0
 	exp_internal 0
 	foreach file $files {
-		if [string match ".*a" [file extension $file]] {
-			p_verb "$file  == .a(.la)"
+		if {[string match ".*a" [file extension $file]] || \
+			([file extension "$file"] != ".so" && ![file executable "$file"])} {
 			continue
 		}
-		if {[file extension "$file"] != ".so" && ![file executable "$file"]} {
-			p_verb "$file != .so || exec"
+		if [exec2 "file $file" out err] {
+			p_warn "Error running file on '$file': $err"
+		} elseif {![regexp "^.*:.*ELF.*$" $out]} {
 			continue
 		}
-		p_verb "pass 1 $file"
-		spawn file $file
-		p_verb "SPWN: $spawn_id"
-		expect {
-			-re "^.*:.*ELF.*$" {
-				p_verb "ELF file: $file"
-				close
-				wait
-			} eof {
-				p_verb "skip non-ELF file: $file"
-				wait
-				continue
-			}
-		}
-		p_verb "pass 2 $file"
-		spawn readelf -d $file
-		p_verb "SPWN: $spawn_id"
-		expect {
-			-re {Library rpath: \[([^\]]*)} {
-				set temp $expect_out(1,string)
-				p_verb "temp match: $temp"
+		p_verb "checking $file"
+		if [exec2 "readelf -d $file" out err] {
+			p_warn "Error running readelf on '$file': $err"
+		} else {
+			# Do we have an rpath entry?
+			if {[regexp {Library rpath: \[([^\]]*)\]} $out all lib]} {
 				if {![regexp [format "%s%s%s%s%s%s" \
 						  "^(/usr/lib|/usr/lib64|/lib|/lib64" \
 						  "|/etc/appWeb/bin" \
 						  "|/usr/lib/appweb/modules" \
 						  "|/usr/local/xenomai/lib" \
 						  "|/usr/lib/perl5/.*" \
-						  "|\\\$ORIGIN)$"] $temp]} {
+						  "|\\\$ORIGIN)$"] $lib]} {
 					incr cnt
-					p_warn "$file contains wrong RPATH: $temp"
+					p_warn "$file contains wrong RPATH: $lib"
 				}
-				close
-				wait
-			} eof wait
+			}
 		}
 	}
 }
