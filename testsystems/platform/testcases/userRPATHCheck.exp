@@ -63,10 +63,12 @@ proc rpath_check_files {fl} {
 			-re {Library rpath: \[([^\]]*)} {
 				set temp $expect_out(1,string)
 				p_verb "temp match: $temp"
-				if {![regexp [format "%s%s%s%s" \
+				if {![regexp [format "%s%s%s%s%s%s" \
 						  "^(/usr/lib|/usr/lib64|/lib|/lib64" \
 						  "|/etc/appWeb/bin" \
+						  "|/usr/lib/appweb/modules" \
 						  "|/usr/local/xenomai/lib" \
+						  "|/usr/lib/perl5/.*" \
 						  "|\\\$ORIGIN)$"] $temp]} {
 					incr cnt
 					p_warn "$file contains wrong RPATH: $temp"
