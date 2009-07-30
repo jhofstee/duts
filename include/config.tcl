@@ -25,8 +25,6 @@
 ###############################################################################
 
 set config_errors 0
-set was_default_config "no"
-set was_selected_config "no"
 set configs_no 0
 
 #
@@ -38,26 +36,13 @@ set configs_no 0
 #
 proc duts_config {name args} {
 
-	global cur_config CONFIG_DEFAULT_NAME was_selected_config
-	global config_errors was_default_config selected_config configs_no
+	global cur_config CONFIG_DEFAULT_NAME
+	global config_errors selected_config configs_no
 	global l_configs
 
 	set cur_config $name
 
 	lappend l_configs $name
-
-	if {$name == $CONFIG_DEFAULT_NAME} {
-		if {$was_default_config == "yes"} {
-			p_verb "$CONFIG_DEFAULT_NAME re-defined?!"
-		} else {
-			set was_default_config "yes"
-		}
-	}
-	if {$name == $selected_config} {
-		if {$was_selected_config != "yes"} {
-			set was_selected_config "yes"
-		}
-	}
 
 	if {($cur_config == $CONFIG_DEFAULT_NAME) ||
 	    ($cur_config == $selected_config)} {
@@ -88,14 +73,14 @@ set _context_firmware_image ""
 #
 #
 proc context {type name c} {
-	global cur_config config_errors BASE_DIR
+	global selected_config cur_config config_errors BASE_DIR
 	global _context_kernel _context_firmware _context_host
 	global _context_kernel_prompt _context_kernel_image _context_kernel_alt_prompt
 	global _context_firmware_prompt _context_firmware_image
 	global _context_host_prompt _context_host_shell
 	global board_name a_configs
 
-	set a_configs($cur_config,$name) $c
+	set a_configs($selected_config,$name) $c
 
 	# numer of elements in context section
 	set max [expr [llength $c] - 1]
@@ -188,7 +173,10 @@ proc cfg_context_host {name c} {
 # path is relative to $testsystem
 #
 proc cfg_device_ops {p} {
-	global cur_device a_devices device_errors BASE_DIR
+	global cur_config cur_device a_devices device_errors BASE_DIR
+	global board_name a_configs
+
+	set a_configs($cur_config,ops) $p
 
 	##
 	## validate file
@@ -211,14 +199,10 @@ proc cfg_device_ops {p} {
 # validates loaded config data
 #
 proc valid_configs {} {
-	global config_errors was_selected_config selected_config
+	global config_errors selected_config
 
 	set rv 1
 	if {$config_errors > 0} {
-		set rv 0
-	}
-	if {$was_selected_config != "yes"} {
-		p_err "selected config '$selected_config' was not found?!"
 		set rv 0
 	}
 
@@ -244,9 +228,7 @@ proc valid_configs {} {
 #
 # loads config description files
 #
-# e: extension
-#
-proc load_configs {{e ""}} {
+proc load_configs {} {
 
 	global BASE_DIR CONFIG_DESCR_DIR CONFIG_DESCR_EXT configs_no
 
@@ -255,9 +237,7 @@ proc load_configs {{e ""}} {
 		p_err "Invalid device dir: $d" 1
 	}
 
-	set e [expr {($e == "") ? $CONFIG_DESCR_EXT : $e}]
-
-	foreach f [find_files $d $e] {
+	foreach f [find_files $d $CONFIG_DESCR_EXT] {
 		p_verb "loading configs from $f"
 
 		# just sourcing the file does the trick - a_configs hash

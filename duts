@@ -359,9 +359,9 @@ if {$params(date) != ""} {
 }
 
 # Select different configuration
-set selected_config $CONFIG_DEFAULT_NAME
-load_configs
 if {$params(c) == "?"} {
+	set selected_config $CONFIG_DEFAULT_NAME
+	load_configs
 	puts "Defined configuration views:"
 	foreach c $l_configs {
 		puts "  $c"
@@ -369,6 +369,7 @@ if {$params(c) == "?"} {
 	exit 0
 } elseif {$params(c) != ""} {
 	set selected_config $params(c)
+	load_configs
 }
 
 # Show details about configuration if neccessary
@@ -388,6 +389,9 @@ if {$params(showconfig)} {
 	if [in_array a_configs "$selected_config,host"] {
 		puts "Host context 'host'"
 		puts $a_configs($selected_config,host)
+	}
+	if [in_array a_configs "$selected_config,ops"] {
+		puts "Operations defined in '$a_configs($selected_config,ops)'"
 	}
 	exit 1
 }
