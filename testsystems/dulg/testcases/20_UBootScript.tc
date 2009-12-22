@@ -1,0 +1,31 @@
+# -*- Mode: tcl -*-
+# Test 'source' command
+#
+
+duts_tc UBootSourceHelp {
+	Type u-boot
+	Commands {
+		"help source" ".*"
+	}
+}
+
+duts_tc UBootSourceScript {
+	Type u-boot
+	Commands {
+		"!userScr.exp"
+	}
+}
+
+duts_tc UBootSourceMkimage {
+	Type host
+	Commands "!userSourceMkimage.exp"
+}
+
+duts_tc UBootSource {
+	Type u-boot
+	Commands {
+		"tftp $CFG_RAM_WS_BASE /tftpboot/$BOARD/example.img" ".*"
+		"imi" ".*"
+		"source $CFG_RAM_WS_BASE" ".*"
+	}
+}
