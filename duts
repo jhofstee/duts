@@ -230,7 +230,7 @@ if ![valid_board_name $board_name] {
 if {$params(td) != ""} {
 	set testsystem $params(td)
 	if ![valid_dir $testsystem] {
-		p_err "Incorrect value for option -d" 1
+		p_err "Incorrect value for option -td" 1
 	}
 
 	p_verb "alternative testsystem selected: $testsystem"
