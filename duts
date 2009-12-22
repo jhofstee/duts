@@ -359,8 +359,8 @@ if {$params(date) != ""} {
 }
 
 # Select different configuration
+set selected_config $CONFIG_DEFAULT_NAME
 if {$params(c) == "?"} {
-	set selected_config $CONFIG_DEFAULT_NAME
 	load_configs
 	puts "Defined configuration views:"
 	foreach c $l_configs {
@@ -369,6 +369,8 @@ if {$params(c) == "?"} {
 	exit 0
 } elseif {$params(c) != ""} {
 	set selected_config $params(c)
+	load_configs
+} else {
 	load_configs
 }
 
