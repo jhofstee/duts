@@ -6,12 +6,6 @@ duts_tc UBootI2cHelp {
 	Type u-boot
 	Requires i2c
 	Commands {
-		"help iprobe" ".*"
-		"help icrc32" ".*"
-		"help imw" ".*"
-		"help inm" ".*"
-		"help imm" ".*"
-		"help imd" ".*"
-		"help iloop" ".*"
+		"help i2c" ".*"
 	}
 }
