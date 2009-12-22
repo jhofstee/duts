@@ -1,12 +1,10 @@
-#
+# -*- Mode: tcl -*-
 # Testcases for the "fdt - Flattened Device Tree utility commands" section
 #
 
-global CFG_FDT_ADDR_R CFG_FDT_FILE
-
-
 duts_tc UBootFDTCmdHelp {
 	Type u-boot
+	Requires fdt
 	Commands {
 		"help fdt" ".*"
 	}
@@ -15,15 +13,18 @@ duts_tc UBootFDTCmdHelp {
 duts_tc UBootFDTCmdAddr {
 	Type u-boot
 	Timeout 600
-	Pre {
-		"sete fdt_addr_r $CFG_FDT_ADDR_R" ".*"
-		"sete fdt_file $CFG_FDT_FILE" ".*"
+	Requires fdt
+	Commands {
+		"print fdt_addr_r" ".*"
+		"print fdt_file" ".*"
+		"tftp ${fdt_addr_r} ${fdt_file}" ".*"
+		"fdt addr ${fdt_addr_r}" ".*"
 	}
-	Commands "!userUBootFDTCmdAddr.exp"
 }
 
 duts_tc UBootFDTCmdList {
 	Type u-boot
+	Requires fdt
 	Commands {
 		"fdt list /cpus" ".*"
 	}
@@ -31,6 +32,7 @@ duts_tc UBootFDTCmdList {
 
 duts_tc UBootFDTCmdPrint {
 	Type u-boot
+	Requires fdt
 	Commands {
 		"fdt print /cpus" ".*"
 	}
@@ -38,6 +40,7 @@ duts_tc UBootFDTCmdPrint {
 
 duts_tc UBootFDTCmdCreateNode {
 	Type u-boot
+	Requires fdt
 	Commands {
 		"fdt list /" ".*"
 		"fdt mknode / testnode" ".*"
@@ -48,6 +51,7 @@ duts_tc UBootFDTCmdCreateNode {
 
 duts_tc UBootFDTCmdCreateProperty {
 	Type u-boot
+	Requires fdt
 	Commands {
 		"fdt set /testnode testprop testvalue" ".*"
 		"fdt list /testnode" ".*"
@@ -56,6 +60,7 @@ duts_tc UBootFDTCmdCreateProperty {
 
 duts_tc UBootFDTCmdRemove {
 	Type u-boot
+	Requires fdt
 	Commands {
 		"fdt rm /testnode testprop" ".*"
 		"fdt list /testnode" ".*"
@@ -66,6 +71,7 @@ duts_tc UBootFDTCmdRemove {
 
 duts_tc UBootFDTCmdMove {
 	Type u-boot
+	Requires fdt
 	Commands {
 		"fdt move ${fdt_addr_r} $CFG_RAM_WS_BASE" ".*"
 		"fdt list /" ".*"
@@ -78,6 +84,7 @@ duts_tc UBootFDTCmdMove {
 
 duts_tc UBootFDTCmdChosen {
 	Type u-boot
+	Requires fdt
 	Commands {
 		"fdt list /" ".*"
 		"fdt chosen" ".*"
