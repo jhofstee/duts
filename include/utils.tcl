@@ -150,7 +150,7 @@ proc boot_kernel_net_nfs {} {
 	## check if the kernel file is ok
 	##
 	if ![valid_kernel_file $_context_kernel_image] {
-		p_err "problems validating kernel file" 1
+		p_err "problems validating kernel file '$_context_kernel_image'" 1
 	}
 
 	if ![_context_firmware_get_prompt] {

@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2006-2008 DENX Software Engineering
+# (C) Copyright 2006-2009 DENX Software Engineering
 #
 # Author: Rafal Jaworowski <raj@semihalf.com>
 #
@@ -20,7 +20,7 @@
 #
 
 proc valid_kernel_file {f} {
-	if [catch {set output [exec file $f 2>@1]}] {
+	if [catch {set output [exec file -L $f 2>@1]}] {
 		p_err "cannot execute 'file' command"
 		return 0
 	}
