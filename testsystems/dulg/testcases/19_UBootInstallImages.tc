@@ -7,15 +7,60 @@
 # range etc. are properly set for the given board, so beware and triple check
 # everything makes sense before running these.
 #
+# Also note that the filenames are derived directly from boardname, i.e.
+# linux kernel		: duts/$BOARD/uImage
+# ramdisk		: duts/$BOARD/uRamdisk
+# flat device tree	: duts/$BOARD/$BOARD.dtb
 
 duts_tc UBootInstallKernelTftp {
 	Type u-boot
 	Timeout 600
-	Commands "!userInstallKernelTftp.exp"
+	Commands {
+		"setenv kernel_addr $CFG_KERNEL_START" ".*"
+		"protect off $CFG_KERNEL_START $CFG_KERNEL_END" ".*"
+		"erase $CFG_KERNEL_START $CFG_KERNEL_END" ".*"
+		"setenv bootfile /tftpboot/duts/$BOARD/uImage" ".*"
+		"setenv ram_ws $CFG_RAM_WS_BASE" ".*"
+		"tftp ${ram_ws} ${bootfile}" ".*"
+		"iminfo ${ram_ws}" ".*"
+		"cp.b ${ram_ws} ${kernel_addr} ${filesize}" "done"
+		"iminfo ${kernel_addr}" ".*"
+		"setenv ram_ws" ".*"
+		"saveenv" ".*"
+	}
 }
 
 duts_tc UBootInstallRamdisk {
 	Type u-boot
 	Timeout 600
-	Commands "!userInstallRamdiskTftp.exp"
+	Commands {
+		"setenv ramdisk_addr $CFG_RAMDISK_START" ".*"
+		"setenv ram_ws $CFG_RAM_WS_BASE" ".*"
+		"protect off $CFG_RAMDISK_START $CFG_RAMDISK_END" ".*"
+		"erase $CFG_RAMDISK_START $CFG_RAMDISK_END" ".*"
+		"tftp $CFG_RAM_WS_BASE /tftpboot/duts/$BOARD/uRamdisk" ".*"
+		"iminfo ${ram_ws}" ".*"
+		"cp.b ${ram_ws} ${ramdisk_addr} ${filesize}" "done"
+		"iminfo ${ramdisk_addr}" ".*"
+		"setenv ram_ws" ".*"
+		"saveenv" ".*"
+	}
+}
+
+duts_tc UBootInstallFdt {
+	Type u-boot
+	Timeout 600
+	Requires fdt
+	Commands {
+		"setenv fdt_file /tftpboot/duts/$BOARD/$BOARD.dtb" ".*"
+		"setenv fdt_addr $CFG_FDT_START" ".*"
+		"setenv fdt_addr_r $CFG_FDT_ADDR_R" ".*"
+		"setenv ram_ws $CFG_RAM_WS_BASE" ".*"
+		"protect off $CFG_FDT_START $CFG_FDT_END" ".*"
+		"erase $CFG_FDT_START $CFG_FDT_END" ".*"
+		"tftp $CFG_RAM_WS_BASE /tftpboot/duts/$BOARD/$BOARD.dtb" ".*"
+		"cp.b ${ram_ws} ${fdt_addr} ${filesize}" "done"
+		"setenv ram_ws" ".*"
+		"saveenv" ".*"
+	}
 }
