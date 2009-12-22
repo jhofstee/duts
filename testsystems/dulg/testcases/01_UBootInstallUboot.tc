@@ -13,8 +13,8 @@ duts_tc UBootInstallUboot {
 	Type u-boot
 	Timeout 300
 	Commands {
-		"sete uboot_file $board_name/u-boot.bin-duts" ".*"
-		"run update_uboot" "Copy to Flash... done.*"
+		"setenv u-boot /tftpboot/duts/$BOARD/u-boot.bin" ".*"
+		"run load update" "Copy to Flash... done.*"
 	}
 	Code {
 		send -s "reset\r"
