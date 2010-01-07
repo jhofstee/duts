@@ -11,5 +11,8 @@ duts_tc UBootIminfoHelp {
 
 duts_tc UBootIminfo {
 	Type u-boot
-	Commands "!userIminfo.exp"
+	Commands {
+		"tftp ${ram_ws} ${bootfile}" "Bytes transferred"
+		"imi ${ram_ws}" "Verifying Checksum ... OK"
+	}
 }
