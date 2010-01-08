@@ -4,26 +4,125 @@
 
 duts_tc LinuxBootNetNfs {
 	Type u-boot
-	Commands "!userLinuxBootNetNfs.exp"
+	# Pull in library functions
+	Commands {
+		"!libLinux.tcl"
+	}
+	Code {
+		set res [boot_kernel_nfs "net_nfs"]
+	}
 }
 
 duts_tc LinuxBootSelf {
 	Type u-boot
-	Commands "!userLinuxBootSelf.exp"
+	Code {
+		set timeout 300
+		set res 0
+
+		send -s "run flash_self\r"
+		expect {
+			timeout {
+				p_err "timed out after 'flash_self'"
+			}
+			"login: " {
+				set cur_context "kernel"
+				set res [login_kernel "root" "root"]
+			}
+
+			-re ".*Application\\ running.*" {
+				set cur_context "kernel"
+				if ![_context_kernel_get_prompt] {
+					p_err "could not get kernel prompt"
+				}
+				set res 1
+			}
+		}
+	}
 }
 
 duts_tc LinuxTelnetSelf {
 	Type linux
-	Commands "!userLinuxTelnet.exp"
+	# Pull in library functions
+	Commands {
+		"!libLinux.tcl"
+	}
+	Code {
+		# Determine ip address of target
+		if { [catch {set ip [dnslookup $BOARD]} err] } {
+			p_err "$err"
+			return 0
+		}
+
+		_context_kernel_command "ifconfig" "$ip"
+		set res 1
+	}
+	Commands {
+		"mount nodev /tmp -t tmpfs" ""
+		"sed -e 's/\\(disable.*\\)yes/\\1no/g' /etc/xinetd.d/telnet > /tmp/telnet_" ""
+		"mv /tmp/telnet_ /etc/xinetd.d/telnet" ""
+		"umount /tmp" ""
+		"killall -HUP xinetd" ""
+	}
+	Code {
+		sleep 5
+		spawn -noecho telnet $BOARD
+		set telnet_conn $spawn_id
+		expect {
+			-re "Connected to $BOARD.*login:" {
+				# ELDK SELF has a simple password
+				if [login_kernel "root" "root" $telnet_conn] {
+					set res 1
+				}
+			}
+		}
+	}
 }
 
 duts_tc LinuxBootNfs {
 	Type u-boot
-	Commands "!userLinuxBootNfs.exp"
+	Commands {
+		"!libLinux.tcl"
+	}
+	Code {
+		set res [boot_kernel_nfs "flash_nfs"]
+	}
 }
 
 # this will try to connect via telnet
 duts_tc LinuxTelnetNFS {
 	Type linux
-	Commands "!userLinuxTelnet.exp"
+	# Pull in library functions
+	Commands {
+		"!libLinux.tcl"
+	}
+	Code {
+		# Determine ip address of target
+		if { [catch {set ip [dnslookup $BOARD]} err] } {
+			p_err "$err"
+			return 0
+		}
+
+		_context_kernel_command "ifconfig" "$ip"
+		set res 1
+	}
+	Commands {
+		"mount nodev /tmp -t tmpfs" ""
+		"sed -e 's/\\(disable.*\\)yes/\\1no/g' /etc/xinetd.d/telnet > /tmp/telnet_" ""
+		"mv /tmp/telnet_ /etc/xinetd.d/telnet" ""
+		"umount /tmp" ""
+		"killall -HUP xinetd" ""
+	}
+	Code {
+		sleep 5
+		spawn -noecho telnet $BOARD
+		set telnet_conn $spawn_id
+		expect {
+			-re "Connected to $BOARD.*login:" {
+				# ELDK NFS Root has no password
+				if [login_kernel "root" "" $telnet_conn] {
+					set res 1
+				}
+			}
+		}
+	}
 }

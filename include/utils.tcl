@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2008, 2009 Detlev Zundel <dzu@denx.de>, DENX Software Engineering
+# (C) Copyright 2008-2010 Detlev Zundel <dzu@denx.de>, DENX Software Engineering
 # (C) Copyright 2006, 2007 Rafal Jaworowski <raj@semihalf.com> for DENX Software Engineering
 #
 # This program is free software; you can redistribute it and/or
@@ -80,165 +80,25 @@ proc run_external_script {fn {vars ""} } {
 	return $rv
 }
 
-
 #
-# Performs a UNIX login with user/pass pair. It is assumed the caller has already
-# detected the "login: " prompt
-#
-# returns 0/1
-#
-proc login_kernel {user {pass ""} {spid ""}} {
-	global _context_kernel_prompt TIMEOUT console_con
-
-	if {$spid eq ""} {
-		set spawn_id $console_con
-	} else {
-		set spawn_id $spid
+# sends the contents of a file via send_user.  This is handy to
+# dump files into duts logfiles
+# 
+proc send_user_file {fn} {
+	if ![valid_file $fn] {
+		p_err "problems accessing file: '$fn'"
+		return 0
 	}
-	set timeout $TIMEOUT
-	send -s "$user\r"
-	expect {
-		"assword: " {
-			send -s "$pass\r"
-			expect {
-				-re ".*$_context_kernel_prompt" {
-					return 1
-				}
-				"incorrect" {
-					p_err "wrong login or password"
-					return 0
-				}
-				timeout {
-					p_err "timed out while waiting for kernel prompt"
-					return 0
-				}
-			}
-		}
-		-re ".*$_context_kernel_prompt" {
-			return 1
-		}
-		timeout {
-			p_err "timed out while waiting for kernel prompt"
-			return 0
-		}
+	
+	if [catch {set f [open $fn r]} err] {
+		p_err "problems open'ing '$fn'"
+		puts "  $err"
+		return 0
 	}
-}
-
-
-proc boot_kernel_net_nfs {} {
-
-	global _context_kernel_image TIMEOUT console_con
-	global CFG_FDT_FILE CFG_ROOTPATH BUILD_ARCH
-
-	set spawn_id $console_con
-	expect "*"
-
-	##
-	## check rootpath
-	##
-	if ![var_exists CFG_ROOTPATH] {
-		p_err "variable CFG_ROOTPATH is not set, please update the\
-		       .tgt definition file for your board" 1
-	} else {
-		p_verb "CFG_ROOTPATH '$CFG_ROOTPATH'"
-		if ![valid_dir $CFG_ROOTPATH] {
-			p_err "problem validating rootpath: '$CFG_ROOTPATH'" 1
-		}
+	
+	while {[gets $f line] >= 0} {
+		send_user -- "$line\n"
 	}
-
-	##
-	## check if the kernel file is ok
-	##
-	if ![valid_kernel_file $_context_kernel_image] {
-		p_err "problems validating kernel file '$_context_kernel_image'" 1
-	}
-
-	if ![_context_firmware_get_prompt] {
-		p_err "could not get firmware prompt" 1
-	}
-
-	##
-	## set bootfile
-	##
-	_context_firmware_command "setenv bootfile $_context_kernel_image" ".*"
-
-	##
-	## set fdt_file - only for arch/powerpc kernels
-	## note that we can still continue without fdt_file if
-	## we test a bootwrapped kernel.
-	##
-	if {$BUILD_ARCH == "powerpc"} {
-		if ![var_exists CFG_FDT_FILE] {
-			if [var_exists CFG_FDT_START] {
-				p_err "Defined fdt start, but not CFG_FDT_NAME, config inconsistent..." 1
-			}
-			p_warn " variable CFG_FDT_FILE is not set."
-			p_warn " assuming bootwrapper-crafted cuImage."
-		} else {
-			_context_firmware_command "setenv fdt_file $CFG_FDT_FILE" ".*"
-		}
-	}
-
-	##
-	## set rootpath
-	##
-	_context_firmware_command "setenv rootpath $CFG_ROOTPATH" ".*"
-
-	##
-	## run net_nfs
-	##
-	set timeout 120
-	send -s "run net_nfs\r"
-
-	expect {
-		timeout {
-			p_err "timed out after 'bootcmd'"
-			return 0
-		}
-		"TFTP error" {
-			p_err "TFTP problems"
-			# send CTRL-C
-			send -s "\003"
-			if ![_context_firmware_get_prompt] {
-				p_err "could not recover after CTRL-C, aborting..." 1
-			}
-
-			return 0
-		}
-		"Bad Magic Number" {
-			p_err "problems finding image?!"
-			return 0
-		}
-		"Linux version" {
-			set cur_context "kernel"
-			set timeout 300
-
-			expect {
-				timeout {
-					p_err "timed out while waiting for\
-					       login prompt" 1
-				}
-				-re ".*Kernel\\ panic" {
-					##
-					## This is really bad - we cannot be
-					## sure if the crash does not confuse
-					## test cases that were scheduled for
-					## execution after this one.
-					##
-					p_err "PANIC!"
-					if [ask_yesno "continue execution? "] {
-						return 1
-					} else {
-						exit1
-					}
-				}
-				"login:" {
-					if ![login_kernel "root" "root"] {
-						p_err "could not login" 1
-					}
-					return 1
-				}
-			}
-		}
-	}
+	
+	close $f
 }

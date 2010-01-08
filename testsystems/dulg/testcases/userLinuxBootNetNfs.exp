@@ -1,4 +1,0 @@
-##
-## net_nfs
-##
-return [boot_kernel_net_nfs]
