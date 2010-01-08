@@ -14,6 +14,9 @@ duts_tc UBootFDTCmdAddr {
 	Type u-boot
 	Timeout 600
 	Requires fdt
+	Pre {
+		"setenv fdt_file $CFG_FDT_FILE" ""
+	}
 	Commands {
 		"print fdt_addr_r" ".*"
 		"print fdt_file" ".*"
