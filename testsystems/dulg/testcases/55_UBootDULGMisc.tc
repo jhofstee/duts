@@ -21,7 +21,21 @@ duts_tc BoardId {
 
 duts_tc BDI2000Config {
 	Type host
-	Commands "!userBDI2000Config.exp"
+	Code {
+		send_user_file "/tftpboot/$BOARD/$BOARD.cfg"
+		set res 1
+	}
+}
+
+duts_tc FlatDeviceTree {
+	Type host
+	Requires fdt
+	Code {
+		global CFG_FDT_SOURCE
+
+		send_user_file [subst $CFG_FDT_SOURCE]
+		set res 1
+	}
 }
 
 # this will create an empty file and this is what is needed in most cases
