@@ -10,21 +10,70 @@ duts_tc UBootSourceHelp {
 }
 
 duts_tc UBootSourceScript {
-	Type u-boot
-	Commands {
-		"!userScr.exp"
+	Type host
+	Code {
+		global BASE_DIR
+
+		send_user_file "$BASE_DIR/testsystems/dulg/testcases/example.script"
+		set res 1
 	}
 }
 
 duts_tc UBootSourceMkimage {
 	Type host
-	Commands "!userSourceMkimage.exp"
+	Code {
+		#
+		# create example Source image (and put it in /tftpboot dir)
+		#
+
+		global testsystem board_name TC_DESCR_DIR BASE_DIR CFG_SCRIPT_EXAMPLE
+
+		set cmd "$BASE_DIR/tools/UBootSourceMkimage.sh"
+		set arg1 "$testsystem/$TC_DESCR_DIR/example.script"
+		set arg2 [subst $CFG_SCRIPT_EXAMPLE]
+
+		##
+		## validate
+		##
+		if ![valid_file $cmd] {
+			p_err "helper script not accessible: '$cmd'"
+			return 0
+		}
+		if ![valid_file $arg1] {
+			p_err "source script not accessible: '$arg1'"
+			return 0
+		}
+
+		if [valid_file $arg2] {
+			p_warn "image file exists and will be overwritten: '$arg2'"
+			if ![file writable $arg2] {
+				p_err "file not writable: '$arg2'"
+				return 0
+			}
+		} else {
+			set d [file dirname $arg2]
+			if ![valid_dir $d 1] {
+				p_err "image dir location not accessible: '$d'"
+				return 0
+			}
+		}
+
+		p_verb "executing: '$cmd $arg1 $arg2"
+		if [catch {set o [eval exec $cmd $arg1 $arg2]} err] {
+			p_err "couldn't execute '$cmd'"
+			puts $err
+			return 0
+		}
+		send_user $o
+
+		set res 1
+	}
 }
 
 duts_tc UBootSource {
 	Type u-boot
 	Commands {
-		"tftp $CFG_RAM_WS_BASE /tftpboot/$BOARD/example.img" ".*"
+		"tftp $CFG_RAM_WS_BASE $CFG_SCRIPT_EXAMPLE" ".*"
 		"imi" ".*"
 		"source $CFG_RAM_WS_BASE" ".*"
 	}

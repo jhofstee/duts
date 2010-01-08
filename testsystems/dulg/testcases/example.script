@@ -7,4 +7,3 @@ echo
 echo Server:
 printenv serverip rootpath
 echo
-
