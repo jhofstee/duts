@@ -11,6 +11,13 @@ duts_device _common {
 		CFG_RAM_WS_BASE		0x100000
 		CFG_RAM_WS_BASE_ALT	0x200000
 
+		CFG_LINUX_KERNEL	"/tftpboot/duts/$BOARD/uImage"
+		CFG_FDT_FILE		"/tftpboot/duts/$BOARD/$BOARD.dtb"
+		CFG_FDT_SOURCE		"/tftpboot/duts/$BOARD/$BOARD.dts"
+		CFG_LINUX_RAMDISK	"/tftpboot/duts/$BOARD/uRamdisk"
+		CFG_UBOOT_IMAGE		"/tftpboot/duts/$BOARD/u-boot.bin"
+		CFG_SCRIPT_EXAMPLE	"/tftpboot/duts/$BOARD/example.scr"
+
 		UBOOT_GIT_BRANCH	"origin/master"
 		UBOOT_GIT_REPO		"git://git.denx.de/u-boot.git"
 

@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2008, 2009 Detlev Zundel <dzu@denx.de>, DENX Software Engineering
+# (C) Copyright 2008-2010 Detlev Zundel <dzu@denx.de>, DENX Software Engineering
 # (C) Copyright 2009 Vitaly Bordug <vitb@kernel.crashing.org>
 # (C) Copyright 2006, 2007 Rafal Jaworowski <raj@semihalf.com> for DENX Software Engineering
 #
@@ -64,7 +64,7 @@ proc duts_tc {name args} {
 
 	# check if we have mandatory sections
 	if {![in_array a_testcases "$name,commands"]} {
-		p_err "Neither 'Commands' nor 'Code' block is defined for '$name' TC?!" 1
+		p_err "No 'Commands' or 'Code' blocks defined for '$name' TC?!" 1
 	}
 
 	# save the filename the TC lives in
@@ -270,7 +270,7 @@ proc show_tc_details {tc} {
 #
 proc run_cmds {cmds ctx} {
 
-	global dry_run board_name a_devices DEVICE_COMMON_NAME
+	global dry_run board_name BOARD a_devices DEVICE_COMMON_NAME
 	global test_vars
 	set result 1
 	upvar $cmds c
@@ -295,7 +295,6 @@ proc run_cmds {cmds ctx} {
 		global $v
 	}
 	# this is a built-in keyword often used - add it to the var list
-	set BOARD $board_name
 	lappend l_vars "BOARD"
 
 #puts "RUN: $cmds"
@@ -338,7 +337,10 @@ proc run_cmds {cmds ctx} {
 			p_verb "U-Boot vars found, skip forced substitution"
 		} else {
 			# try force subst - we may have VARs used in command
-			if [catch {set cmd [subst $cmd]}] {
+			# Double substitution is used to allow for e.g. $BOARD in the
+			# expanded content
+			if [catch {set cmd [subst -nobackslashes \
+					    [subst -nobackslashes $cmd]]}] {
 				p_err "substitution failed on the following:"
 				puts "  $cmd"
 				set result 0
@@ -473,7 +475,7 @@ proc run_tc {tc} {
 
 	global l_testcases a_testcases TIMEOUT
 	global timeout cur_context cur_logfile
-	global board_name logs_location
+	global board_name BOARD logs_location
 
 	set rv 1
 
