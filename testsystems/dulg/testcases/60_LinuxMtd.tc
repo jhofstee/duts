@@ -26,6 +26,7 @@ duts_tc LinuxMtdErase {
 	Type linux
 	# some larger flash partitions can take long to erase..
 	Timeout 900
+	Cost 60
 	Pre {
 		"mount -t tmpfs nodev /tmp" ".*"
 	}
@@ -44,6 +45,7 @@ duts_tc LinuxMtdErase {
 duts_tc LinuxMtdWrite {
 	Type linux
 	Timeout 900
+	Cost 60
 	Pre {
 		"mount -t tmpfs nodev /tmp" ".*"
 		"flash_eraseall /dev/$CFG_MTD_ERASE_DEVICE" ".*"
