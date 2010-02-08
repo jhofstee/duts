@@ -83,22 +83,22 @@ proc run_external_script {fn {vars ""} } {
 #
 # sends the contents of a file via send_user.  This is handy to
 # dump files into duts logfiles
-# 
+#
 proc send_user_file {fn} {
 	if ![valid_file $fn] {
 		p_err "problems accessing file: '$fn'"
 		return 0
 	}
-	
+
 	if [catch {set f [open $fn r]} err] {
 		p_err "problems open'ing '$fn'"
 		puts "  $err"
 		return 0
 	}
-	
+
 	while {[gets $f line] >= 0} {
 		send_user -- "$line\n"
 	}
-	
+
 	close $f
 }
