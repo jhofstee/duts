@@ -11,8 +11,5 @@ duts_tc UBootResetHelp {
 
 duts_tc UBootReset {
 	Type u-boot
-	Commands {
-		"" ".*"
-	}
-	Info {Heh, executing reboots the board...}
+	Commands "!userBoot.exp"
 }
