@@ -92,6 +92,7 @@ source "$BASE_DIR/include/utils.tcl"
 source "$BASE_DIR/include/dev.tcl"
 source "$BASE_DIR/include/tc.tcl"
 source "$BASE_DIR/include/config.tcl"
+source "$BASE_DIR/include/liblinux.tcl"
 
 ##
 ## initialise global defaults

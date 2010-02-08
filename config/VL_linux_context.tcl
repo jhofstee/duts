@@ -1,7 +1,6 @@
 #
-# (C) Copyright 2006-2009 DENX Software Engineering
-#
-# Author: Rafal Jaworowski <raj@semihalf.com>
+# (C) Copyright 2009-2010 Detlev Zundel <dzu@denx.de>, DENX Software Engineering
+# (C) Copyright 2006, 2007 Rafal Jaworowski <raj@semihalf.com> for DENX Software Engineering
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -32,7 +31,7 @@ proc valid_kernel_file {f} {
 # this context. assume we start from 'firmware' context
 #
 proc _context_kernel_handler {} {
-	return [boot_kernel_net_nfs]
+	return [boot_kernel_nfs "net_nfs"]
 }
 
 

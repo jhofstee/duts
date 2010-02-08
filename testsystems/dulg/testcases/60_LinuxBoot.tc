@@ -4,10 +4,6 @@
 
 duts_tc LinuxBootNetNfs {
 	Type u-boot
-	# Pull in library functions
-	Commands {
-		"!libLinux.tcl"
-	}
 	Code {
 		set res [boot_kernel_nfs "net_nfs"]
 	}
@@ -42,10 +38,6 @@ duts_tc LinuxBootSelf {
 
 duts_tc LinuxTelnetSelf {
 	Type linux
-	# Pull in library functions
-	Commands {
-		"!libLinux.tcl"
-	}
 	Code {
 		# Determine ip address of target
 		if { [catch {set ip [dnslookup $BOARD]} err] } {
@@ -80,9 +72,6 @@ duts_tc LinuxTelnetSelf {
 
 duts_tc LinuxBootNfs {
 	Type u-boot
-	Commands {
-		"!libLinux.tcl"
-	}
 	Code {
 		set res [boot_kernel_nfs "flash_nfs"]
 	}
@@ -91,10 +80,6 @@ duts_tc LinuxBootNfs {
 # this will try to connect via telnet
 duts_tc LinuxTelnetNFS {
 	Type linux
-	# Pull in library functions
-	Commands {
-		"!libLinux.tcl"
-	}
 	Code {
 		# Determine ip address of target
 		if { [catch {set ip [dnslookup $BOARD]} err] } {
