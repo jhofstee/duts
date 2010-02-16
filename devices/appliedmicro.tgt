@@ -174,6 +174,13 @@ duts_device ebony {
 }
 
 duts_device glacier {
+	Features {
+		 i2c
+		 rtc
+		 dtt
+		 nand
+		 fdt
+	}
 	Vars {
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xxFP/"
 		CFG_MTD_ERASE_DEVICE	"mtd3"
