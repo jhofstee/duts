@@ -9,10 +9,11 @@
 #
 
 
-duts_tc UBootInstallUboot {
+duts_tc InstallUBootUsingUBoot {
 	Type u-boot
 	Timeout 300
 	Commands {
+		"printenv load update" ".*"
 		"setenv u-boot /tftpboot/duts/$BOARD/u-boot.bin" ".*"
 		"run load update" "Copy to Flash... done.*"
 	}
