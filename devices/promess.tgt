@@ -17,7 +17,9 @@
 # 0xFFF70000 - 0xFFFFFFFF user data
 #
 duts_device motionpro {
-
+	Features {
+		linux_in_nor
+	}
 	Vars {
 		BUILD_TARGET		"motionpro"
 		BUILD_ARCH		"powerpc"

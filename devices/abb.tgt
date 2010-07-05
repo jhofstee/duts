@@ -7,6 +7,7 @@ duts_device socrates {
 		 nand
 		 i2c
 		 rtc
+		 linux_in_nor
 		 linux_swap
 	}
 	Vars {

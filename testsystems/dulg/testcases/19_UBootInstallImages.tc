@@ -10,6 +10,7 @@
 duts_tc UBootInstallKernelTftp {
 	Type u-boot
 	Timeout 600
+	Requires linux_in_nor
 	Commands {
 		"setenv kernel_addr $CFG_KERNEL_START" ".*"
 		"protect off $CFG_KERNEL_START $CFG_KERNEL_END" ".*"

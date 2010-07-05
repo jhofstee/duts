@@ -3,6 +3,9 @@
 #
 
 duts_device mpc8349emds {
+	Features {
+		linux_in_nor
+	}
 	Vars {
 		CFG_KERNEL_START	0x80060000
 		CFG_KERNEL_END		0x8015ffff
@@ -15,6 +18,9 @@ duts_device mpc8349emds {
 }
 
 duts_device lite5200b {
+	Features {
+		linux_in_nor
+	}
 	Vars {
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_6xx/"
 		CFG_MTD_ERASE_DEVICE	"mtd4"

@@ -11,6 +11,7 @@ duts_tc LinuxBootNetNfs {
 
 duts_tc LinuxBootSelf {
 	Type u-boot
+	Requires linux_in_nor
 	Code {
 		set timeout 300
 		set res 0
@@ -72,6 +73,7 @@ duts_tc LinuxTelnetSelf {
 
 duts_tc LinuxBootNfs {
 	Type u-boot
+	Requires linux_in_nor
 	Code {
 		set res [boot_kernel_nfs "flash_nfs"]
 	}

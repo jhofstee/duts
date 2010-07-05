@@ -18,7 +18,8 @@
 #    CFG_FLASH_ERASE_BANK (bank nubmers are 1-based)
 #    CFG_FLASH_TST_SIZE - must be <= (CFG_FLASH_TST_END - CFG_FLASH_TST_START)
 #
-# 3. Areas to be filled out with kernel and ramdisk images:
+# 3. Areas to be filled out with kernel and ramdisk images (requires
+#    linux_in_nor feature):
 #
 #    CFG_KERNEL_START - CFG_KERNEL_END
 #    CFG_RAMDISK_START - CFG_RAMDISK_END

@@ -3,6 +3,9 @@
 #
 
 duts_device qong {
+	Features {
+		linux_in_nor
+	}
 	Vars {
 		CFG_ROOTPATH		"/opt/eldk-4.2-arm/armVFP"
 

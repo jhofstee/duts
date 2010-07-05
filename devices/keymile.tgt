@@ -7,6 +7,9 @@
 # 0xF0A00000 - 0xF027FFFF kernel (15 sectors)
 #
 duts_device mgsuvd {
+	Features {
+		linux_in_nor
+	}
 	Vars {
 		CFG_RAM_WS_BASE		0x200000
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_8xx/"
@@ -59,6 +62,9 @@ duts_device mgsuvd {
 # 0x50000000 - 0x508FFFFF ramdisk (75 sectors)
 #
 duts_device mgcoge {
+	Features {
+		linux_in_nor
+	}
 	Vars {
 		CFG_RAM_WS_BASE		0x200000
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_82xx/"

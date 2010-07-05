@@ -16,6 +16,9 @@
 # 0xFFB00000 - 0xFFFFFFFF Spare (5MB)
 #
 duts_device v38b {
+	Features {
+		linux_in_nor
+	}
 	Vars {
 		BUILD_TARGET		"v38b"
 		BUILD_ARCH		"ppc"

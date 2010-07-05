@@ -7,6 +7,7 @@ duts_device arches {
 		 i2c
 		 dtt
 		 fdt
+		 linux_in_nor
 	}
 	Vars {
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xxFP/"
@@ -44,6 +45,9 @@ duts_device arches {
 }
 
 duts_device bamboo {
+	Features {
+		linux_in_nor
+	}
 	Vars {
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xxFP/"
 
@@ -77,6 +81,9 @@ duts_device bamboo {
 }
 
 duts_device bubinga {
+	Features {
+		linux_in_nor
+	}
 	Vars {
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xx/"
 
@@ -106,6 +113,7 @@ duts_device canyonlands {
 		 dtt
 		 nand
 		 fdt
+		 linux_in_nor
 	}
 	Vars {
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xxFP/"
@@ -143,6 +151,9 @@ duts_device canyonlands {
 }
 
 duts_device ebony {
+	Features {
+		linux_in_nor
+	}
 	Vars {
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xx/"
 
@@ -180,6 +191,7 @@ duts_device glacier {
 		 dtt
 		 nand
 		 fdt
+		linux_in_nor
 	}
 	Vars {
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xxFP/"
@@ -219,6 +231,9 @@ duts_device glacier {
 }
 
 duts_device haleakala {
+	Features {
+		linux_in_nor
+	}
 	Vars {
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xx/"
 		CFG_MTD_ERASE_DEVICE	"mtd3"
@@ -272,6 +287,9 @@ duts_device haleakala {
 #   FF180000 - FF37FFFF ramdisk
 #
 duts_device katmai {
+	Features {
+		linux_in_nor
+	}
 	Vars {
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xx/"
 
@@ -324,6 +342,7 @@ duts_device kilauea {
 		 rtc
 		 nand
 		 fdt
+		linux_in_nor
 	}
 	Vars {
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xx/"
@@ -386,6 +405,9 @@ duts_device kilauea {
 #   FFD50000 - FFEBFFFF ramdisk
 #
 duts_device luan {
+	Features {
+		linux_in_nor
+	}
 	Vars {
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xx/"
 
@@ -417,6 +439,9 @@ duts_device luan {
 }
 
 duts_device lwmon5 {
+	Features {
+		linux_in_nor
+	}
 	Vars {
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xxFP/"
 		CFG_KERNEL_START	0xf8000000
@@ -446,6 +471,9 @@ duts_device lwmon5 {
 }
 
 duts_device ocotea {
+	Features {
+		linux_in_nor
+	}
 	Vars {
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xx/"
 
@@ -493,6 +521,9 @@ duts_device ocotea {
 #   FFFA0000 - FFFFFFFF U-Boot
 #
 duts_device rainier {
+	Features {
+		linux_in_nor
+	}
 	Vars {
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xx/"
 
@@ -541,6 +572,9 @@ duts_device rainier {
 #   FFFA0000 - FFFFFFFF U-Boot
 #
 duts_device sequoia {
+	Features {
+		linux_in_nor
+	}
 	Vars {
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xxFP/"
 		CFG_MTD_ERASE_DEVICE	"mtd6"
@@ -572,6 +606,9 @@ duts_device sequoia {
 }
 
 duts_device sycamore {
+	Features {
+		linux_in_nor
+	}
 	Vars {
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xx/"
 
@@ -617,6 +654,9 @@ duts_device sycamore {
 #   FFFC0000 - FFFFFFFF U-Boot
 #
 duts_device taishan {
+	Features {
+		linux_in_nor
+	}
 	Vars {
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xx/"
 
@@ -651,6 +691,9 @@ duts_device taishan {
 }
 
 duts_device walnut {
+	Features {
+		linux_in_nor
+	}
 	Vars {
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xx/"
 
@@ -675,6 +718,9 @@ duts_device walnut {
 }
 
 duts_device yellowstone {
+	Features {
+		linux_in_nor
+	}
 	Vars {
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xx/"
 
@@ -707,6 +753,9 @@ duts_device yellowstone {
 }
 
 duts_device yosemite {
+	Features {
+		linux_in_nor
+	}
 	Vars {
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xxFP/"
 
@@ -765,6 +814,9 @@ duts_device yosemite {
 #
 #
 duts_device yucca {
+	Features {
+		linux_in_nor
+	}
 	Vars {
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xx/"
 
