@@ -8,6 +8,7 @@ duts_device arches {
 		 dtt
 		 fdt
 		 linux_in_nor
+		ramdisk_in_nor
 	}
 	Vars {
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xxFP/"
@@ -47,6 +48,7 @@ duts_device arches {
 duts_device bamboo {
 	Features {
 		linux_in_nor
+		ramdisk_in_nor
 	}
 	Vars {
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xxFP/"
@@ -83,6 +85,7 @@ duts_device bamboo {
 duts_device bubinga {
 	Features {
 		linux_in_nor
+		ramdisk_in_nor
 	}
 	Vars {
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xx/"
@@ -114,6 +117,7 @@ duts_device canyonlands {
 		 nand
 		 fdt
 		 linux_in_nor
+		ramdisk_in_nor
 	}
 	Vars {
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xxFP/"
@@ -153,6 +157,7 @@ duts_device canyonlands {
 duts_device ebony {
 	Features {
 		linux_in_nor
+		ramdisk_in_nor
 	}
 	Vars {
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xx/"
@@ -192,6 +197,7 @@ duts_device glacier {
 		 nand
 		 fdt
 		linux_in_nor
+		ramdisk_in_nor
 	}
 	Vars {
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xxFP/"
@@ -233,6 +239,7 @@ duts_device glacier {
 duts_device haleakala {
 	Features {
 		linux_in_nor
+		ramdisk_in_nor
 	}
 	Vars {
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xx/"
@@ -289,6 +296,7 @@ duts_device haleakala {
 duts_device katmai {
 	Features {
 		linux_in_nor
+		ramdisk_in_nor
 	}
 	Vars {
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xx/"
@@ -343,6 +351,7 @@ duts_device kilauea {
 		 nand
 		 fdt
 		linux_in_nor
+		ramdisk_in_nor
 	}
 	Vars {
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xx/"
@@ -407,6 +416,7 @@ duts_device kilauea {
 duts_device luan {
 	Features {
 		linux_in_nor
+		ramdisk_in_nor
 	}
 	Vars {
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xx/"
@@ -441,6 +451,7 @@ duts_device luan {
 duts_device lwmon5 {
 	Features {
 		linux_in_nor
+		ramdisk_in_nor
 	}
 	Vars {
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xxFP/"
@@ -473,6 +484,7 @@ duts_device lwmon5 {
 duts_device ocotea {
 	Features {
 		linux_in_nor
+		ramdisk_in_nor
 	}
 	Vars {
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xx/"
@@ -523,6 +535,7 @@ duts_device ocotea {
 duts_device rainier {
 	Features {
 		linux_in_nor
+		ramdisk_in_nor
 	}
 	Vars {
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xx/"
@@ -574,6 +587,7 @@ duts_device rainier {
 duts_device sequoia {
 	Features {
 		linux_in_nor
+		ramdisk_in_nor
 	}
 	Vars {
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xxFP/"
@@ -608,6 +622,7 @@ duts_device sequoia {
 duts_device sycamore {
 	Features {
 		linux_in_nor
+		ramdisk_in_nor
 	}
 	Vars {
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xx/"
@@ -656,6 +671,7 @@ duts_device sycamore {
 duts_device taishan {
 	Features {
 		linux_in_nor
+		ramdisk_in_nor
 	}
 	Vars {
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xx/"
@@ -720,6 +736,7 @@ duts_device walnut {
 duts_device yellowstone {
 	Features {
 		linux_in_nor
+		ramdisk_in_nor
 	}
 	Vars {
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xx/"
@@ -755,6 +772,7 @@ duts_device yellowstone {
 duts_device yosemite {
 	Features {
 		linux_in_nor
+		ramdisk_in_nor
 	}
 	Vars {
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xxFP/"
@@ -816,6 +834,7 @@ duts_device yosemite {
 duts_device yucca {
 	Features {
 		linux_in_nor
+		ramdisk_in_nor
 	}
 	Vars {
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_4xx/"

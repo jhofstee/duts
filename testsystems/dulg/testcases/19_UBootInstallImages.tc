@@ -28,6 +28,7 @@ duts_tc UBootInstallKernelTftp {
 duts_tc UBootInstallRamdisk {
 	Type u-boot
 	Timeout 600
+	Requires ramdisk_in_nor
 	Commands {
 		"setenv ramdisk_addr $CFG_RAMDISK_START" ".*"
 		"setenv ram_ws $CFG_RAM_WS_BASE" ".*"

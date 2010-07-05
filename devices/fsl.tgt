@@ -5,6 +5,7 @@
 duts_device mpc8349emds {
 	Features {
 		linux_in_nor
+		ramdisk_in_nor
 	}
 	Vars {
 		CFG_KERNEL_START	0x80060000

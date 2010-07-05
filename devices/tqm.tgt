@@ -20,6 +20,7 @@
 duts_device tqm8272 {
 	Features {
 		linux_in_nor
+		ramdisk_in_nor
 	}
 	Vars {
 		CFG_KERNEL_START	0x40080000
@@ -51,6 +52,7 @@ duts_device tqm8272 {
 duts_device tqm834x {
 	Features {
 		linux_in_nor
+		ramdisk_in_nor
 	}
 	Vars {
 		CFG_KERNEL_START	0x80060000
@@ -67,6 +69,7 @@ duts_device tqm834x {
 duts_device tqm8540 {
 	Features {
 		linux_in_nor
+		ramdisk_in_nor
 	}
 	Vars {
 		CFG_KERNEL_START	0xFE000000
@@ -98,6 +101,7 @@ duts_device tqm8540 {
 duts_device tqm8541 {
 	Features {
 		linux_in_nor
+		ramdisk_in_nor
 	}
 	Vars {
 		CFG_KERNEL_START	0xFE000000
@@ -132,6 +136,7 @@ duts_device tqm8548 {
 		 rtc
 		 linux_swap
 		linux_in_nor
+		ramdisk_in_nor
 	}
 	Vars {
 		CFG_ROOTPATH		"/opt/eldk-4.2/ppc_85xx/"
@@ -170,6 +175,7 @@ duts_device tqm8548 {
 duts_device tqm8555 {
 	Features {
 		linux_in_nor
+		ramdisk_in_nor
 	}
 	Vars {
 		CFG_KERNEL_START	0xFE000000
@@ -201,6 +207,7 @@ duts_device tqm8555 {
 duts_device tqm8560 {
 	Features {
 		linux_in_nor
+		ramdisk_in_nor
 	}
 	Vars {
 		CFG_KERNEL_START	0xFE000000

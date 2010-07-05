@@ -8,6 +8,7 @@ duts_device socrates {
 		 i2c
 		 rtc
 		 linux_in_nor
+		ramdisk_in_nor
 		 linux_swap
 	}
 	Vars {

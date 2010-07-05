@@ -9,6 +9,7 @@
 duts_device mgsuvd {
 	Features {
 		linux_in_nor
+		ramdisk_in_nor
 	}
 	Vars {
 		CFG_RAM_WS_BASE		0x200000
@@ -64,6 +65,7 @@ duts_device mgsuvd {
 duts_device mgcoge {
 	Features {
 		linux_in_nor
+		ramdisk_in_nor
 	}
 	Vars {
 		CFG_RAM_WS_BASE		0x200000
