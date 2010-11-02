@@ -1,4 +1,4 @@
-#
+# -*- Mode: tcl -*-
 # mgsuvd layout:
 #
 # 16MB in 128 sectors, 1 bank (1 sector = 128 KB)
