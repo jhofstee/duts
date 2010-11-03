@@ -30,7 +30,7 @@ if [valid_dir $dst] {
 
 	cd $dst
 
-	set tool_cmd "git-checkout "
+	set tool_cmd "git checkout "
 	set tool_arg "-f $UBOOT_GIT_BRANCH"
 	if ![exec2_log "$tool_cmd $tool_arg" err] {
 		puts "$err"

@@ -1,8 +1,8 @@
 #!/bin/env tclsh
 #                                -*- Mode: tcl -*-
 #
+# (C) Copyright 2008-2010 Detlev Zundel <dzu@denx.de>, DENX Software Engineering
 # (C) Copyright 2006, 2007 Rafal Jaworowski <raj@semihalf.com> for DENX Software Engineering
-# (C) Copyright 2008 Detlev Zundel <dzu@denx.de>, DENX Software Engineering
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -81,75 +81,10 @@ proc usage {optlist} {
 }
 
 #
-# checks if the path to repo $r is accessible and resembles git, returns 0/1
-#
-proc git_valid_repo {r} {
-	if ![valid_dir $r] {
-		return 0
-	} else {
-		# check if .git present in the src dir
-		if ![file exists $r/.git] {
-			p_err "'$r' is not a git repository"
-			return 0
-		}
-	}
-
-	return 1
-}
-
-#
-# checks the src git repo specified, returns 0/1.
-#
-# git src can be specified as:
-#
-# "-s /home/git/u-boot"
-#
-proc git_valid_src {src} {
-	if ![git_valid_repo $src] {
-		p_err "Not a valid git repository: '$src'"
-		return 0
-	}
-
-	return 1
-}
-
-#
-# checks git dest location - it can be specified in the following conventions:
-#
-# "-d <some_dir>/<name>" e.g. for U-Boot: -d ~/u-boot.mycopy
-#
-# "-d <some_dir>" e.g. -d ~
-#
-# the specification is checked against:
-#   - already exists?
-#   - parent dir writable?
-#
-# returns 0/1
-#
-proc git_valid_dst {dst} {
-	set dst [string trimright $dst "/"]
-	if [file exists $dst] {
-		if [file exists "$dst/.git"] {
-			p_err "destination location already has git repo:\
-			'$dst'"
-			return 0
-		} else {
-			if ![valid_dir $dst 1] {
-				p_err "access problems with destination:\
-				'$dst'"
-				return 0
-			}
-		}
-	}
-
-	return 1
-}
-
-#
 # create a new branch off an existing branch
 #
 proc git_create_branch {branchpoint newbranch} {
-	set c "git-checkout -f -b $newbranch $branchpoint"
+	set c "git checkout -f -b $newbranch $branchpoint"
 	p_banner "$c" *
 	if ![exec2_log "$c 2>&1" res] {
 		p_err "$res"
@@ -160,10 +95,10 @@ proc git_create_branch {branchpoint newbranch} {
 }
 
 #
-# performs git-clone command, returns 0/1 upon fail/success
+# performs git clone command, returns 0/1 upon fail/success
 #
 proc git_clone {src dst} {
-	set c "git-clone $src $dst"
+	set c "git clone $src $dst"
 	p_banner "$c" *
 	if ![exec2_log "$c 2>@1" res] {
 		p_err "$res"
@@ -178,18 +113,8 @@ proc git_clone {src dst} {
 # the sources
 #
 proc do_git {src dst rev} {
-	if ![string match "git://*" $src] {
-		if ![git_valid_src $src] {
-			exit1
-		}
-	}
 	p_verb "Working with source repo: '$src'"
-
-	if ![git_valid_dst $dst] {
-		exit1
-	}
 	p_verb "Working with destination repo: '$dst'"
-
 	p_verb "Using supplied revision: '$rev'"
 
 	##
