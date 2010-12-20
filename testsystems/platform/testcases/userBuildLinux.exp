@@ -94,10 +94,10 @@ if ![valid_dir $dst_dir 1] {
 set tool_cmd "$tools_dir/build_image"
 if [ info exists BUILD_TARGET_PREFIX ] {
 	set tool_arg "-s $src -d $dst -n $BUILD_TARGET_PREFIX/$BUILD_TARGET \
-	-a $BUILD_ARCH -c $BUILD_CROSS $build_type"
+	-a $BUILD_ARCH -c $BUILD_CROSS linux"
 } else {
 	set tool_arg "-s $src -d $dst -n $BUILD_TARGET \
-		-a $BUILD_ARCH -c $BUILD_CROSS $build_type"
+		-a $BUILD_ARCH -c $BUILD_CROSS linux"
 }
 if [file exists $dst] {
 	p_warn "destination kernel image already exists and will be\
