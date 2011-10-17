@@ -11,6 +11,9 @@ duts_tc UBootIminfoHelp {
 
 duts_tc UBootIminfo {
 	Type u-boot
+	Pre {
+		"setenv bootfile $CFG_LINUX_KERNEL" ".*"
+	}
 	Commands {
 		"tftp ${ram_ws} ${bootfile}" "Bytes transferred"
 		"imi ${ram_ws}" "Verifying Checksum ... OK"
