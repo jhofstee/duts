@@ -29,7 +29,7 @@ duts_tc UBootFDTCmdList {
 	Type u-boot
 	Requires fdt
 	Commands {
-		"fdt list /cpus" ".*"
+		"fdt list $CFG_FDT_PRINT_NODE" ".*"
 	}
 }
 
@@ -37,7 +37,7 @@ duts_tc UBootFDTCmdPrint {
 	Type u-boot
 	Requires fdt
 	Commands {
-		"fdt print /cpus" ".*"
+		"fdt print $CFG_FDT_PRINT_NODE" ".*"
 	}
 }
 

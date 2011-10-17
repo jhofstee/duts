@@ -11,6 +11,7 @@ duts_device _common {
 		CFG_RAM_WS_BASE		0x100000
 		CFG_RAM_WS_BASE_ALT	0x200000
 
+		CFG_FDT_PRINT_NODE	"/cpus"
 		CFG_LINUX_KERNEL	"/tftpboot/duts/$BOARD/uImage"
 		CFG_FDT_FILE		"/tftpboot/duts/$BOARD/$BOARD.dtb"
 		CFG_FDT_SOURCE		"/tftpboot/duts/$BOARD/$BOARD.dts"
