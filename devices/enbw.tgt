@@ -1,0 +1,96 @@
+# -*- Mode: tcl -*-
+# Definitions for EnBW boards
+#
+
+duts_device enbw_cmc {
+	Features {
+		nand
+		i2c
+		linux_in_nand
+		ramdisk_in_nand
+		fdt_in_nand
+		fdt
+		rtc
+		dtt
+		mtdparts
+		ubi_nand
+		mmc_raw
+		mmc_fat
+	}
+	Vars {
+		CFG_BOARD_NAME		"enbw_cmc"
+		CFG_ROOTPATH		"/opt/eldk-5.0/armv5te/rootfs"
+		CFG_RAM_WS_BASE		0xc0000000
+		CFG_RAM_WS_BASE_ALT	0xc0300000
+
+		CFG_FLASH_TST_START	0x60100000
+		CFG_FLASH_ERASE_START	0x60100000
+		CFG_FLASH_TST_END	0x6014ffff
+		CFG_FLASH_ERASE_END	0x6014ffff
+		CFG_FLASH_TST_SIZE	0x00050000
+		CFG_FLASH_TST_SECT	"1:19-34"
+
+		CFG_FLASH_PROT1_START	0x60000000
+		CFG_FLASH_PROT1_END	0x6009FFFF
+		CFG_FLASH_ERASE_BANK	1
+		CFG_FLASH_ERASE_SECT	"1:19-34"
+
+		CFG_FDT_PRINT_NODE	"/memory"
+
+		CFG_NAND_CMP_ADDR_R	0xc0000000
+
+		CFG_LINUX_KERNEL	"/tftpboot/duts/enbw_cmc/uImage"
+		CFG_KERNEL_ADDR_R	0xc0700000
+		CFG_KERNEL_NAND_OFF	0x20000
+		CFG_KERNEL_NAND_LEN	0x300000
+
+		CFG_LINUX_RAMDISK	"/tftpboot/duts/enbw_cmc/uRamdisk"
+		CFG_RAMDISK_NAND_OFF	0x320000
+		CFG_RAMDISK_NAND_LEN	0x400000
+		CFG_RAMDISK_ADDR_R	0xc0b00000
+		CFG_MTD_ERASE_DEVICE	"mtd3"
+
+		CFG_MTDPARTS_MTDPARTITION	"nand0"
+		CFG_MTDPARTS_MTDIDS	"=davinci_nand.1"
+		CFG_MTDPARTS_MTDPARTS	"davinci_nand.1:0xc0000(uboot),0x40000(NVRAM),0x300000(k0),0x1400000(r0),0x300000(k1),0x1400000(r1),0x1100000(data)"
+		CFG_MTDPARTS_DEL_PART0	"data"
+		CFG_MTDPARTS_DEL_PART1	"r1"
+		CFG_MTDPARTS_ADD_PART	"newdata"
+
+		CFG_UBI_DEVICE_NOR	"3"
+		CFG_UBI_DEVICE_NR_NOR	0
+		CFG_UBI_DEVICE_NAND	"7"
+		CFG_UBI_DEVICE_NR_NAND	0
+		CFG_UBI_NOR_NAME	"rest"
+		CFG_UBI_NOR_IO_SZ	1
+		CFG_UBI_NOR_PEB_SIZE	"64KiB"
+		CFG_UBI_NOR_LEB_SZ	65408
+		CFG_UBI_NOR_MAX_LEB	22
+		CFG_UBI_NOR_VOL_SZ	1177344
+		CFG_UBI_NAND_NAME	"userfs"
+		CFG_UBI_NAND_IO_SZ	2048
+		CFG_UBI_NAND_PEB_SIZE	"128KiB"
+		CFG_UBI_NAND_LEB_SZ	126976
+		CFG_UBI_NAND_MAX_LEB	950
+		CFG_UBI_NAND_VOL_SZ	120246272
+
+		CFG_MMC_BLOCK		247
+		CFG_MMC_BLOCK_LEN	10
+
+		CFG_FDT_FILE		"/tftpboot/duts/enbw_cmc/enbw_cmc.dtb"
+		CFG_FDT_NAND_OFF	0x0
+		CFG_FDT_NAND_LEN	0x2000
+		CFG_FDT_ADDR_R		0xc0600000
+
+		UBOOT_GIT_BRANCH	"remotes/origin/enbw_cmc"
+		UBOOT_GIT_REPO		"git://git.denx.de/u-boot-testing.git"
+
+		LINUX_GIT_BRANCH	"remotes/origin/enbw_cmc"
+		LINUX_GIT_REPO		"git://git.denx.de/linux-denx.git"
+		LINUX_BUILD_TARGET	"enbw_cmc"
+
+		BUILD_TARGET		"enbw_cmc"
+		BUILD_ARCH		"arm"
+		BUILD_CROSS		"arm-linux-"
+	}
+}
