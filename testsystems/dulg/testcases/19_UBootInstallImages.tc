@@ -46,7 +46,7 @@ duts_tc UBootInstallRamdisk {
 duts_tc UBootInstallFdt {
 	Type u-boot
 	Timeout 600
-	Requires fdt
+	Requires fdt_in_nor
 	Commands {
 		"setenv fdt_addr $CFG_FDT_START" ".*"
 		"setenv fdt_addr_r $CFG_FDT_ADDR_R" ".*"
@@ -57,5 +57,86 @@ duts_tc UBootInstallFdt {
 		"cp.b ${ram_ws} ${fdt_addr} ${filesize}" "done"
 		"setenv ram_ws" ".*"
 		"saveenv" ".*"
+	}
+}
+
+duts_tc UBootInstallNandKernelTftp {
+	Type u-boot
+	Timeout 600
+	Requires linux_in_nand
+	Pre {
+		"setenv cmp_addr_r $CFG_NAND_CMP_ADDR_R" ".*"
+	}
+	Commands {
+		"setenv kernel_addr_r $CFG_KERNEL_ADDR_R" ".*"
+		"setenv nand_off $CFG_KERNEL_NAND_OFF" ".*"
+		"nand erase $CFG_KERNEL_NAND_OFF $CFG_KERNEL_NAND_LEN" ".*"
+		"tftp $CFG_KERNEL_ADDR_R $CFG_LINUX_KERNEL" ".*"
+		"iminfo $CFG_KERNEL_ADDR_R" ".*"
+		"nand write \\${kernel_addr_r} \\${nand_off} \\${filesize}" "OK"
+		"setenv nand_off" ".*"
+		"saveenv" ".*"
+
+	}
+	Post {
+		"setenv nand_off $CFG_KERNEL_NAND_OFF" ".*"
+		"nand read \\${cmp_addr_r} \\${nand_off} \\${filesize}" "OK"
+		"cmp.b \\${cmp_addr_r} \\${kernel_addr_r} \\${filesize}" "same"
+		"setenv cmp_addr_r" ".*"
+		"setenv nand_off" ".*"
+	}
+}
+
+duts_tc UBootInstallNandBlobTftp {
+	Type u-boot
+	Timeout 600
+	Requires fdt_in_nand
+	Pre {
+		"setenv cmp_addr_r $CFG_NAND_CMP_ADDR_R" ".*"
+	}
+	Commands {
+		"setenv fdt_addr_r $CFG_FDT_ADDR_R" ".*"
+		"setenv nand_off $CFG_FDT_NAND_OFF" ".*"
+		"setenv nand_len $CFG_FDT_NAND_LEN" ".*"
+		"setenv cmp_addr_r $CFG_NAND_CMP_ADDR_R" ".*"
+		"nand erase \\${nand_off} \\${nand_len}" ".*"
+		"tftp $CFG_FDT_ADDR_R $CFG_FDT_FILE" ".*"
+		"nand write \\${fdt_addr_r} \\${nand_off} \\${filesize}" "OK"
+		"setenv nand_off" ".*"
+		"setenv nand_len" ".*"
+		"saveenv" ".*"
+	}
+	Post {
+		"setenv nand_off $CFG_FDT_NAND_OFF" ".*"
+		"nand read \\${cmp_addr_r} \\${nand_off} \\${filesize}" "OK"
+		"cmp.b \\${cmp_addr_r} \\${fdt_addr_r} \\${filesize}" "same"
+		"setenv cmp_addr_r" ".*"
+		"setenv nand_off" ".*"
+	}
+}
+
+duts_tc UBootInstallNandRamdisk {
+	Type u-boot
+	Timeout 600
+	Requires ramdisk_in_nand
+	Pre {
+		"setenv cmp_addr_r $CFG_NAND_CMP_ADDR_R" ".*"
+	}
+	Commands {
+		"setenv ramdisk_addr_r $CFG_RAMDISK_ADDR_R" ".*"
+		"setenv nand_off $CFG_RAMDISK_NAND_OFF" ".*"
+		"nand erase $CFG_RAMDISK_NAND_OFF $CFG_RAMDISK_NAND_LEN" ".*"
+		"tftp $CFG_RAMDISK_ADDR_R $CFG_LINUX_RAMDISK" ".*"
+		"iminfo $CFG_RAMDISK_ADDR_R" ".*"
+		"nand write \\${ramdisk_addr_r} \\${nand_off} \\${filesize}" "OK"
+		"setenv nand_off" ".*"
+		"saveenv" ".*"
+	}
+	Post {
+		"setenv nand_off $CFG_RAMDISK_NAND_OFF" ".*"
+		"nand read \\${cmp_addr_r} \\${nand_off} \\${filesize}" "OK"
+		"cmp.b \\${cmp_addr_r} \\${ramdisk_addr_r} \\${filesize}" "same"
+		"setenv nand_off" ".*"
+		"setenv cmp_addr_r" ".*"
 	}
 }

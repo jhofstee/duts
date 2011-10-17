@@ -7,6 +7,7 @@ duts_device arches {
 		 i2c
 		 dtt
 		 fdt
+		 fdt_in_nor
 		 linux_in_nor
 		ramdisk_in_nor
 	}
@@ -116,6 +117,7 @@ duts_device canyonlands {
 		 dtt
 		 nand
 		 fdt
+		 fdt_in_nor
 		 linux_in_nor
 		ramdisk_in_nor
 	}
@@ -196,6 +198,7 @@ duts_device glacier {
 		 dtt
 		 nand
 		 fdt
+		 fdt_in_nor
 		linux_in_nor
 		ramdisk_in_nor
 	}
@@ -350,6 +353,7 @@ duts_device kilauea {
 		 rtc
 		 nand
 		 fdt
+		 fdt_in_nor
 		linux_in_nor
 		ramdisk_in_nor
 	}
