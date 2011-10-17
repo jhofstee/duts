@@ -48,8 +48,12 @@ duts_tc UBootCmpHelp {
 
 duts_tc UBootCmp {
 	Type u-boot
+	Pre {
+		"tftp $CFG_RAM_WS_BASE $CFG_LINUX_KERNEL" ".*"
+		"tftp $CFG_RAM_WS_BASE_ALT $CFG_LINUX_KERNEL" ".*"
+	}
 	Commands {
-		"cmp $CFG_RAM_WS_BASE $CFG_RAM_WS_BASE_ALT 0x400" ".*"
+		"cmp $CFG_RAM_WS_BASE $CFG_RAM_WS_BASE_ALT 0x400" "same"
 		"md $CFG_RAM_WS_BASE 0xc" ".*"
 		"md $CFG_RAM_WS_BASE_ALT 0xc" ".*"
 	}
@@ -57,10 +61,14 @@ duts_tc UBootCmp {
 
 duts_tc UBootCmpExt {
 	Type u-boot
+	Pre {
+		"tftp $CFG_RAM_WS_BASE $CFG_LINUX_KERNEL" ".*"
+		"tftp $CFG_RAM_WS_BASE_ALT $CFG_LINUX_KERNEL" ".*"
+	}
 	Commands {
-		"cmp.l $CFG_RAM_WS_BASE $CFG_RAM_WS_BASE_ALT 0x400" ".*"
-		"cmp.w $CFG_RAM_WS_BASE $CFG_RAM_WS_BASE_ALT 0x800" ".*"
-		"cmp.b $CFG_RAM_WS_BASE $CFG_RAM_WS_BASE_ALT 0x1000" ".*"
+		"cmp.l $CFG_RAM_WS_BASE $CFG_RAM_WS_BASE_ALT 0x400" "same"
+		"cmp.w $CFG_RAM_WS_BASE $CFG_RAM_WS_BASE_ALT 0x800" "same"
+		"cmp.b $CFG_RAM_WS_BASE $CFG_RAM_WS_BASE_ALT 0x1000" "same"
 	}
 }
 
