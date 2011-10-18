@@ -16,3 +16,10 @@ duts_tc UBootBootmHelp {
 		"help bootm" ".*"
 	}
 }
+
+duts_tc UBootBootdHelp {
+	Type u-boot
+	Commands {
+		"help bootd" ".*"
+	}
+}
