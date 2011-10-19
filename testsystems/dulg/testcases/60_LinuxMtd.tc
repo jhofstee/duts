@@ -18,7 +18,7 @@ duts_tc LinuxProcMtd {
 duts_tc LinuxMtdDump {
 	Type linux
 	Commands {
-		"xxd /dev/$CFG_MTD_ERASE_DEVICE | head -4" ".*"
+		"hexdump -C /dev/$CFG_MTD_ERASE_DEVICE | head -4" ".*"
 	}
 }
 
