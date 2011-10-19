@@ -38,6 +38,35 @@ duts_tc LinuxBootSelf {
 	}
 }
 
+duts_tc LinuxBootSelfNand {
+	Type u-boot
+	Requires linux_in_nand
+	Requires ramdisk_in_nand
+	Code {
+		set timeout 300
+		set res 0
+
+		send -s "run nand_selfnand\r"
+		expect {
+			timeout {
+				p_err "timed out after 'nand_selfnand'"
+			}
+			"login: " {
+				set cur_context "kernel"
+				set res [login_kernel "root" "root"]
+			}
+
+			-re ".*Application\\ running.*" {
+				set cur_context "kernel"
+				if ![_context_kernel_get_prompt] {
+					p_err "could not get kernel prompt"
+				}
+				set res 1
+			}
+		}
+	}
+}
+
 duts_tc LinuxTelnetSelf {
 	Type linux
 	Code {
