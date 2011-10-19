@@ -117,3 +117,66 @@ duts_tc UBootProtect {
 		"prot off $CFG_FLASH_TST_START $CFG_FLASH_TST_END" ".*"
 	}
 }
+
+duts_tc UBootMtdPartsHelp {
+	Type u-boot
+	Requires mtdparts
+	Commands {
+		"help mtdparts" ".*"
+	}
+}
+
+duts_tc UBootMtdParts {
+	Type u-boot
+	Requires mtdparts
+	Pre {
+		"setenv mtdparts mtdparts=$CFG_MTDPARTS_MTDPARTS" ".*"
+	}
+	Commands {
+		"mtdparts" ".*"
+	}
+}
+
+duts_tc UBootMtdPartsPrint {
+	Type u-boot
+	Requires mtdparts
+	Pre {
+		"setenv mtdparts mtdparts=$CFG_MTDPARTS_MTDPARTS" ".*"
+	}
+	Commands {
+		"print mtdparts" ".*"
+	}
+}
+
+duts_tc UBootMtdPartsDefault {
+	Type u-boot
+	Requires mtdparts
+	Commands {
+		"mtdparts default" ".*"
+		"mtdparts" ".*"
+	}
+}
+
+duts_tc UBootMtdPartsDelete {
+	Type u-boot
+	Requires mtdparts
+	Pre {
+		"setenv mtdparts mtdparts=$CFG_MTDPARTS_MTDPARTS" ".*"
+	}
+	Commands {
+		"print mtdparts" ".*"
+		"mtdparts del $CFG_MTDPARTS_DEL_PART0" ".*"
+		"mtdparts del $CFG_MTDPARTS_DEL_PART1" ".*"
+		"mtdparts" ".*"
+	}
+}
+
+duts_tc UBootMtdPartsAdd {
+	Type u-boot
+	Requires mtdparts
+	Commands {
+		"print mtdparts" ".*"
+		"mtdparts add $CFG_MTDPARTS_MTDPARTITION - $CFG_MTDPARTS_ADD_PART" ".*"
+		"mtdparts" ".*"
+	}
+}
