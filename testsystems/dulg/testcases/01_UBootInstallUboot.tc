@@ -15,7 +15,7 @@ duts_tc InstallUBootUsingUBoot {
 	Commands {
 		"printenv load update" ".*"
 		"setenv u-boot /tftpboot/duts/$BOARD/u-boot.bin" ".*"
-		"run load update" "Copy to Flash... done.*"
+		"run load update" "done.*"
 	}
 	Code {
 		send -s "reset\r"
