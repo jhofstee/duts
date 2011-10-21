@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # (C) Copyright 2006, 2007 Rafal Jaworowski <raj@semihalf.com> for DENX Software Engineering
-# (C) Copyright 2008 Detlev Zundel <dzu@denx.de>, DENX Software Engineering
+# (C) Copyright 2008-2011 Detlev Zundel <dzu@denx.de>, DENX Software Engineering
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -73,7 +73,7 @@ done=""
 for f in ${1}*.log; do
 	n=`echo $f | sed 's/\.log$/\.txt/; s/^'$1'//; s/^_//'`
 	[ -n "$verbose" ] && echo "Processing $n"
-	( echo "<verbatim>"; sed ' s/\r//g; 1 {/^[ \t]*$/ d};' < $f | col -b ; echo "</verbatim>" ) > ${dulgdata}/$n
+	( echo "<verbatim>"; sed ' s/\r//g; 1 {/^[ \t]*$/ d};' < $f | col -xb ; echo "</verbatim>" ) > ${dulgdata}/$n
 	done="$done $n"
 done
 
