@@ -3,14 +3,28 @@
 #
 
 duts_tc UBootSetSerial {
-	Type host
-	Commands "!userSetSerial.exp"
+	Type u-boot
+	Commands {
+		"setenv serial# DUTS" ".*"
+		"setenv ethaddr !!!!!!FILL_THIS!!!!!!" ".*"
+	}
 }
 
 duts_tc UBootPrintenvBoardID {
 	Type u-boot
 	Commands {
 		"printenv serial# ethaddr" ".*"
+	}
+	Post_Code {
+		send -s "reset\r"
+		expect {
+			-re ".*Hit any key .*" {
+				send -s "\r"
+				_context_firmware_command "version" "U-Boot.*"
+				set res 1
+			}
+			timeout {set res 0}
+		}
 	}
 }
 
