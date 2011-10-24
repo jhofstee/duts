@@ -22,7 +22,7 @@ duts_tc InstallUBootUsingUBoot {
 		expect {
 			-re ".*Hit any key .*" {
 				send -s "\r"
-				_context_firmware_command "version\r" "U-Boot.*"
+				_context_firmware_command "version" "U-Boot.*"
 				set res 1
 			}
 			timeout {set res 0}
