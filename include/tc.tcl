@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2008-2010 Detlev Zundel <dzu@denx.de>, DENX Software Engineering
+# (C) Copyright 2008-2011 Detlev Zundel <dzu@denx.de>, DENX Software Engineering
 # (C) Copyright 2009 Vitaly Bordug <vitb@kernel.crashing.org>
 # (C) Copyright 2006, 2007 Rafal Jaworowski <raj@semihalf.com> for DENX Software Engineering
 #
@@ -32,7 +32,7 @@ proc def {name = args} {
 }
 proc const a { return $a }
 
-def TYPE_EXPECT 	= 0
+def TYPE_EXPECT		= 0
 def TYPE_CODE		= 1
 def EXIT_FAIL		= 0
 def EXIT_SUCCESS	= 1
@@ -101,7 +101,14 @@ proc Pre {commands} {
 	global cur_tc
 	global a_testcases
 
-	set a_testcases($cur_tc,pre) $commands
+	lappend a_testcases($cur_tc,pre) [list [TYPE_EXPECT] $commands]
+}
+
+proc Pre_Code {code} {
+	global cur_tc
+	global a_testcases
+
+	lappend a_testcases($cur_tc,pre) [list [TYPE_CODE] $code]
 }
 
 proc Post {commands} {
@@ -109,6 +116,13 @@ proc Post {commands} {
 	global a_testcases
 
 	set a_testcases($cur_tc,post) $commands
+}
+
+proc Post_Code {code} {
+	global cur_tc
+	global a_testcases
+
+	lappend a_testcases($cur_tc,post) [list [TYPE_CODE] $code]
 }
 
 proc Result {result} {
@@ -201,8 +215,8 @@ proc show_tc_list {} {
 	puts -nonewline "\n"
 }
 
-proc show_commands_details {cmd_list} {
-	puts "Commands details:"
+proc show_commands_details {label cmd_list} {
+	puts "$label details:"
 	foreach elem $cmd_list {
 		set type [lindex $elem 0]
 		set cmd [lindex $elem 1]
@@ -245,7 +259,7 @@ proc show_tc_details {tc} {
 		puts "  Requires:\t\t$a_testcases($tc,requires)"
 	}
 	if {[in_array a_testcases "$tc,pre"]} {
-		puts "  Pre:\t\t$a_testcases($tc,pre)"
+		show_commands_details "Pre-Commands" $a_testcases($tc,commands)
 	}
 
 	if {$a_testcases($tc,cost) != 1} {
@@ -253,11 +267,11 @@ proc show_tc_details {tc} {
 	}
 
 	if {[in_array a_testcases "$tc,commands"]} {
-		show_commands_details $a_testcases($tc,commands)
+		show_commands_details "Commands" $a_testcases($tc,commands)
 	}
 
 	if {[in_array a_testcases "$tc,post"]} {
-		puts "  Post:\t\t$a_testcases($tc,post)"
+		show_commands_details "Post-Commands" $a_testcases($tc,commands)
 	}
 	puts "  Filename:\t$a_testcases($tc,filename)"
 }
@@ -503,9 +517,28 @@ proc run_tc {tc} {
 	# pre-commands (are not logged)
 	if {[in_array a_testcases "$tc,pre"]} {
 		p_verb "running commands from Pre section"
-		if ![run_cmds a_testcases($tc,pre) $context] {
-			p_err "problems while executing Pre section"
-			set rv 0
+
+		foreach elem $a_testcases($tc,pre) {
+			set cmd [lindex $elem 1]
+			set type [lindex $elem 0]
+			p_verb "Executing command block $cmd of type $type"
+
+			if {$type == [TYPE_EXPECT]} {
+				if ![run_cmds cmd $context ] {
+					set rv 0
+				}
+			} elseif {$type == [TYPE_CODE]} {
+				eval $cmd
+				if ![info exists res] {
+					p_warn "Code section in test case did not set 'res' variable"
+				} else {
+					set rv $res
+				}
+			}
+			if {$rv == [EXIT_FAIL]} {
+				p_err "problems while executing pre code"
+				break
+			}
 		}
 	} else {
 		p_verb "no Pre section for test case '$tc'"
@@ -537,7 +570,7 @@ proc run_tc {tc} {
 			}
 		}
 		if {$rv == [EXIT_FAIL]} {
-			p_err "problems while executing test cases"
+			p_err "problems while executing test case"
 			break
 		}
 	}
@@ -546,9 +579,29 @@ proc run_tc {tc} {
 
 	# post-commands
 	if {[in_array a_testcases "$tc,post"]} {
-		if ![run_cmds a_testcases($tc,post) $context] {
-			p_err "problems while while executing Post section"
-			set rv 0
+		p_verb "running commands from Post section"
+
+		foreach elem $a_testcases($tc,post) {
+			set cmd [lindex $elem 1]
+			set type [lindex $elem 0]
+			p_verb "Executing command block $cmd of type $type"
+
+			if {$type == [TYPE_EXPECT]} {
+				if ![run_cmds cmd $context ] {
+					set rv 0
+				}
+			} elseif {$type == [TYPE_CODE]} {
+				eval $cmd
+				if ![info exists res] {
+					p_warn "Code section in test case did not set 'res' variable"
+				} else {
+					set rv $res
+				}
+			}
+			if {$rv == [EXIT_FAIL]} {
+				p_err "problems while executing post code"
+				break
+			}
 		}
 	} else {
 		p_verb "no Post section for test case '$tc'"

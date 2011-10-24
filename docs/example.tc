@@ -112,6 +112,18 @@ duts_tc UBootBase {
 	}
 
 	######################################################################
+	# section Pre_code optional
+	#
+	# Pre_Code is to Pre what Code is to Command.
+	#
+	# file.
+	######################################################################
+	Pre_Code {
+		puts "This is TCL code"
+		set res 1
+	}
+
+	######################################################################
 	# section Post, optional
 	#
 	# describes flow of commands to be executed in the test case AFTER the
@@ -124,6 +136,18 @@ duts_tc UBootBase {
 	######################################################################
 	Post {
 		"base 0" ".*"
+	}
+
+	######################################################################
+	# section Post_code optional
+	#
+	# Post_Code is to Post what Code is to Command.
+	#
+	# file.
+	######################################################################
+	Post_Code {
+		puts "This is TCL code"
+		set res 1
 	}
 
 	######################################################################
