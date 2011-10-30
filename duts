@@ -43,6 +43,7 @@ proc usage {optlist} {
 }
 
 set verbose "no"
+set assume_yes "no"
 set debugging "yes"
 
 ##
@@ -179,6 +180,7 @@ set options {
 	{var.arg	""	"override supplied variables, ? lists defined vars"}
 	{continue		"continue previously interrupted run"}
 	{n			"dry-run"}
+	{y			"auto-confirm start of execution"}
 	{showtc			"show details about selected testcases"}
 	{showconfig		"show details about selected configuration"}
 	{v                      "be verbose"}
@@ -208,6 +210,10 @@ if {$params(n)} {
 if {$params(v)} {
 	set verbose "yes"
 	p_verb "verbose mode ON"
+}
+if {$params(y)} {
+	set assume_yes "yes"
+	p_verb "assume yes mode ON"
 }
 
 set board_name [lindex $argv 0]

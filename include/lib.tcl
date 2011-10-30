@@ -260,6 +260,12 @@ proc p_banner {msg {p "* "}} {
 #
 proc ask_yesno {msg} {
 
+	global assume_yes
+
+	if {$assume_yes == "yes"} {
+		return 1
+	}
+
 	set timeout -1
 	send_user "$msg\[y] "
 	expect_user -re "(.*)\n" {
