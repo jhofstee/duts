@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2006, 2007 DENX Software Engineering
+# (C) Copyright 2006-2011 DENX Software Engineering
 #
 # Author: Rafal Jaworowski <raj@semihalf.com>
 #
@@ -61,6 +61,9 @@ proc _device_connect_target {} {
 		p_err "couldn't spawn connecting command?!" 1
 	}
 
+	# Some time may pass before we actually talk to the board
+	sleep 3
+
 	return $spawn_id
 }
 
@@ -104,6 +107,9 @@ proc _device_current_context {} {
 
 	set ctx "off"
 	set spawn_id $console_con
+
+	# Flush any leftovers
+	expect "*"
 
 	if [is_powered_on] {
 		send -s " \r"
