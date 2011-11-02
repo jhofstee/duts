@@ -1,6 +1,6 @@
 #
+# (C) Copyright 2008-2011 Detlev Zundel <dzu@denx.de>, DENX Software Engineering
 # (C) Copyright 2006, 2007 Rafal Jaworowski <raj@semihalf.com> for DENX Software Engineering
-# (C) Copyright 2008 Detlev Zundel <dzu@denx.de>, DENX Software Engineering
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -66,7 +66,11 @@ proc _device_power_off {} {
 # method implementing connection to the target in $board_name global
 #
 proc _device_connect_target {} {
-	global board_name
+	global console_con board_name target_connected
+
+	if {$target_connected == "yes"} {
+		return $console_con
+	}
 
 	set con_cmd "connect"
 
@@ -75,6 +79,9 @@ proc _device_connect_target {} {
 	if [catch {spawn -noecho $con_cmd $board_name}] {
 		p_err "couldn't spawn 'connect'?!" 1
 	}
+
+	set target_connected "yes"
+	set console_con $spawn_id
 
 	expect {
 		timeout {
@@ -101,24 +108,19 @@ proc _device_connect_target {} {
 			p_verb "connection OK"
 		}
 	}
-	return $spawn_id
+	return $console_con
 }
 
-
-#
-# method implementing connecting to the host (VL), it is only required for
-# the remote VL set up, so systems with local VL may have it a no-op. returns
-# spawn_id of the created process
-#
-proc _device_connect_host {} {
-}
 
 proc _device_disconnect_target {} {
-}
+	global console_con target_connected
 
-proc _device_disconnect_host {} {
+	p_verb "Closing device connection"
+	if {$target_connected == "yes"} {
+		close -i $console_con
+		set target_connected "no"
+	}
 }
-
 
 #
 # checks if device is powered on, assume connection to host established for

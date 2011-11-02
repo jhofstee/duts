@@ -428,56 +428,14 @@ proc tc_prologue {tc ctx} {
 #	}
 
 	global cur_context send_slow spawn_id
-	global connected console_con control_con
+	global connected console_con host_con
 
 	set send_slow {1 .050}
-
-	if {$ctx == "host"} {
-		set cur_context $ctx
-
-		# we don't need to connect to target or switch device's
-		# contexts in case of operations on host, so we're done with
-		# the prologue
-		return
-	}
-
-	##
-	## establish console/control connection(s)
-	##
-	if {$connected != "yes"} {
-
-#p_banner "CONS connection"
-
-		# connect to devices' console
-		set console_con [_device_connect_target]
-#		p_verb "CONS connection set, OK"
-
-		set connected "yes"
-
-		# have console connection spawn_id be the global default
-		set spawn_id $console_con
-		expect "*"
-	}
-
-	##
-	## try identify if the declared cur_context is really what device
-	## actually is, this might be not easy at all...
-	##
-	set real_context [_device_current_context]
-	if {$real_context != $cur_context} {
-		p_verb "adjusting current context '$cur_context' to: '$real_context'"
-		set cur_context $real_context
-	}
-
 
 	##
 	## bring the board to the required state
 	##
-	if {$ctx != $cur_context} {
-		context_switch $ctx
-	} else {
-		p_verb "context already set, no action"
-	}
+	context_switch $ctx
 }
 
 #

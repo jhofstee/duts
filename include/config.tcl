@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2008, 2009 Detlev Zundel <dzu@denx.de>, DENX Software Engineering
+# (C) Copyright 2008-2011 Detlev Zundel <dzu@denx.de>, DENX Software Engineering
 # (C) Copyright 2006, 2007 Rafal Jaworowski <raj@semihalf.com> for DENX Software Engineering
 #
 # This program is free software; you can redistribute it and/or
@@ -312,38 +312,73 @@ proc context_class {ctx} {
 # changes context by invoking appropriate methods
 #
 #
-proc context_switch {ctx} {
-	global cur_context dst_context
+proc context_switch {dst_context} {
+	global spawn_id cur_context
 
-	set dst_context $ctx
-
-	if {($cur_context == "off") &&
-	    ($dst_context == "kernel")} {
-
-		##
-		## transition off->kernel needs additional stage: firmware
-		## context
-		##
-
-		p_verb "switching context to intermediate: $ctx"
-
-		# call handler
-		_context_firmware_handler
-		set cur_context $ctx
+	##
+	## try identify if the declared cur_context is really what device
+	## actually is, this might be not easy at all...
+	##
+	if {$dst_context == "host"} {
+		set spawn_id [_device_connect_host]
+		set real_context [_host_current_context]
+	} else {
+		set spawn_id [_device_connect_target]
+		set real_context [_device_current_context]
+	}
+	if {$real_context != $cur_context} {
+		p_verb "unexpected context - adjusting current context '$cur_context' to: '$real_context'"
+		set cur_context $real_context
 	}
 
-	p_verb "switching context to: $dst_context"
+	if {$dst_context == $cur_context} {
+		return
+	}
 
-	##
-	## call handler of the destination context
-	##
-	set handler "_context_${ctx}_handler"
-	$handler
+	p_verb "switching context $cur_context to: $dst_context"
 
-	##
-	## we have a new context..
-	##
-	set cur_context $dst_context
+	## TODO: Pull the state transitions here so that the state
+	##       machine is at a central place
+	switch "$cur_context,$dst_context" {
+		"off,kernel" {
+			# transition off->kernel needs additional
+			# stage: firmware context
+			context_switch "firmware"
+			context_switch "kernel"
+			set cur_context $dst_context
+		}
+		"off,firmware" {
+			_context_firmware_handler
+			set cur_context $dst_context
+		}
+		"off,host" {
+			_context_host_handler
+			set cur_context $dst_context
+		}
+		"firmware,kernel" {
+			_context_kernel_handler
+			set cur_context $dst_context
+		}
+		"firmware,host" {
+			# Nothing to be done
+		}
+		"kernel,host" {
+		}
+		"kernel,firmware" {
+			# Do a reboot
+			_context_firmware_handler
+			set cur_context $dst_context
+		}
+		"host,firmware" {
+			# Maybe close connection?
+		}
+		"host,kernel" {
+			# Maybe close connection?
+		}
+		default {
+			p_err "Don't know how to get from $cur_context to $dst_context"
+		}
+	}
 }
 
 #

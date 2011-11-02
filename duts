@@ -147,10 +147,10 @@ set cur_config ""
 
 # current TC context (state)
 set cur_context "off"
-set dst_context ""
 set cur_logfile ""
 
-set connected "no"
+set host_connected "no"
+set target_connected "no"
 
 set powered_on "no"
 
@@ -166,7 +166,7 @@ set test_vars curdate
 
 # spawn id identifiers for console and control connections
 set console_con ""
-set control_con ""
+set host_con ""
 
 # Option handling
 set options {
