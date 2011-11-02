@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2008, 2009 Detlev Zundel <dzu@denx.de>, DENX Software Engineering
+# (C) Copyright 2008-2011 Detlev Zundel <dzu@denx.de>, DENX Software Engineering
 # (C) Copyright 2006, 2007 Rafal Jaworowski <raj@semihalf.com> for DENX Software Engineering
 #
 # This program is free software; you can redistribute it and/or
@@ -124,7 +124,7 @@ proc has_feature {f} {
 	global a_devices board_name
 
 	if [in_array a_devices "$board_name,features"] {
-		return [lsearch $a_devices($board_name,features) $f]
+		return [lsearch -glob $a_devices($board_name,features) $f]
 	} else {
 		p_verb "Warning, board '$board_name' defines no features"
 		return -1

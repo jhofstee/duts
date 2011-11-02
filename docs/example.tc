@@ -156,15 +156,18 @@ duts_tc UBootBase {
 	# if the test depends upon a special feature of a board, this
 	# can be specified in this section.  Test cases will not be run
 	# on boards without the feature.
+	# Note that glob patterns (i.e. fdt_in_*) can be used here to
+	# match different features.
 	######################################################################
 	Requires i2c
 
 	######################################################################
-	# section Requires, optional
+	# section Conflicts, optional
 	#
-	# if the test depends upon a special feature of a board, this
+	# if the test ocnflicts with a special feature of a board, this
 	# can be specified in this section.  Test cases will not be run
-	# on boards without the feature.
+	# on boards having the feature.
+	# Glob patterns are allowed just as for Requires.
 	######################################################################
 	Conflicts ide
 
