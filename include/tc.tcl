@@ -481,6 +481,30 @@ proc tc_prologue {tc ctx} {
 }
 
 #
+# runs a command block
+#
+# block: { type cmds }
+# ctx  : context
+#
+proc run_block {blk ctx} {
+	upvar $blk block
+	set cmd [lindex $block 1]
+	set type [lindex $block 0]
+
+	if {$type == [TYPE_EXPECT]} {
+		return [run_cmds cmd $ctx ]
+	} elseif {$type == [TYPE_CODE]} {
+		p_verb "executing $cmd"
+		eval $cmd
+		if ![info exists res] {
+			p_warn "Code section in test case did not set 'res' variable"
+			set res 1
+		}
+	}
+	return $res
+}
+
+#
 # runs individual TC
 #
 # tc: name of a test case from the l_testcases list
@@ -519,23 +543,7 @@ proc run_tc {tc} {
 		p_verb "running commands from Pre section"
 
 		foreach elem $a_testcases($tc,pre) {
-			set cmd [lindex $elem 1]
-			set type [lindex $elem 0]
-			p_verb "Executing command block $cmd of type $type"
-
-			if {$type == [TYPE_EXPECT]} {
-				if ![run_cmds cmd $context ] {
-					set rv 0
-				}
-			} elseif {$type == [TYPE_CODE]} {
-				eval $cmd
-				if ![info exists res] {
-					p_warn "Code section in test case did not set 'res' variable"
-				} else {
-					set rv $res
-				}
-			}
-			if {$rv == [EXIT_FAIL]} {
+			if {[run_block elem $context] == [EXIT_FAIL]} {
 				p_err "problems while executing pre code"
 				break
 			}
@@ -553,23 +561,7 @@ proc run_tc {tc} {
 	# First acquire a prompt so this is logged properly.
 	get_prompt
 	foreach elem $a_testcases($tc,commands) {
-		set cmd [lindex $elem 1]
-		set type [lindex $elem 0]
-		p_verb "Executing command block $cmd of type $type"
-
-		if {$type == [TYPE_EXPECT]} {
-			if ![run_cmds cmd $context ] {
-				set rv 0
-			}
-		} elseif {$type == [TYPE_CODE]} {
-			eval $cmd
-			if ![info exists res] {
-				p_warn "Code section in test case did not set 'res' variable"
-			} else {
-				set rv $res
-			}
-		}
-		if {$rv == [EXIT_FAIL]} {
+		if {[run_block elem $context] == [EXIT_FAIL]} {
 			p_err "problems while executing test case"
 			break
 		}
@@ -582,23 +574,7 @@ proc run_tc {tc} {
 		p_verb "running commands from Post section"
 
 		foreach elem $a_testcases($tc,post) {
-			set cmd [lindex $elem 1]
-			set type [lindex $elem 0]
-			p_verb "Executing command block $cmd of type $type"
-
-			if {$type == [TYPE_EXPECT]} {
-				if ![run_cmds cmd $context ] {
-					set rv 0
-				}
-			} elseif {$type == [TYPE_CODE]} {
-				eval $cmd
-				if ![info exists res] {
-					p_warn "Code section in test case did not set 'res' variable"
-				} else {
-					set rv $res
-				}
-			}
-			if {$rv == [EXIT_FAIL]} {
+			if {[run_block elem $context] == [EXIT_FAIL]} {
 				p_err "problems while executing post code"
 				break
 			}
