@@ -115,7 +115,7 @@ proc Post {commands} {
 	global cur_tc
 	global a_testcases
 
-	set a_testcases($cur_tc,post) $commands
+	lappend a_testcases($cur_tc,post) [list [TYPE_EXPECT] $commands]
 }
 
 proc Post_Code {code} {
@@ -259,7 +259,7 @@ proc show_tc_details {tc} {
 		puts "  Requires:\t\t$a_testcases($tc,requires)"
 	}
 	if {[in_array a_testcases "$tc,pre"]} {
-		show_commands_details "Pre-Commands" $a_testcases($tc,commands)
+		show_commands_details "Pre-Commands" $a_testcases($tc,pre)
 	}
 
 	if {$a_testcases($tc,cost) != 1} {
@@ -271,7 +271,7 @@ proc show_tc_details {tc} {
 	}
 
 	if {[in_array a_testcases "$tc,post"]} {
-		show_commands_details "Post-Commands" $a_testcases($tc,commands)
+		show_commands_details "Post-Commands" $a_testcases($tc,post)
 	}
 	puts "  Filename:\t$a_testcases($tc,filename)"
 }
