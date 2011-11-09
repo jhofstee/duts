@@ -346,20 +346,11 @@ proc run_cmds {cmds ctx} {
 		# we need to force vars substitution (subst) as there can be
 		# $ vars defined and used for commands.  Note that this also
 		# allows commands to be embedded.
-		#
-		if [string match "*$\{*" $cmd] {
-			p_verb "U-Boot vars found, skip forced substitution"
-		} else {
-			# try force subst - we may have VARs used in command
-			# Double substitution is used to allow for e.g. $BOARD in the
-			# expanded content
-			if [catch {set cmd [subst -nobackslashes \
-					    [subst -nobackslashes $cmd]]}] {
-				p_err "substitution failed on the following:"
-				puts "  $cmd"
-				set result 0
-				continue
-			}
+		if [catch {set cmd [subst $cmd]}] {
+			p_err "substitution failed on the following:"
+			puts "  $cmd"
+			set result 0
+			continue
 		}
 
 		##
