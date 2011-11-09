@@ -1,7 +1,7 @@
 #!/bin/env expect
 #                                -*- Mode: tcl -*-
 #
-# (C) Copyright 2008-2010 Detlev Zundel <dzu@denx.de>, DENX Software Engineering
+# (C) Copyright 2008-2011 Detlev Zundel <dzu@denx.de>, DENX Software Engineering
 # (C) Copyright 2006, 2007 Rafal Jaworowski <raj@semihalf.com> for DENX Software Engineering
 #
 # This program is free software; you can redistribute it and/or
@@ -162,7 +162,7 @@ set logs_location $LOG_DIR
 set dry_run "no"
 
 # List of variables accessible to test cases
-set test_vars curdate
+set test_vars [list curdate BOARD]
 
 # spawn id identifiers for console and control connections
 set console_con ""

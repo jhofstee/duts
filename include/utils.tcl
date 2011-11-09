@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2008-2010 Detlev Zundel <dzu@denx.de>, DENX Software Engineering
+# (C) Copyright 2008-2011 Detlev Zundel <dzu@denx.de>, DENX Software Engineering
 # (C) Copyright 2006, 2007 Rafal Jaworowski <raj@semihalf.com> for DENX Software Engineering
 #
 # This program is free software; you can redistribute it and/or
@@ -64,7 +64,6 @@ proc run_external_script {fn {vars ""} } {
 		p_warn "dry run activated, skipping execution of '$f'"
 	} else {
 		foreach v $vars {
-			p_verb "global'ling $v"
 			global $v
 		}
 		set err ""

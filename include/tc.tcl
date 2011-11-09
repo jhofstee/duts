@@ -277,39 +277,36 @@ proc show_tc_details {tc} {
 }
 
 #
+# Return a list of variable names that we want to export to the tests
+#
+proc var_list {} {
+	global a_devices board_name DEVICE_COMMON_NAME test_vars
+
+	if [catch {set common_varlist $a_devices($DEVICE_COMMON_NAME,varlist)}] {
+		set common_varlist ""
+	}
+	if [catch {set board_varlist $a_devices($board_name,varlist)}] {
+		set board_varlist ""
+	}
+
+	return [concat $common_varlist $board_varlist $test_vars]
+}
+
+#
 # runs a sequence of commands for a TC
 #
 # cmds: commands/responses struct
 # ctx: context [class] of the TC
 #
-proc run_cmds {cmds ctx} {
+proc run_cmds {cmds ctx vars} {
 
 	global dry_run board_name BOARD a_devices DEVICE_COMMON_NAME
-	global test_vars
 	set result 1
 	upvar $cmds c
 
-	#
-	# if we have global vars set for the board make them available
-	# locally
-	#
-	if [catch {set common_varlist $a_devices($DEVICE_COMMON_NAME,varlist)}] {
-		p_warn "no _common section or no variables set"
-		set common_varlist ""
-	}
-	if [catch {set board_varlist $a_devices($board_name,varlist)}] {
-		p_warn "no variables set in board '$board_name' config"
-		set board_varlist ""
-	}
-
-	set l_vars [concat $common_varlist $board_varlist $test_vars]
-
-	foreach v $l_vars {
-#		p_verb "global'ling $v"
+	foreach v $vars {
 		global $v
 	}
-	# this is a built-in keyword often used - add it to the var list
-	lappend l_vars "BOARD"
 
 #puts "RUN: $cmds"
 #puts "CMDS:\n$c"
@@ -323,7 +320,7 @@ proc run_cmds {cmds ctx} {
 		# script to execute
 		set res 1
 		if [regexp {^\!.*} $c] {
-			set res [run_external_script $c $l_vars]
+			set res [run_external_script $c $vars]
 			# we allow only one special (external) TC
 		#	return
 
@@ -439,10 +436,14 @@ proc run_block {blk ctx} {
 	upvar $blk block
 	set cmd [lindex $block 1]
 	set type [lindex $block 0]
+	set vars [var_list]
 
 	if {$type == [TYPE_EXPECT]} {
-		return [run_cmds cmd $ctx ]
+		return [run_cmds cmd $ctx $vars]
 	} elseif {$type == [TYPE_CODE]} {
+		foreach v $vars {
+			global $v
+		}
 		p_verb "executing $cmd"
 		eval $cmd
 		if ![info exists res] {
