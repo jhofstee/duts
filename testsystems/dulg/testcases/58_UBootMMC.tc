@@ -1,0 +1,96 @@
+# -*- Mode: tcl -*-
+#
+#
+#
+duts_tc UBootMMCHelp {
+	Type u-boot
+	Requires mmc_raw
+	Commands {
+		"help mmc" ".*"
+	}
+}
+
+duts_tc UBootMMCDev {
+	Type u-boot
+	Requires mmc_raw
+	Commands {
+		"mmc dev" ".*"
+	}
+}
+
+duts_tc UBootMMCList {
+	Type u-boot
+	Requires mmc_raw
+	Commands {
+		"mmc list" ".*"
+	}
+}
+
+duts_tc UBootMMCRescan {
+	Type u-boot
+	Requires mmc_raw
+	Commands {
+		"mmc rescan" ".*"
+	}
+}
+
+duts_tc UBootMMCInfo {
+	Type u-boot
+	Requires mmc_raw
+	Commands {
+		"mmcinfo" ".*"
+	}
+}
+
+duts_tc UBootMMCPart {
+	Type u-boot
+	Requires mmc_raw
+	Commands {
+		"mmc part" ".*"
+	}
+}
+
+duts_tc UBootMMCRead {
+	Type u-boot
+	Requires mmc_raw
+	Commands {
+		"mmc read $CFG_RAM_WS_BASE $CFG_MMC_BLOCK $CFG_MMC_BLOCK_LEN" ".*"
+		"md $CFG_RAM_WS_BASE" ".*"
+	}
+}
+
+duts_tc UBootMMCReadWrite {
+	Type u-boot
+	Requires mmc_raw
+	Commands {
+		"mmc read $CFG_RAM_WS_BASE_ALT $CFG_MMC_BLOCK $CFG_MMC_BLOCK_LEN" ".*"
+		"md $CFG_RAM_WS_BASE_ALT" ".*"
+		"mw $CFG_RAM_WS_BASE 0xdeadface 1000" ".*"
+		"md $CFG_RAM_WS_BASE" ".*"
+		"mmc erase $CFG_MMC_BLOCK $CFG_MMC_BLOCK_LEN" ".*"
+		"mmc write $CFG_RAM_WS_BASE  $CFG_MMC_BLOCK $CFG_MMC_BLOCK_LEN" ".*"
+		"mw $CFG_RAM_WS_BASE 0x0 1000" ".*"
+		"mmc read $CFG_RAM_WS_BASE $CFG_MMC_BLOCK $CFG_MMC_BLOCK_LEN" ".*"
+		"md $CFG_RAM_WS_BASE" ".*"
+		"mmc erase $CFG_MMC_BLOCK $CFG_MMC_BLOCK_LEN" ".*"
+		"mmc write $CFG_RAM_WS_BASE_ALT  $CFG_MMC_BLOCK $CFG_MMC_BLOCK_LEN" ".*"
+		"mmc read $CFG_RAM_WS_BASE $CFG_MMC_BLOCK $CFG_MMC_BLOCK_LEN" ".*"
+		"md $CFG_RAM_WS_BASE" ".*"
+	}
+}
+duts_tc UBootMMCFatLs {
+	Type u-boot
+	Requires mmc_fat
+	Commands {
+		"fatls mmc 0 /" ".*"
+	}
+}
+
+duts_tc UBootMMCFatLoad {
+	Type u-boot
+	Requires mmc_fat
+	Commands {
+		"fatload mmc 0 $CFG_RAM_WS_BASE date_of_creation" ".*"
+		"md $CFG_RAM_WS_BASE" ".*"
+	}
+}

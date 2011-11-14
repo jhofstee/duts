@@ -1,0 +1,54 @@
+# -*- Mode: tcl -*-
+# Test Linux MMC subsystem
+#
+duts_tc LinuxMMCShowDeviceFiles {
+	Type linux
+	Requires mmc_fat
+	Commands {
+		"ls -al /dev/mmcblk0*" ".*"
+	}
+}
+
+duts_tc LinuxMMCMount {
+	Type linux
+	Requires mmc_fat
+	Pre {
+		"cd /tmp" ".*"
+		"mkdir duts" ".*"
+		"cd duts" ".*"
+		"mkdir mmc" ".*"
+		"cd /home/root" ".*"
+	}
+	Commands {
+		"cd /tmp/duts" ".*"
+		"ls -al mmc" ".*"
+		"mount" ".*"
+		"df" ".*"
+		"mount -t vfat /dev/mmcblk0p1 /tmp/duts/mmc" ".*"
+		"mount" ".*"
+		"df" ".*"
+		"ls -al mmc" ".*"
+	}
+}
+
+duts_tc LinuxMMCReadWrite {
+	Type linux
+	Requires mmc_fat
+	Commands {
+		"date > /tmp/duts/mmc/date_of_creation" ".*"
+		"dd if=/dev/urandom of=/tmp/duts/random.hex bs=1024 count=1" ".*"
+		"cp random.hex mmc/" ".*"
+		"cmp random.hex mmc/random.hex" ".*"
+		"ls -al mmc/" ".*"
+	}
+}
+
+duts_tc LinuxMMCUmount {
+	Type linux
+	Requires mmc_fat
+	Commands {
+		"umount /tmp/duts/mmc" ".*"
+		"mount" ".*"
+		"df" ".*"
+	}
+}
