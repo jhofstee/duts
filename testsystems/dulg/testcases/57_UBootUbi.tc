@@ -1,0 +1,146 @@
+# -*- Mode: tcl -*-
+#
+#
+#
+duts_tc UBootUbiMtdParts {
+	Type u-boot
+	Requires mtdparts
+	Commands {
+		"mtdparts" ".*"
+	}
+}
+
+duts_tc UBootUbiHelp {
+	Type u-boot
+	Requires ubi*
+	Commands {
+		"help ubi" ".*"
+	}
+}
+
+duts_tc UBootUbiPartNor {
+	Type u-boot
+	Requires ubi_nor
+	Commands {
+		"ubi part $CFG_UBI_NOR_NAME" ".*"
+	}
+}
+
+duts_tc UBootUbiInfoNor {
+	Type u-boot
+	Requires ubi_nor
+	Commands {
+		"ubi info l" ".*"
+	}
+}
+
+duts_tc UBootUbiMountNor {
+	Type u-boot
+	Requires ubi_nor
+	Commands {
+		"ubifsmount $CFG_UBI_NOR_NAME" ".*"
+	}
+}
+
+duts_tc UBootUbiAccess {
+	Type u-boot
+	Requires ubi_nor
+	Commands {
+		"ubifsls" ".*"
+		"fsload $CFG_RAM_WS_BASE date_of_creation" ".*"
+		"md $CFG_RAM_WS_BASE" ".*"
+		"ubifsload $CFG_RAM_WS_BASE README" ".*"
+		"md $CFG_RAM_WS_BASE" ".*"
+	}
+}
+
+duts_tc UBootUbiDetach {
+	Type u-boot
+	Requires ubi*
+	Commands {
+		"ubi part foobar" ".*"
+	}
+}
+
+duts_tc UBootUbiUpdate {
+	Type u-boot
+	Requires ubi_nor
+	Commands {
+		"ubi part $CFG_UBI_NOR_NAME" ".*"
+		"ubifsmount $CFG_UBI_NOR_NAME" ".*"
+		"ubifsls" ".*"
+		"tftp $CFG_RAM_WS_BASE CFG_BOARD_NAME/image-$CFG_UBI_NOR_NAME-new.ubifs" ".*"
+		"ubi write $CFG_RAM_WS_BASE $CFG_UBI_NOR_NAME \\${filesize}" ".*"
+		"ubifsmount $CFG_UBI_NOR_NAME" ".*"
+		"ubifsls" ".*"
+	}
+}
+
+duts_tc UBootUbiPartNand {
+	Type u-boot
+	Requires ubi_nand
+	Commands {
+		"ubi part $CFG_UBI_NAND_NAME $CFG_UBI_NAND_IO_SZ" ".*"
+	}
+}
+
+
+duts_tc UBootUbiInfoNand {
+	Type u-boot
+	Requires ubi_nand
+	Commands {
+		"ubi info l" ".*"
+	}
+}
+
+duts_tc UBootUbiMountNand {
+	Type u-boot
+	Requires ubi_nand
+	Commands {
+		"ubifsmount $CFG_UBI_NAND_NAME" ".*"
+	}
+}
+
+duts_tc UBootUbiAccessNand {
+	Type u-boot
+	Requires ubi_nand
+	Commands {
+		"ubifsls" ".*"
+		"ubifsload $CFG_RAM_WS_BASE date_of_creation" ".*"
+		"md $CFG_RAM_WS_BASE" ".*"
+		"ubifsload $CFG_RAM_WS_BASE README" ".*"
+		"md $CFG_RAM_WS_BASE" ".*"
+	}
+}
+
+duts_tc UBootUbiCreateNewTestFS {
+	Type host
+	Requires ubi_nand
+	Pre {
+		"cd /tmp" ".*"
+		"mkdir dutsnew" ".*"
+		"cd dutsnew" ".*"
+	}
+	Commands {
+		"mkdir fsnew" ".*"
+		"echo Just an example >fsnew/README" ".*"
+		"date >fsnew/date_of_creation" ".*"
+		"date >fsnew/date_of_modification" ".*"
+		"mkfs.ubifs --root=fsnew --min-io-size=$CFG_UBI_NAND_IO_SZ --leb-size=$CFG_UBI_NAND_LEB_SZ --max-leb-cnt=$CFG_UBI_NAND_MAX_LEB -o image-$CFG_UBI_NAND_NAME-new.ubifs" ".*"
+		"cp image-$CFG_UBI_NAND_NAME-new.ubifs /tftpboot/$CFG_BOARD_NAME" ".*"
+	}
+}
+
+duts_tc UBootUbiUpdateNand {
+	Type u-boot
+	Requires ubi_nand
+	Commands {
+		"ubi part $CFG_UBI_NAND_NAME $CFG_UBI_NAND_IO_SZ" ".*"
+		"ubifsmount $CFG_UBI_NAND_NAME" ".*"
+		"ubifsls" ".*"
+		"tftp $CFG_RAM_WS_BASE $CFG_BOARD_NAME/image-$CFG_UBI_NAND_NAME-new.ubifs" "hex.*"
+		"ubi write $CFG_RAM_WS_BASE $CFG_UBI_NAND_NAME \\${filesize}" ".*"
+		"ubifsmount $CFG_UBI_NAND_NAME" ".*"
+		"ubifsls" ".*"
+	}
+}

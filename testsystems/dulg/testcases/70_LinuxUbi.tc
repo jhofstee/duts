@@ -1,0 +1,363 @@
+# -*- Mode: tcl -*-
+# Test Linux UBI subsystem
+#
+# WARNING! Testcases contained herein attempt to manipulate board flash
+# contents. They assume the parameters in board config file
+# (testsystems/common/devices/*.tgt) like CFG_UBI_DEVICE_NOR, CFG_UBI_DEVICE_NAND
+# range etc. are properly set for the given board, so beware and triple check
+# everything makes sense before running these.
+#
+
+duts_tc LinuxUbiCreateDeviceFiles {
+	Type linux
+	Requires ubi*
+	Pre {
+		"cd /home" ".*"
+		"mkdir duts" ".*"
+		"chmod 777 duts" ".*"
+		"cd duts" ".*"
+		"rm -rf fs" ".*"
+		"mkdir fs" ".*"
+		"chmod 777 fs" ".*"
+		"cd /home/root" ".*"
+	}
+	Commands {
+		"mknod /dev/ubi_ctrl c 10 63" ".*"
+		"mknod /dev/ubi0 c 253 0" ".*"
+		"for i in \\$(seq 0 9); do mknod /dev/ubi0_\\$i c 253 \\$((i + 1)); done" ".*"
+		"mknod /dev/ubi1 c 252 0" ".*"
+		"for i in \\$(seq 0 9); do mknod /dev/ubi1_\\$i c 252 \\$((i + 1)); done" ".*"
+		"ls -l /dev/ubi*" ".*"
+	}
+}
+
+duts_tc LinuxUbiDeletePartitionNor {
+	Type linux
+	Timeout 900
+	Cost 60
+	Requires ubi_nor
+	Commands {
+		"flash_erase -q /dev/mtd$CFG_UBI_DEVICE_NOR 0 0" ".*"
+	}
+}
+
+duts_tc LinuxUbiAttachNor {
+	Type linux
+	Requires ubi_nor
+	Commands {
+		"ubiattach /dev/ubi_ctrl -m $CFG_UBI_DEVICE_NOR" ".*"
+	}
+}
+
+duts_tc LinuxUbiInfoNor {
+	Type linux
+	Requires ubi_nor
+	Commands {
+		"ubinfo" ".*"
+	}
+}
+
+duts_tc LinuxUbiCreateVolumeNor {
+	Type linux
+	Requires ubi_nor
+	Commands {
+		"ubimkvol /dev/ubi$CFG_UBI_DEVICE_NR_NOR -N $CFG_UBI_NOR_NAME -m" ".*"
+	}
+}
+
+duts_tc LinuxUbiMountVolumeNor {
+	Type linux
+	Requires ubi_nor
+	Pre {
+		"rm -rf /mnt/$CFG_UBI_NOR_NAME" ".*"
+	}
+	Commands {
+		"mkdir /mnt/$CFG_UBI_NOR_NAME" ".*"
+		"mount -t ubifs /dev/ubi${CFG_UBI_DEVICE_NR_NOR}_0 /mnt/$CFG_UBI_NOR_NAME" ".*"
+	}
+}
+
+duts_tc LinuxUbiDeletePartitionNand {
+	Type linux
+	Timeout 900
+	Cost 60
+	Requires ubi_nand
+	Commands {
+		"flash_erase -q /dev/mtd$CFG_UBI_DEVICE_NAND 0 0" ".*"
+	}
+}
+
+duts_tc LinuxUbiAttachNand {
+	Type linux
+	Requires ubi_nand
+	Commands {
+		"ubiattach /dev/ubi_ctrl -m $CFG_UBI_DEVICE_NAND -O 2048" ".*"
+	}
+}
+
+duts_tc LinuxUbiInfoNand {
+	Type linux
+	Requires ubi_nand
+	Commands {
+		"ubinfo" ".*"
+	}
+}
+
+duts_tc LinuxUbiCreateVolumeNand {
+	Type linux
+	Requires ubi_nand
+	Commands {
+		"ubimkvol /dev/ubi$CFG_UBI_DEVICE_NR_NAND -N $CFG_UBI_NAND_NAME -m" ".*"
+	}
+}
+
+duts_tc LinuxUbiInfoNorNand {
+	Type linux
+	Requires ubi*
+	Commands {
+		"ubinfo -a" ".*"
+	}
+}
+
+duts_tc LinuxUbiMountVolumeNand {
+	Type linux
+	Requires ubi_nand
+	Pre {
+		"rm -rf /mnt/$CFG_UBI_NAND_NAME" ".*"
+	}
+	Commands {
+		"mkdir /mnt/$CFG_UBI_NAND_NAME" ".*"
+		"mount -t ubifs /dev/ubi${CFG_UBI_DEVICE_NR_NAND}_0 /mnt/$CFG_UBI_NAND_NAME" ".*"
+	}
+}
+
+duts_tc LinuxUbidf {
+	Type linux
+	Requires ubi*
+	Commands {
+		"df -h" ".*"
+	}
+}
+
+duts_tc LinuxUbiMTDInfo {
+	Type linux
+	Requires ubi*
+	Commands {
+		"cat /proc/mtd" ".*"
+	}
+}
+
+duts_tc LinuxUbiMTDInfoNor {
+	Type linux
+	Requires ubi_nor
+	Commands {
+		"mtdinfo -u /dev/mtd$CFG_UBI_DEVICE_NOR" ".*"
+	}
+}
+
+duts_tc LinuxUbiMTDInfoNand {
+	Type linux
+	Requires ubi_nand
+	Commands {
+		"mtdinfo -u /dev/mtd$CFG_UBI_DEVICE_NAND" ".*"
+		"ubinfo /dev/ubi$CFG_UBI_DEVICE_NR_NAND" ".*"
+	}
+}
+
+duts_tc LinuxUbiCreateTestFS {
+	Type host
+	Requires ubi*
+	Pre {
+		"cd /tmp" ".*"
+		"mkdir duts" ".*"
+		"cd duts" ".*"
+		"rm -rf fs" ".*"
+	}
+	Commands {
+		"cd /tmp" ".*"
+		"cd duts" ".*"
+		"mkdir fs" ".*"
+		"echo Just an example >fs/README" ".*"
+		"date >fs/date_of_creation" ".*"
+		"ls -l fs" ".*"
+	}
+}
+
+duts_tc LinuxUbiCreateImageNor {
+	Type host
+	Requires ubi_nor
+	Commands {
+		"mkfs.ubifs --root=/tmp/duts/fs --min-io-size=$CFG_UBI_NOR_IO_SZ --leb-size=$CFG_UBI_NOR_LEB_SZ --max-leb-cnt=$CFG_UBI_NOR_MAX_LEB -o /tmp/duts/image-$CFG_UBI_NOR_NAME.ubifs" ".*"
+		"ls -lh /tmp/duts/image-$CFG_UBI_NOR_NAME.ubifs" ".*"
+		"cp /tmp/duts/image-$CFG_UBI_NOR_NAME.ubifs $CFG_ROOTPATH/home/duts/" ".*"
+	}
+}
+
+duts_tc LinuxUbiCreateImageNand {
+	Type host
+	Requires ubi_nand
+	Commands {
+		"mkfs.ubifs --root=/tmp/duts/fs --min-io-size=$CFG_UBI_NAND_IO_SZ --leb-size=$CFG_UBI_NAND_LEB_SZ --max-leb-cnt=$CFG_UBI_NAND_MAX_LEB -o /tmp/duts/image-$CFG_UBI_NAND_NAME.ubifs" ".*"
+		"ls -lh /tmp/duts/image-$CFG_UBI_NAND_NAME.ubifs" ".*"
+		"cp /tmp/duts/image-$CFG_UBI_NAND_NAME.ubifs $CFG_ROOTPATH/home/duts/" ".*"
+	}
+}
+
+duts_tc LinuxUbiUmountVolumeNor {
+	Type linux
+	Requires ubi_nor
+	Commands {
+		"umount /mnt/$CFG_UBI_NOR_NAME" ".*"
+		"ubidetach /dev/ubi_ctrl -m $CFG_UBI_DEVICE_NOR" ".*"
+	}
+}
+
+duts_tc LinuxUbiUmountVolumeNand {
+	Type linux
+	Requires ubi_nand
+	Commands {
+		"umount /mnt/$CFG_UBI_NAND_NAME" ".*"
+		"ubidetach /dev/ubi_ctrl -m $CFG_UBI_DEVICE_NAND" ".*"
+	}
+}
+
+duts_tc LinuxUbiInstallUbifsImageNor {
+	Type linux
+	Requires ubi_nor
+	Commands {
+		"ubiattach /dev/ubi_ctrl -m $CFG_UBI_DEVICE_NOR" ".*"
+		"ubiupdatevol /dev/ubi${CFG_UBI_DEVICE_NR_NOR}_0 /home/duts/image-$CFG_UBI_NOR_NAME.ubifs" ".*"
+		"mount -t ubifs /dev/ubi${CFG_UBI_DEVICE_NR_NOR}_0 /mnt/$CFG_UBI_NOR_NAME" ".*"
+		"ls -l /mnt/$CFG_UBI_NOR_NAME" ".*"
+	}
+}
+
+duts_tc LinuxUbiInstallUbifsImageNand {
+	Type linux
+	Requires ubi_nand
+	Commands {
+		"ubiattach /dev/ubi_ctrl -m $CFG_UBI_DEVICE_NAND -O 2048" ".*"
+		"ubiupdatevol /dev/ubi${CFG_UBI_DEVICE_NR_NAND}_0 /home/duts/image-$CFG_UBI_NAND_NAME.ubifs" ".*"
+		"mount -t ubifs /dev/ubi${CFG_UBI_DEVICE_NR_NAND}_0 /mnt/$CFG_UBI_NAND_NAME" ".*"
+		"ls -l /mnt/$CFG_UBI_NAND_NAME" ".*"
+		"hexdump -C /mnt/$CFG_UBI_NAND_NAME/date_of_creation" ".*"
+	}
+}
+
+duts_tc LinuxUbiCreateIniFileNor {
+	Type host
+	Requires ubi_nor
+	Pre {
+		"cd /tmp/duts" ".*"
+	}
+	Commands {
+		"echo \"\\[ubifs\\]\nmode=ubi\nimage=image-$CFG_UBI_NOR_NAME.ubifs\nvol_id=0\nvol_size=$CFG_UBI_NOR_VOL_SZ\nvol_type=dynamic\nvol_name=rest\" > ubi-$CFG_UBI_NOR_NAME.cfg" ".*"
+	}
+}
+duts_tc LinuxUbiIniFileNor {
+	Type host
+	Requires ubi_nor
+	Pre {
+		"cd /tmp/duts" ".*"
+	}
+	Commands {
+		"cat ubi-$CFG_UBI_NOR_NAME.cfg" ".*"
+		"ubinize --min-io-size=$CFG_UBI_NOR_IO_SZ --peb-size=$CFG_UBI_NOR_PEB_SIZE -o image-$CFG_UBI_NOR_NAME.ubi ubi-$CFG_UBI_NOR_NAME.cfg" ".*"
+		"cp /tmp/duts/image-$CFG_UBI_NOR_NAME.ubi $CFG_ROOTPATH/home/duts/" ".*"
+	}
+}
+
+duts_tc LinuxUbiCreateIniFileNand {
+	Type host
+	Requires ubi_nand
+	Pre {
+		"cd /tmp/duts" ".*"
+	}
+	Commands {
+		"echo \"\\[ubifs\\]\nmode=ubi\nimage=image-$CFG_UBI_NAND_NAME.ubifs\nvol_id=0\nvol_size=$CFG_UBI_NAND_VOL_SZ\nvol_type=dynamic\nvol_name=$CFG_UBI_NAND_NAME\" > ubi-$CFG_UBI_NAND_NAME.cfg" ".*"
+	}
+}
+
+duts_tc LinuxUbiIniFileNand {
+	Type host
+	Requires ubi_nand
+	Pre {
+		"cd /tmp/duts" ".*"
+	}
+	Commands {
+		"cat ubi-$CFG_UBI_NAND_NAME.cfg" ".*"
+		"ubinize --min-io-size=$CFG_UBI_NAND_IO_SZ --peb-size=$CFG_UBI_NAND_PEB_SIZE -s $CFG_UBI_NAND_IO_SZ -o image-$CFG_UBI_NAND_NAME.ubi ubi-$CFG_UBI_NAND_NAME.cfg" ".*"
+		"cp /tmp/duts/image-$CFG_UBI_NAND_NAME.ubi $CFG_ROOTPATH/home/duts/" ".*"
+	}
+}
+
+duts_tc LinuxUbiUmountVolumeNor2 {
+	Type linux
+	Requires ubi_nor
+	Commands {
+		"umount /mnt/$CFG_UBI_NOR_NAME" ".*"
+		"ubidetach /dev/ubi_ctrl -m $CFG_UBI_DEVICE_NOR" ".*"
+	}
+}
+
+duts_tc LinuxUbiUmountVolumeNand2 {
+	Type linux
+	Requires ubi_nand
+	Commands {
+		"umount /mnt/$CFG_UBI_NAND_NAME" ".*"
+		"ubidetach /dev/ubi_ctrl -m $CFG_UBI_DEVICE_NAND" ".*"
+	}
+}
+duts_tc LinuxUbiAttachErrorNand {
+	Type linux
+	Requires ubi_nand
+	Commands {
+		"ubiattach /dev/ubi_ctrl -m $CFG_UBI_DEVICE_NAND" ".*"
+	}
+	Post {
+		"ubidetach /dev/ubi_ctrl -m $CFG_UBI_DEVICE_NAND" ".*"
+	}
+}
+
+duts_tc LinuxUbiFormatNor {
+	Type linux
+	Requires ubi_nor
+	Pre {
+		"cd /home/duts" ".*"
+	}
+	Commands {
+		"ubiformat -q -f image-$CFG_UBI_NOR_NAME.ubi /dev/mtd$CFG_UBI_DEVICE_NOR" ".*"
+	}
+}
+
+duts_tc LinuxUbiFormatNand {
+	Type linux
+	Requires ubi_nand
+	Pre {
+		"cd /home/duts" ".*"
+	}
+	Commands {
+		"ubiformat -q -s $CFG_UBI_NAND_IO_SZ -f /home/duts/image-$CFG_UBI_NAND_NAME.ubi /dev/mtd$CFG_UBI_DEVICE_NAND" ".*"
+	}
+}
+
+duts_tc LinuxUbiFormatVerifyNor {
+	Type linux
+	Requires ubi_nor
+	Commands {
+		"ubiattach /dev/ubi_ctrl -m $CFG_UBI_DEVICE_NOR" ".*"
+		"mount -t ubifs /dev/ubi${CFG_UBI_DEVICE_NR_NOR}_0 /mnt/$CFG_UBI_NOR_NAME" ".*"
+		"ls -l /mnt/$CFG_UBI_NOR_NAME" ".*"
+	}
+}
+
+duts_tc LinuxUbiFormatVerifyNand {
+	Type linux
+	Requires ubi_nand
+	Commands {
+		"ubiattach /dev/ubi_ctrl -m $CFG_UBI_DEVICE_NAND -O $CFG_UBI_NAND_IO_SZ" ".*"
+		"mount -t ubifs /dev/ubi${CFG_UBI_DEVICE_NR_NAND}_0 /mnt/$CFG_UBI_NAND_NAME" ".*"
+		"ls -al /mnt/$CFG_UBI_NAND_NAME" ".*"
+		"hexdump -C /mnt/$CFG_UBI_NAND_NAME/date_of_creation" ".*"
+	}
+}
