@@ -20,8 +20,8 @@ duts_tc UBootFDTCmdAddr {
 	Commands {
 		"print fdt_addr_r" ".*"
 		"print fdt_file" ".*"
-		"tftp ${fdt_addr_r} ${fdt_file}" ".*"
-		"fdt addr ${fdt_addr_r}" ".*"
+		"tftp \\${fdt_addr_r} \\${fdt_file}" ".*"
+		"fdt addr \\${fdt_addr_r}" ".*"
 	}
 }
 
@@ -76,11 +76,11 @@ duts_tc UBootFDTCmdMove {
 	Type u-boot
 	Requires fdt
 	Commands {
-		"fdt move ${fdt_addr_r} $CFG_RAM_WS_BASE" ".*"
+		"fdt move \\${fdt_addr_r} $CFG_RAM_WS_BASE" ".*"
 		"fdt list /" ".*"
 		"fdt mknod / foobar" ".*"
 		"fdt list /" ".*"
-		"fdt addr ${fdt_addr_r}" ".*"
+		"fdt addr \\${fdt_addr_r}" ".*"
 		"fdt list /" ".*"
 	}
 }
