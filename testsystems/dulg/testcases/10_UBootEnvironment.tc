@@ -72,7 +72,7 @@ duts_tc UBootSetenvSet {
 duts_tc UBootSetenvQuote {
 	Type u-boot
 	Commands {
-		{setenv cons_opts 'console=tty0 console=ttyS0,${baudrate}'} ".*"
+		{setenv cons_opts 'console=tty0 console=ttyS0,\${baudrate}'} ".*"
 		"printenv cons_opts" ".*"
 	}
 }
