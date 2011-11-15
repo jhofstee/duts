@@ -73,7 +73,7 @@ duts_tc UBootSourceMkimage {
 duts_tc UBootSource {
 	Type u-boot
 	Commands {
-		"tftp $CFG_RAM_WS_BASE $CFG_SCRIPT_EXAMPLE" ".*"
+		"tftp $CFG_RAM_WS_BASE [subst $CFG_SCRIPT_EXAMPLE]" ".*"
 		"imi" ".*"
 		"source $CFG_RAM_WS_BASE" ".*"
 	}
