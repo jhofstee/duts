@@ -31,7 +31,7 @@ duts_tc LinuxMtdErase {
 		"mount -t tmpfs nodev /tmp" ".*"
 	}
 	Commands {
-		"flash_eraseall /dev/$CFG_MTD_ERASE_DEVICE" ".*"
+		"flash_erase -q /dev/$CFG_MTD_ERASE_DEVICE 0 0" ".*"
 		"date > /tmp/tempfile" ".*"
 		"dd if=/dev/zero of=/tmp/tempfile bs=1 count=4096 seek=50" ".*"
 		"dd if=/tmp/tempfile of=/dev/$CFG_MTD_ERASE_DEVICE bs=4096 count=1" ".*"
@@ -48,7 +48,7 @@ duts_tc LinuxMtdWrite {
 	Cost 60
 	Pre {
 		"mount -t tmpfs nodev /tmp" ".*"
-		"flash_eraseall /dev/$CFG_MTD_ERASE_DEVICE" ".*"
+		"flash_erase -q /dev/$CFG_MTD_ERASE_DEVICE 0 0" ".*"
 	}
 	Commands {
 		"date > /tmp/tempfile" ".*"
