@@ -28,11 +28,6 @@ duts_tc UBootPrintenvBoardID {
 	}
 }
 
-duts_tc BoardId {
-	Type host
-	Commands "!userBoardId.exp"
-}
-
 duts_tc BDI2000Config {
 	Type host
 	Code {
