@@ -1,0 +1,46 @@
+# -*- Mode: tcl -*-
+# Test Linux MMC / sd card
+#
+# This assumes a valid SD card is connected to the DUT, with a supported
+# filesystem.
+#
+# for example
+#
+#	#/!/bin/sh
+#
+#	export DRIVE=/dev/mmcblk0
+#	export SIZE=`fdisk -l $DRIVE | grep Disk | awk '{print $5}'`
+#	export CYLINDERS="$SIZE/255/63/512"
+#	{
+#		echo ,,b,*
+#	} | sfdisk -D -H 255 -S 63 -C $CYLINDERS $DRIVE
+# 	mkfs.vfat -F 32 -n "test" ${DRIVE}p1
+#
+# test with.
+#	/duts -tc LinuxMmcMount,LinuxMmcCpFiles,LinuxMmcUMount bpp3
+#
+
+duts_tc LinuxMmcMount {
+	Type linux
+	Commands {
+		"if \\[ ! -d dir \\]; then mkdir -p /media/sdcard; fi" "\r\n"
+		"mount /dev/mmcblk0p1 /media/sdcard || echo ERROR" "\r\n"
+	}
+}
+
+duts_tc LinuxMmcCpFiles {
+	Type linux
+	Commands {
+		"rm /media/sdcard/test 2&>1 > /dev/null" "\r\n"
+		"cp /etc/group /media/sdcard/test || echo ERROR" "\r\n"
+		"diff /etc/group /media/sdcard/test || echo ERROR" "\r\n"
+		"rm /media/sdcard/test || echo ERROR" "\r\n"
+	}
+}
+
+duts_tc LinuxMmcUMount {
+	Type linux
+	Commands {
+		"umount /media/sdcard || echo ERROR" "\r\n"
+	}
+}
