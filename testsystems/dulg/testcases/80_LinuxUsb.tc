@@ -1,0 +1,30 @@
+# -*- Mode: tcl -*-
+# Test Linux USB host
+#
+# This assumes a valid USB stick is connected to the DUT
+# with a supported filesystem.
+
+duts_tc LinuxUsbMount {
+	Type linux
+	Commands {
+		"if \\[ ! -d dir \\]; then mkdir -p /media/usbstick; fi" "\r\n"
+		"mount /dev/sda /media/usbstick || echo ERROR" "\r\n"
+	}
+}
+
+duts_tc LinuxUsbCpFiles {
+	Type linux
+	Commands {
+		"rm /media/usbstick/test 2&>1 > /dev/null" "\r\n"
+		"cp /etc/group /media/usbstick/test || echo ERROR" "\r\n"
+		"diff /etc/group /media/usbstick/test || echo ERROR" "\r\n"
+		"rm /media/usbstick/test || echo ERROR" "\r\n"
+	}
+}
+
+duts_tc LinuxUsbUMount {
+	Type linux
+	Commands {
+		"umount /media/usbstick || echo ERROR" "\r\n"
+	}
+}
