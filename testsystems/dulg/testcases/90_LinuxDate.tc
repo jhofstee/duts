@@ -1,0 +1,25 @@
+# -*- Mode: tcl -*-
+# Test Linux Date / RTC
+#
+
+duts_tc LinuxDateSetOld {
+	Timeout 100
+	Type linux
+	# reboot is not recognized by login..
+	Commands {
+		"date 010100002010" "Fri Jan  1 00:00:00 UTC 2010\r\n"
+		"hwclock -w" "\r\n"
+		"reboot" ".*login.*"
+	}
+}
+
+duts_tc LinuxDateCheck {
+	Type linux
+	Commands {
+		# todo, check if the date is close to the set one
+		"date" ".*"
+	}
+}
+
+#duts_tc LinuxDateSetNow {
+#}
